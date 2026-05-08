@@ -992,8 +992,14 @@
     // Esperar a que el DOM esté completamente cargado
     document.addEventListener('DOMContentLoaded', function() {
       // Configuración de la API Journey Builder
-      const JOURNEY_API_URL = 'https://api.journeybuilder.numia.co/api/v1/run/38223ec2-6123-4e6e-862a-4945161ed221?stream=false';
+      const JOURNEY_API_URL = 'https://api.journeybuilder.numia.co/api/v1/run/d83a2fbd-f8d0-468f-9ecd-375709fd149f?stream=false';
       const JOURNEY_API_KEY = 'sk-WfTsCY302RrciqoVRYAZWruD9mpyPKatAo8GU8tyzIM';
+      const PASOS_ANALISIS_UI = [
+        { titulo: 'Comportamiento digital', detalle: 'Evaluación de onboarding y señales digitales.' },
+        { titulo: 'Scoring', detalle: 'Puntuación y mejor oferta disponible.' },
+        { titulo: 'Sugerencia de canal', detalle: 'Priorización del canal de atención.' },
+        { titulo: 'Calcular prioridad', detalle: 'Analisis del estado actual de la sucursal comparado con el cliente.' }
+      ];
 
       // Objeto con nombres y DNI
       const usuarios = {
@@ -1115,247 +1121,78 @@
           // Mostrar la sección explícitamente
           atencionSection.style.display = 'block';
           atencionSection.classList.add('active');
-          stepsContainer.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split me-2"></i>Conectando con el asistente...</div>';
-          stepsContainer.style.display = 'block';
+
           summarySection.style.display = 'none';
-          
-          // Scroll automático al log
+          summaryContent.innerHTML = '';
+
+          const pasosInicio = Date.now();
+          const delayPaso = 800;
+          const nPasos = PASOS_ANALISIS_UI.length;
+          const pasosAnimacionMs = nPasos * delayPaso + 500;
+
+          stepsContainer.innerHTML = '';
+          stepsContainer.style.display = 'block';
+          stepsContainer.style.visibility = 'visible';
+          stepsContainer.style.opacity = '1';
+
+          PASOS_ANALISIS_UI.forEach((paso, index) => {
+            setTimeout(() => {
+              agregarPaso({ name: paso.titulo, output: paso.detalle }, index);
+            }, index * delayPaso);
+          });
+
           setTimeout(() => {
             const logContent = document.querySelector('.log-content');
             if (logContent) {
               logContent.scrollTop = logContent.scrollHeight;
             }
           }, 100);
-          
-          // Llamar a la API de Journey Builder
-          const response = await fetch(JOURNEY_API_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': JOURNEY_API_KEY,
-              'Origin': 'journeybuilder.numia.co'
-            },
-            body: JSON.stringify({
-              input_value: mensaje,
-              input_type: 'chat'
-            })
-          });
-        
-        if (!response.ok) {
-          throw new Error(`Error en servidor (${response.status})`);
-        }
-        
-        const data = await response.json();
-        
-        console.log('Respuesta completa de la API:', JSON.stringify(data, null, 2));
-        
-        // Asegurar que el contenedor de logs esté visible (ya está declarado arriba)
-        if (logContainer) {
-          logContainer.classList.add('visible');
-        }
-        
-        // Asegurar que la sección esté visible
-        atencionSection.style.display = 'block';
-        atencionSection.classList.add('active');
-        
-        // Procesar y mostrar los pasos
-        let contents = [];
-        let messageText = null;
-        
-        // Función recursiva para buscar tool_use en cualquier estructura
-        function buscarToolUse(obj, path = '') {
-          if (!obj || typeof obj !== 'object') return;
-          
-          // Si es un array, buscar en cada elemento
-          if (Array.isArray(obj)) {
-            obj.forEach((item, index) => {
-              buscarToolUse(item, `${path}[${index}]`);
+
+          let messageText = null;
+          try {
+            const response = await fetch(JOURNEY_API_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': JOURNEY_API_KEY,
+                'Origin': 'journeybuilder.numia.co'
+              },
+              body: JSON.stringify({
+                input_value: mensaje,
+                input_type: 'chat'
+              })
             });
-            return;
-          }
-          
-          // Si tiene name y output, es probablemente un tool_use
-          if (obj.name && (obj.output !== undefined || obj.tool_input !== undefined)) {
-            console.log(`Encontrado tool_use en ${path}:`, obj);
-            contents.push({
-              type: 'tool_use',
-              name: obj.name,
-              tool_name: obj.name,
-              tool_input: obj.tool_input || obj.input,
-              input: obj.tool_input || obj.input,
-              output: obj.output,
-              path: path
-            });
-          }
-          
-          // Si tiene type === 'tool_use', también es válido
-          if (obj.type === 'tool_use' && obj.name) {
-            console.log(`Encontrado tool_use (type) en ${path}:`, obj);
-            contents.push({
-              type: 'tool_use',
-              name: obj.name,
-              tool_name: obj.name,
-              tool_input: obj.tool_input || obj.input,
-              input: obj.tool_input || obj.input,
-              output: obj.output,
-              path: path
-            });
-          }
-          
-          // Si tiene tool_use como propiedad anidada
-          if (obj.tool_use && obj.tool_use.name) {
-            console.log(`Encontrado tool_use anidado en ${path}:`, obj.tool_use);
-            contents.push({
-              type: 'tool_use',
-              name: obj.tool_use.name,
-              tool_name: obj.tool_use.name,
-              tool_input: obj.tool_use.input || obj.tool_use.tool_input,
-              input: obj.tool_use.input || obj.tool_use.tool_input,
-              output: obj.tool_use.output,
-              path: `${path}.tool_use`
-            });
-          }
-          
-          // Buscar recursivamente en todas las propiedades
-          for (const key in obj) {
-            if (obj.hasOwnProperty(key) && key !== 'tool_use') {
-              buscarToolUse(obj[key], path ? `${path}.${key}` : key);
+
+            if (!response.ok) {
+              throw new Error(`Error en servidor (${response.status})`);
             }
-          }
-        }
-        
-        // Buscar en diferentes estructuras de respuesta
-        if (data.outputs && data.outputs.length > 0) {
-          const firstOutput = data.outputs[0];
-          console.log('First output:', firstOutput);
-          
-          // Buscar en la estructura específica: outputs[0].outputs[0].results.message.content_blocks[0].contents
-          if (firstOutput.outputs && firstOutput.outputs.length > 0) {
-            const innerOutput = firstOutput.outputs[0];
-            
-            // Buscar en results.message.content_blocks
-            if (innerOutput.results?.message?.content_blocks) {
-              innerOutput.results.message.content_blocks.forEach((block, blockIndex) => {
-                if (block.contents && Array.isArray(block.contents)) {
-                  block.contents.forEach((content, contentIndex) => {
-                    // Solo agregar los que son tool_use
-                    if (content.type === 'tool_use' && content.name) {
-                      console.log(`Encontrado tool_use: ${content.name}`, content);
-                      contents.push({
-                        type: 'tool_use',
-                        name: content.name,
-                        tool_name: content.name,
-                        tool_input: content.tool_input || content.input,
-                        input: content.tool_input || content.input,
-                        output: content.output,
-                        duration: content.duration,
-                        header: content.header
-                      });
-                    }
-                  });
-                }
-              });
-            }
-            
-            // Buscar mensaje final en artifacts
-            if (innerOutput.artifacts?.message) {
-              messageText = typeof innerOutput.artifacts.message === 'string' 
-                ? innerOutput.artifacts.message 
-                : innerOutput.artifacts.message.message || JSON.stringify(innerOutput.artifacts.message);
-            } else if (innerOutput.outputs?.message?.message) {
-              messageText = innerOutput.outputs.message.message;
-            } else if (innerOutput.results?.message?.text) {
-              messageText = innerOutput.results.message.text;
-            }
-          }
-          
-          // Buscar en agent_steps si existe (como respaldo)
-          if (firstOutput.agent_steps && Array.isArray(firstOutput.agent_steps)) {
-            firstOutput.agent_steps.forEach((step, index) => {
-              if (step.tool_use && step.tool_use.name) {
-                const exists = contents.some(c => c.name === step.tool_use.name);
-                if (!exists) {
-                  contents.push({
-                    type: 'tool_use',
-                    name: step.tool_use.name,
-                    tool_name: step.tool_use.name,
-                    tool_input: step.tool_use.input,
-                    input: step.tool_use.input,
-                    output: step.tool_use.output
-                  });
-                }
+
+            const data = await response.json();
+            console.log('Respuesta completa de la API:', JSON.stringify(data, null, 2));
+
+            if (data.outputs?.[0]?.outputs?.[0]) {
+              const innerOutput = data.outputs[0].outputs[0];
+              if (innerOutput.artifacts?.message) {
+                messageText = typeof innerOutput.artifacts.message === 'string'
+                  ? innerOutput.artifacts.message
+                  : innerOutput.artifacts.message.message || JSON.stringify(innerOutput.artifacts.message);
+              } else if (innerOutput.outputs?.message?.message) {
+                messageText = innerOutput.outputs.message.message;
+              } else if (innerOutput.results?.message?.text) {
+                messageText = innerOutput.results.message.text;
               }
-            });
-          }
-          
-        }
-        
-        console.log('Contents encontrados:', contents.length);
-        console.log('Message text:', messageText);
-        
-        // Filtrar solo los pasos de tipo tool_use
-        const toolUseSteps = contents.filter(content => 
-          content.type === 'tool_use' || 
-          content.tool_name || 
-          content.name ||
-          (content.tool_use && content.tool_use.name)
-        );
-        
-        console.log('Pasos tool_use encontrados:', toolUseSteps.length);
-        
-        // Mostrar los pasos encontrados
-        if (toolUseSteps.length > 0) {
-          // Limpiar contenedor y asegurar visibilidad
-          stepsContainer.innerHTML = '';
-          stepsContainer.style.display = 'block';
-          stepsContainer.style.visibility = 'visible';
-          stepsContainer.style.opacity = '1';
-          
-          console.log(`Agregando ${toolUseSteps.length} pasos tool_use al DOM`);
-          
-          // Agregar los pasos uno por uno con delay
-          toolUseSteps.forEach((content, index) => {
-            setTimeout(() => {
-              agregarPaso(content, index);
-            }, index * 800); // 800ms entre cada paso
-          });
-          
-          // Mostrar resumen después de todos los pasos
-          if (messageText) {
-            setTimeout(() => {
-              mostrarResumen(messageText);
-            }, toolUseSteps.length * 800 + 500);
-          }
-        } else {
-          // Si no hay pasos, mostrar la respuesta completa o el mensaje
-          if (messageText) {
-            stepsContainer.innerHTML = `
-              <div class="alert alert-success">
-                <i class="bi bi-check-circle me-2"></i>
-                <strong>Proceso completado</strong>
-              </div>
-            `;
-            stepsContainer.style.display = 'block';
-            mostrarResumen(messageText);
-          } else {
-            // Si no hay pasos tool_use, mostrar mensaje amigable
-            stepsContainer.innerHTML = `
-              <div class="alert alert-info">
-                <i class="bi bi-info-circle me-2"></i>
-                <strong>Proceso completado</strong>
-                <p class="mb-0 mt-2">No se encontraron pasos de herramientas para mostrar. El proceso se ejecutó correctamente.</p>
-              </div>
-            `;
-            stepsContainer.style.display = 'block';
-            
-            // Si hay mensaje, mostrarlo
-            if (messageText) {
-              setTimeout(() => {
-                mostrarResumen(messageText);
-              }, 500);
             }
+            console.log('Message text (análisis API):', messageText);
+          } catch (apiErr) {
+            const transcurrido = Date.now() - pasosInicio;
+            await new Promise(function(resolve) { setTimeout(resolve, Math.max(0, pasosAnimacionMs - transcurrido)); });
+            throw apiErr;
           }
-        }
+
+          const transcurridoFin = Date.now() - pasosInicio;
+          await new Promise(function(resolve) { setTimeout(resolve, Math.max(0, pasosAnimacionMs - transcurridoFin)); });
+
+          mostrarResumen(messageText || 'No se recibió el texto de análisis de la API.');
         
       } catch (err) {
         console.error('Error completo:', err);
@@ -1538,6 +1375,21 @@
         return html;
       }
       
+      function formatearNombrePasoAmigable(toolName) {
+        if (!toolName || typeof toolName !== 'string') return 'Herramienta desconocida';
+        const t = toolName.trim();
+        if (!t) return 'Herramienta desconocida';
+        // Frases con espacios ya legibles: no usar /\b\w/g (en JS \w no incluye acentos y rompe palabras como "atención")
+        if (/\s/.test(t) && !/[a-z][A-Z]/.test(t)) {
+          return t;
+        }
+        return t
+          .replace(/([A-Z])/g, ' $1')
+          .replace(/^./, str => str.toUpperCase())
+          .trim()
+          .replace(/\b\w/g, l => l.toUpperCase());
+      }
+
       function agregarPaso(content, index) {
         try {
           console.log(`Agregando paso ${index}:`, content);
@@ -1556,12 +1408,7 @@
                           content.tool_use?.name || 
                           'Herramienta desconocida';
           
-          // Formatear el nombre de manera amigable (ej: "consultaclientenumia" -> "Consultar Cliente Numia")
-          const friendlyName = toolName
-            .replace(/([A-Z])/g, ' $1')
-            .replace(/^./, str => str.toUpperCase())
-            .trim()
-            .replace(/\b\w/g, l => l.toUpperCase());
+          const friendlyName = formatearNombrePasoAmigable(toolName);
           
           // Obtener el output - buscar en diferentes ubicaciones
           let toolOutput = content.output || 
@@ -1670,6 +1517,7 @@
         
         // Buscar patrones como "Scoring: 640", "Scoring:640", "scoring: 640", etc.
         const patrones = [
+          /Score:\s*\*{0,2}(\d+)\*{0,2}/i,
           /Scoring:\s*(\d+)/i,
           /Scoring\s*:\s*(\d+)/i,
           /score\s*:\s*(\d+)/i
@@ -1845,64 +1693,54 @@
           
           atencionSection.style.display = 'block';
           atencionSection.classList.add('active');
-          stepsContainer.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split me-2"></i>Conectando con el asistente...</div>';
-          
-          // Llamar al agente con el DNI fijo y la opción seleccionada
+
+          summarySection.style.display = 'none';
+          summaryContent.innerHTML = '';
+
+          const pasosInicio = Date.now();
+          const delayPaso = 800;
+          const nPasos = PASOS_ANALISIS_UI.length;
+          const pasosAnimacionMs = nPasos * delayPaso + 500;
+
+          stepsContainer.innerHTML = '';
+          stepsContainer.style.display = 'block';
+
+          PASOS_ANALISIS_UI.forEach((paso, index) => {
+            setTimeout(() => {
+              agregarPaso({ name: paso.titulo, output: paso.detalle }, index);
+            }, index * delayPaso);
+          });
+
           const dni = DNI_FIJO;
           const mensaje = `Necesito atención sobre ${opcion}. DNI: ${dni}`;
-          
-          const response = await fetch(JOURNEY_API_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': JOURNEY_API_KEY,
-              'Origin': 'journeybuilder.numia.co'
-            },
-            body: JSON.stringify({
-              input_value: mensaje,
-              input_type: 'chat'
-            })
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Error en servidor (${response.status})`);
-          }
-          
-          const data = await response.json();
-          console.log('Respuesta completa de la API:', JSON.stringify(data, null, 2));
-          
-          // Procesar respuesta (similar al código existente)
-          let contents = [];
+
           let messageText = null;
-          
-          if (data.outputs && data.outputs.length > 0) {
-            const firstOutput = data.outputs[0];
-            
-            if (firstOutput.outputs && firstOutput.outputs.length > 0) {
-              const innerOutput = firstOutput.outputs[0];
-              
-              if (innerOutput.results?.message?.content_blocks) {
-                innerOutput.results.message.content_blocks.forEach((block) => {
-                  if (block.contents && Array.isArray(block.contents)) {
-                    block.contents.forEach((content) => {
-                      if (content.type === 'tool_use' && content.name) {
-                        contents.push({
-                          type: 'tool_use',
-                          name: content.name,
-                          tool_name: content.name,
-                          tool_input: content.tool_input || content.input,
-                          output: content.output,
-                          duration: content.duration
-                        });
-                      }
-                    });
-                  }
-                });
-              }
-              
+          try {
+            const response = await fetch(JOURNEY_API_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': JOURNEY_API_KEY,
+                'Origin': 'journeybuilder.numia.co'
+              },
+              body: JSON.stringify({
+                input_value: mensaje,
+                input_type: 'chat'
+              })
+            });
+
+            if (!response.ok) {
+              throw new Error(`Error en servidor (${response.status})`);
+            }
+
+            const data = await response.json();
+            console.log('Respuesta completa de la API:', JSON.stringify(data, null, 2));
+
+            if (data.outputs?.[0]?.outputs?.[0]) {
+              const innerOutput = data.outputs[0].outputs[0];
               if (innerOutput.artifacts?.message) {
-                messageText = typeof innerOutput.artifacts.message === 'string' 
-                  ? innerOutput.artifacts.message 
+                messageText = typeof innerOutput.artifacts.message === 'string'
+                  ? innerOutput.artifacts.message
                   : innerOutput.artifacts.message.message || JSON.stringify(innerOutput.artifacts.message);
               } else if (innerOutput.outputs?.message?.message) {
                 messageText = innerOutput.outputs.message.message;
@@ -1910,27 +1748,16 @@
                 messageText = innerOutput.results.message.text;
               }
             }
+          } catch (apiErr) {
+            const transcurrido = Date.now() - pasosInicio;
+            await new Promise(function(resolve) { setTimeout(resolve, Math.max(0, pasosAnimacionMs - transcurrido)); });
+            throw apiErr;
           }
-          
-          // Mostrar pasos
-          if (contents.length > 0) {
-            stepsContainer.innerHTML = '';
-            contents.forEach((content, index) => {
-              setTimeout(() => {
-                agregarPaso(content, index);
-              }, index * 800);
-            });
-            
-            if (messageText) {
-              setTimeout(() => {
-                mostrarResumen(messageText);
-              }, contents.length * 800 + 500);
-            }
-          } else {
-            if (messageText) {
-              mostrarResumen(messageText);
-            }
-          }
+
+          const transcurridoFin = Date.now() - pasosInicio;
+          await new Promise(function(resolve) { setTimeout(resolve, Math.max(0, pasosAnimacionMs - transcurridoFin)); });
+
+          mostrarResumen(messageText || 'No se recibió el texto de análisis de la API.');
           
         } catch (err) {
           console.error('Error al llamar al agente:', err);

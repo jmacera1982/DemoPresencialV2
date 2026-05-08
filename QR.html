@@ -692,8 +692,14 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Configuración de la API Journey Builder
-      const JOURNEY_API_URL = 'https://api.journeybuilder.numia.co/api/v1/run/38223ec2-6123-4e6e-862a-4945161ed221?stream=false';
+      const JOURNEY_API_URL = 'https://api.journeybuilder.numia.co/api/v1/run/d83a2fbd-f8d0-468f-9ecd-375709fd149f?stream=false';
       const JOURNEY_API_KEY = 'sk-WfTsCY302RrciqoVRYAZWruD9mpyPKatAo8GU8tyzIM';
+      const PASOS_ANALISIS_UI = [
+        { titulo: 'Comportamiento digital', detalle: 'Evaluación de onboarding y señales digitales.' },
+        { titulo: 'Scoring', detalle: 'Puntuación y mejor oferta disponible.' },
+        { titulo: 'Sugerencia de canal', detalle: 'Priorización del canal de atención.' },
+        { titulo: 'Calcular prioridad', detalle: 'Analisis del estado actual de la sucursal comparado con el cliente.' }
+      ];
       
       // Variables de estado (datos del formulario)
       let formNombre = '';
@@ -881,6 +887,50 @@
         });
       }
       
+      function aplicarResumenYFlujoQr(messageText) {
+        const resumen = messageText || 'No se recibió el texto de análisis de la API.';
+        mostrarResumen(resumen);
+        if (!messageText) {
+          setTimeout(() => solicitarAtencionPresencialDirecta(), 1000);
+          return;
+        }
+        const scoring = extraerScoring(messageText);
+        const textoLower = messageText.toLowerCase();
+        const diceNoOPresencial =
+          textoLower.includes('sugerir videollamada: no') ||
+          textoLower.includes('sugerir videollamada:no') ||
+          textoLower.includes('**sugerir videollamada:** no') ||
+          textoLower.includes('**sugerir videollamada:**no') ||
+          (textoLower.includes('tipo de atención sugerida:') && textoLower.includes('presencial')) ||
+          (textoLower.includes('tipo de atención sugerida') && textoLower.includes('presencial'));
+        let tieneVideollamadaTexto = false;
+        if (!diceNoOPresencial) {
+          tieneVideollamadaTexto =
+            textoLower.includes('- sugerir videollamada: si') ||
+            textoLower.includes('- sugerir videollamada: sí') ||
+            textoLower.includes('sugerir videollamada: si') ||
+            textoLower.includes('sugerir videollamada: sí') ||
+            textoLower.includes('**sugerir videollamada:** si') ||
+            textoLower.includes('**sugerir videollamada:** sí') ||
+            textoLower.includes('**sugerir videollamada:**si') ||
+            textoLower.includes('**sugerir videollamada:**sí') ||
+            textoLower.includes('tipo de atención sugerida: videollamada') ||
+            textoLower.includes('tipo de atención sugerida:videollamada') ||
+            (textoLower.includes('tipo de atención sugerida') && textoLower.includes('videollamada')) ||
+            (textoLower.includes('tipo de atención sugerida:') && textoLower.includes('videollamada'));
+        }
+        const tieneVideollamada = tieneVideollamadaTexto || (scoring !== null && scoring > 640);
+        recomendacionVideollamada = tieneVideollamada;
+        console.log('Scoring extraído:', scoring, 'Videollamada recomendada:', tieneVideollamada);
+        setTimeout(() => {
+          if (tieneVideollamada) {
+            mostrarOpcionesAtencion();
+          } else {
+            solicitarAtencionPresencialDirecta();
+          }
+        }, 1000);
+      }
+
       async function llamarAgenteConOpcionTotem(opcion) {
         try {
           // Ocultar pantalla de opciones y mostrar loading
@@ -893,63 +943,51 @@
           
           atencionSection.style.display = 'block';
           atencionSection.classList.add('active');
-          stepsContainer.innerHTML = '<div style="color: #ffffff;"><i class="bi bi-hourglass-split me-2"></i>Conectando con el asistente...</div>';
-          
-          // Llamar al agente con los datos del formulario y la opción seleccionada
-          const mensaje = `Necesito atención sobre ${opcion}. Nombre: ${formNombre} ${formApellido}, DNI: ${formDni}, Email: ${formEmail}`;
-          
-          const response = await fetch(JOURNEY_API_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': JOURNEY_API_KEY,
-              'Origin': 'journeybuilder.numia.co'
-            },
-            body: JSON.stringify({
-              input_value: mensaje,
-              input_type: 'chat'
-            })
+
+          summarySection.style.display = 'none';
+
+          const pasosInicio = Date.now();
+          const delayPaso = 800;
+          const nPasos = PASOS_ANALISIS_UI.length;
+          const pasosAnimacionMs = nPasos * delayPaso + 500;
+
+          stepsContainer.innerHTML = '';
+
+          PASOS_ANALISIS_UI.forEach((paso, index) => {
+            setTimeout(() => {
+              agregarPaso({ name: paso.titulo, output: paso.detalle }, index);
+            }, index * delayPaso);
           });
-          
-          if (!response.ok) {
-            throw new Error(`Error en servidor (${response.status})`);
-          }
-          
-          const data = await response.json();
-          console.log('Respuesta completa de la API:', JSON.stringify(data, null, 2));
-          
-          // Procesar respuesta (similar al código existente)
-          let contents = [];
+
+          const mensaje = `Necesito atención sobre ${opcion}. Nombre: ${formNombre} ${formApellido}, DNI: ${formDni}, Email: ${formEmail}`;
+
           let messageText = null;
-          
-          if (data.outputs && data.outputs.length > 0) {
-            const firstOutput = data.outputs[0];
-            
-            if (firstOutput.outputs && firstOutput.outputs.length > 0) {
-              const innerOutput = firstOutput.outputs[0];
-              
-              if (innerOutput.results?.message?.content_blocks) {
-                innerOutput.results.message.content_blocks.forEach((block) => {
-                  if (block.contents && Array.isArray(block.contents)) {
-                    block.contents.forEach((content) => {
-                      if (content.type === 'tool_use' && content.name) {
-                        contents.push({
-                          type: 'tool_use',
-                          name: content.name,
-                          tool_name: content.name,
-                          tool_input: content.tool_input || content.input,
-                          output: content.output,
-                          duration: content.duration
-                        });
-                      }
-                    });
-                  }
-                });
-              }
-              
+          try {
+            const response = await fetch(JOURNEY_API_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': JOURNEY_API_KEY,
+                'Origin': 'journeybuilder.numia.co'
+              },
+              body: JSON.stringify({
+                input_value: mensaje,
+                input_type: 'chat'
+              })
+            });
+
+            if (!response.ok) {
+              throw new Error(`Error en servidor (${response.status})`);
+            }
+
+            const data = await response.json();
+            console.log('Respuesta completa de la API:', JSON.stringify(data, null, 2));
+
+            if (data.outputs?.[0]?.outputs?.[0]) {
+              const innerOutput = data.outputs[0].outputs[0];
               if (innerOutput.artifacts?.message) {
-                messageText = typeof innerOutput.artifacts.message === 'string' 
-                  ? innerOutput.artifacts.message 
+                messageText = typeof innerOutput.artifacts.message === 'string'
+                  ? innerOutput.artifacts.message
                   : innerOutput.artifacts.message.message || JSON.stringify(innerOutput.artifacts.message);
               } else if (innerOutput.outputs?.message?.message) {
                 messageText = innerOutput.outputs.message.message;
@@ -957,105 +995,16 @@
                 messageText = innerOutput.results.message.text;
               }
             }
+          } catch (apiErr) {
+            const transcurrido = Date.now() - pasosInicio;
+            await new Promise(function(resolve) { setTimeout(resolve, Math.max(0, pasosAnimacionMs - transcurrido)); });
+            throw apiErr;
           }
-          
-          // Mostrar pasos
-          if (contents.length > 0) {
-            stepsContainer.innerHTML = '';
-            contents.forEach((content, index) => {
-              setTimeout(() => {
-                agregarPaso(content, index);
-              }, index * 800);
-            });
-            
-            if (messageText) {
-              setTimeout(() => {
-                mostrarResumen(messageText);
-                // Extraer Scoring y detectar si recomienda videollamada
-                const scoring = extraerScoring(messageText);
-                const textoLower = messageText.toLowerCase();
-                
-                // Primero verificar si explícitamente dice NO o Presencial
-                const diceNoOPresencial = 
-                  textoLower.includes('sugerir videollamada: no') ||
-                  textoLower.includes('sugerir videollamada:no') ||
-                  textoLower.includes('**sugerir videollamada:** no') ||
-                  textoLower.includes('**sugerir videollamada:**no') ||
-                  (textoLower.includes('tipo de atención sugerida:') && textoLower.includes('presencial')) ||
-                  (textoLower.includes('tipo de atención sugerida') && textoLower.includes('presencial'));
-                
-                // Solo detectar videollamada si NO dice explícitamente NO o Presencial
-                let tieneVideollamadaTexto = false;
-                if (!diceNoOPresencial) {
-                  // Detectar múltiples variaciones del texto de sugerencia de videollamada
-                  tieneVideollamadaTexto = 
-                    // Variaciones con guión y SÍ
-                    textoLower.includes('- sugerir videollamada: si') ||
-                    textoLower.includes('- sugerir videollamada: sí') ||
-                    textoLower.includes('sugerir videollamada: si') ||
-                    textoLower.includes('sugerir videollamada: sí') ||
-                    // Variaciones con asteriscos (markdown) y SÍ
-                    textoLower.includes('**sugerir videollamada:** si') ||
-                    textoLower.includes('**sugerir videollamada:** sí') ||
-                    textoLower.includes('**sugerir videollamada:**si') ||
-                    textoLower.includes('**sugerir videollamada:**sí') ||
-                    // Detectar "Tipo de atención sugerida: Videollamada" (debe estar juntos)
-                    textoLower.includes('tipo de atención sugerida: videollamada') ||
-                    textoLower.includes('tipo de atención sugerida:videollamada');
-                }
-                
-                // Mostrar videollamada si el texto lo sugiere O si el Scoring > 640 (estricto, no >=)
-                const tieneVideollamada = tieneVideollamadaTexto || (scoring !== null && scoring > 640);
-                recomendacionVideollamada = tieneVideollamada;
-                console.log('Scoring extraído:', scoring, 'Dice NO/Presencial:', diceNoOPresencial, 'Videollamada por texto:', tieneVideollamadaTexto, 'Videollamada recomendada:', tieneVideollamada);
-                console.log('Texto completo para debugging:', messageText.substring(0, 500));
-                // Mostrar opciones de videollamada/presencial después del análisis o confirmación directa
-                setTimeout(() => {
-                  if (tieneVideollamada) {
-                    mostrarOpcionesAtencion();
-                  } else {
-                    // Si no hay recomendación de videollamada, solicitar atención presencial directamente
-                    solicitarAtencionPresencialDirecta();
-                  }
-                }, 1000);
-              }, contents.length * 800 + 500);
-            }
-          } else {
-            if (messageText) {
-              mostrarResumen(messageText);
-              // Extraer Scoring y detectar si recomienda videollamada
-              const scoring = extraerScoring(messageText);
-              const textoLower = messageText.toLowerCase();
-              // Detectar múltiples variaciones del texto de sugerencia de videollamada
-              const tieneVideollamadaTexto = 
-                // Variaciones con guión
-                textoLower.includes('- sugerir videollamada: si') ||
-                textoLower.includes('- sugerir videollamada: sí') ||
-                textoLower.includes('sugerir videollamada: si') ||
-                textoLower.includes('sugerir videollamada: sí') ||
-                // Variaciones con asteriscos (markdown)
-                textoLower.includes('**sugerir videollamada:** si') ||
-                textoLower.includes('**sugerir videollamada:** sí') ||
-                textoLower.includes('**sugerir videollamada:**si') ||
-                textoLower.includes('**sugerir videollamada:**sí') ||
-                // Detectar "Tipo de atención sugerida: Videollamada"
-                (textoLower.includes('tipo de atención sugerida') && textoLower.includes('videollamada')) ||
-                (textoLower.includes('tipo de atención sugerida:') && textoLower.includes('videollamada'));
-              // Mostrar videollamada si el texto lo sugiere O si el Scoring > 640
-              const tieneVideollamada = tieneVideollamadaTexto || (scoring !== null && scoring > 640);
-              recomendacionVideollamada = tieneVideollamada;
-              console.log('Scoring extraído:', scoring, 'Videollamada recomendada:', tieneVideollamada);
-              // Mostrar opciones de videollamada/presencial después del análisis o confirmación directa
-              setTimeout(() => {
-                if (tieneVideollamada) {
-                  mostrarOpcionesAtencion();
-                } else {
-                  // Si no hay recomendación de videollamada, solicitar atención presencial directamente
-                  solicitarAtencionPresencialDirecta();
-                }
-              }, 1000);
-            }
-          }
+
+          const transcurridoFin = Date.now() - pasosInicio;
+          await new Promise(function(resolve) { setTimeout(resolve, Math.max(0, pasosAnimacionMs - transcurridoFin)); });
+
+          aplicarResumenYFlujoQr(messageText);
           
         } catch (err) {
           console.error('Error al llamar al agente:', err);
@@ -1169,7 +1118,7 @@
             firstName: formNombre,
             lastName: formApellido,
             dni: formDni,
-            email: formEmail'
+            email: formEmail
           };
           
           const response = await fetch(apiUrl, {
@@ -1252,6 +1201,7 @@
         
         // Buscar patrones como "Scoring: 640", "Scoring:640", "scoring: 640", etc.
         const patrones = [
+          /Score:\s*\*{0,2}(\d+)\*{0,2}/i,
           /Scoring:\s*(\d+)/i,
           /Scoring\s*:\s*(\d+)/i,
           /score\s*:\s*(\d+)/i
@@ -1270,6 +1220,20 @@
         return null;
       }
       
+      function formatearNombrePasoAmigable(toolName) {
+        if (!toolName || typeof toolName !== 'string') return 'Herramienta desconocida';
+        const t = toolName.trim();
+        if (!t) return 'Herramienta desconocida';
+        if (/\s/.test(t) && !/[a-z][A-Z]/.test(t)) {
+          return t;
+        }
+        return t
+          .replace(/([A-Z])/g, ' $1')
+          .replace(/^./, str => str.toUpperCase())
+          .trim()
+          .replace(/\b\w/g, l => l.toUpperCase());
+      }
+
       // Funciones auxiliares (copiadas de app-cliente.html)
       function agregarPaso(content, index) {
         try {
@@ -1277,16 +1241,15 @@
           stepItem.className = 'step-item processing';
           
           const toolName = content.name || content.tool_name || 'Herramienta desconocida';
-          const friendlyName = toolName
-            .replace(/([A-Z])/g, ' $1')
-            .replace(/^./, str => str.toUpperCase())
-            .trim()
-            .replace(/\b\w/g, l => l.toUpperCase());
+          const friendlyName = formatearNombrePasoAmigable(toolName);
           
+          const detallePaso = (typeof content.output === 'string' && content.output.trim())
+            ? content.output.trim()
+            : 'Completado';
           stepItem.innerHTML = `
             <div class="step-title">${escapeHtml(friendlyName)}</div>
             <div class="step-output-content">
-              <em style="color: #ffffff;">Herramienta ejecutada correctamente</em>
+              <em style="color: #ffffff;">${escapeHtml(detallePaso)}</em>
             </div>
           `;
           
