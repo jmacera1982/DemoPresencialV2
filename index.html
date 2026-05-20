@@ -321,7 +321,7 @@
   <div class="container">
     <div class="card mb-3 border-primary" id="portalAuthCard" style="border-width: 2px;">
       <div class="card-header text-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-2" style="background: var(--primary);">
-        <span><i class="bi bi-shield-lock me-2"></i>Acceso demo unificado (Tótem · App cliente · QR · App Salud)</span>
+        <span><i class="bi bi-shield-lock me-2"></i>Acceso demo unificado (Tótem · Tótem Salud · App cliente · QR · App Salud)</span>
         <span id="portalAuthBadge" class="badge bg-light text-dark d-none">Sesión activa</span>
       </div>
       <div class="card-body py-3" id="portalAuthLoggedOut">
@@ -338,7 +338,7 @@
         <p class="text-danger small mb-0 mt-2 d-none" id="portalAuthErr">Contraseña incorrecta.</p>
       </div>
       <div class="card-body py-3 d-none" id="portalAuthLoggedIn">
-        <p class="small mb-2">Sesión lista. Enlaces directos: <a href="totem.html" target="_blank" rel="noopener">totem.html</a> · <a href="app-cliente.html" target="_blank" rel="noopener">app-cliente.html</a> · <a href="QR.html" target="_blank" rel="noopener">QR.html</a> · <a href="app-mobileSalud.html" target="_blank" rel="noopener">app-mobileSalud.html</a></p>
+        <p class="small mb-2">Sesión lista. Enlaces directos: <a href="totem.html" target="_blank" rel="noopener">totem.html</a> · <a href="totem-salud.html" target="_blank" rel="noopener">totem-salud.html</a> · <a href="app-cliente.html" target="_blank" rel="noopener">app-cliente.html</a> · <a href="QR.html" target="_blank" rel="noopener">QR.html</a> · <a href="app-mobileSalud.html" target="_blank" rel="noopener">app-mobileSalud.html</a> · <a href="app-inversion-bdb.html" target="_blank" rel="noopener">app-inversion-bdb.html</a></p>
         <button type="button" class="btn btn-outline-secondary btn-sm" id="portalAuthLogout">Cerrar sesión demo</button>
       </div>
     </div>
@@ -931,7 +931,7 @@
     
     // Datos predefinidos
     const datosPersonas = [
-      { dni: '29328703', firstName: 'Jorge', lastName: 'Macera', email: 'jorge.macera@mail.com', phone: '12345678' },
+      { dni: '29328703', firstName: 'Jorge', lastName: 'Macera', email: 'jorge.macera@mail.com'},
       { dni: '29205608', firstName: 'Jacqueline', lastName: 'Gomez', email: 'jacqueline.gomez@mail.com', phone: '23456789' },
       { dni: '29328704', firstName: 'Ignacio', lastName: 'Martinez', email: 'ignacio.martinez@mail.com', phone: '34567890' },
       { dni: '29205609', firstName: 'juan', lastName: 'gomez', email: 'juan.gomez@mail.com', phone: '45678901' },
