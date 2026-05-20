@@ -1012,7 +1012,7 @@
         'Juanma L': { dni: '38004650', apellido: 'Liza' },
         'Andrea': { dni: '1020799451', apellido: 'Usuario' },
         'Natalia': { dni: '1072655461', apellido: 'Pantoja' },
-        'Aldo': { dni: '22222222', apellido: 'Romero' },
+        'Aldo': { dni: '5215610238745', apellido: 'Romero' },
         'Eduardo': { dni: '33333333', apellido: 'Corona' },
         'Manuel': { dni: '12345678', apellido: 'Ormachea' },
         'Juanca': { dni: '1090378365', apellido: 'Soto' },
@@ -1097,6 +1097,11 @@
       async function llamarAgenteConOpcionDesdeMenu(opcion, btn) {
         try {
           btn.disabled = true;
+          if (opcion === 'inversiones') {
+            try {
+              window.open('app-inversion-bdb.html#cdt', '_blank');
+            } catch (eOpen) {}
+          }
           btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Conectando...';
           
           // Ocultar el menú
@@ -1677,6 +1682,11 @@
       async function llamarAgenteConOpcion(opcion, btn) {
         try {
           btn.disabled = true;
+          if (opcion === 'inversiones') {
+            try {
+              window.open('app-inversion-bdb.html#cdt', '_blank');
+            } catch (eOpen) {}
+          }
           btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Conectando...';
           
           // Ocultar opciones y mostrar loading
