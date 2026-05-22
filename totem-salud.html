@@ -719,6 +719,8 @@
   </style>
 </head>
 <body>
+  <script src="auth-portal.js"></script>
+  <script>AuthPortal.require();</script>
   <!-- Contenedor del tótem -->
   <div class="totem-container">
     <!-- Header -->
@@ -915,7 +917,23 @@
       
       const FV_ENQUEUE_TOTEM_URL = 'https://filavirtual2.debmedia.com/api/v1/queue/16221/branch/10750/enqueue';
       const FV_API_TOKEN = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
+      const DETALLE_EXTRA_FIELDS_TOTEM = 'De acuerdo a la cobertura del paciente, corresponde realizar el pago. De acuerdo a experiencias negativas anteriores y a que no se detectan pacientes en la sala de espera que requieren una atención urgente';
       var TIEMPO_ESPERA_CONFIRMACION_TEXTO = '3 min 0 seg';
+
+      function buildExtraFieldsTotem() {
+        return [{
+          showable: [{ in: 'workstation', format: 'both' }],
+          Detalle: DETALLE_EXTRA_FIELDS_TOTEM
+        }];
+      }
+
+      function buildDatosEnqueueTotem(dni) {
+        return {
+          dni: dni,
+          email: 'mail@mail.com',
+          extraFields: buildExtraFieldsTotem()
+        };
+      }
       
       function resetBloquesTurnoYEsperaConfirmacion() {
         var nb = document.getElementById('numeroTurnoBlock');
@@ -964,7 +982,7 @@
             'Content-Type': 'application/json',
             'x-api-token': FV_API_TOKEN
           },
-          body: JSON.stringify({ dni: dniIngresado })
+          body: JSON.stringify(buildDatosEnqueueTotem(dniIngresado))
         });
         var data = {};
         try {
@@ -1690,11 +1708,7 @@
           const apiUrl = `https://filavirtual2.debmedia.com/api/v1/queue/${queueId}/branch/10750/enqueue`;
           const apiToken = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
           
-          const datos = {
-        
-            dni: dniIngresado,
-      
-          };
+          const datos = buildDatosEnqueueTotem(dniIngresado);
           
           const response = await fetch(apiUrl, {
             method: 'POST',

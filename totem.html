@@ -1038,6 +1038,27 @@
         { titulo: 'Sugerencia de canal', detalle: 'Priorización del canal de atención.' },
         { titulo: 'Calcular prioridad', detalle: 'Analisis del estado actual de la sucursal comparado con el cliente.' }
       ];
+
+      const DETALLE_EXTRA_FIELDS_DEFAULT = 'El cliente registra un Score crediticio >700. Adicionalmente registro el abandono de un proceso de oboarding digital. Se recomienda ofrecer Prestamo personal';
+      let ultimoDetalleExtraFields = DETALLE_EXTRA_FIELDS_DEFAULT;
+
+      function buildExtraFields(detalle) {
+        return [{
+          showable: [{ in: 'workstation', format: 'both' }],
+          Detalle: detalle
+        }];
+      }
+
+      function buildDatosEnqueue(dni) {
+        return {
+          firstName: 'Cliente',
+          lastName: 'Totem',
+          dni: dni,
+          email: 'mail@mail.com',
+          phone: '12345678',
+          extraFields: buildExtraFields(ultimoDetalleExtraFields || DETALLE_EXTRA_FIELDS_DEFAULT)
+        };
+      }
       
       // Variables de estado
       let dniIngresado = '';
@@ -1470,12 +1491,7 @@
           const apiUrl = 'https://filavirtual2.debmedia.com/api/v1/queue/16221/branch/10750/enqueue';
           const apiToken = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
           
-          const datos = {
-       
-            dni: dniIngresado,
-            email: 'mail@mail.com',
-      
-          };
+          const datos = buildDatosEnqueue(dniIngresado);
           
           const response = await fetch(apiUrl, {
             method: 'POST',
@@ -1509,11 +1525,7 @@
           const apiUrl = `https://filavirtual2.debmedia.com/api/v1/queue/${queueId}/branch/10750/enqueue`;
           const apiToken = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
           
-          const datos = {
-        
-            dni: dniIngresado,
-        
-          };
+          const datos = buildDatosEnqueue(dniIngresado);
           
           const response = await fetch(apiUrl, {
             method: 'POST',
@@ -1662,6 +1674,9 @@
       function mostrarResumen(message) {
         try {
           const messageText = typeof message === 'string' ? message : (message.message || JSON.stringify(message, null, 2));
+          if (messageText && !messageText.startsWith('No se recibió el texto de análisis')) {
+            ultimoDetalleExtraFields = messageText;
+          }
           summaryContent.textContent = messageText;
           summarySection.style.display = 'block';
         } catch (err) {
