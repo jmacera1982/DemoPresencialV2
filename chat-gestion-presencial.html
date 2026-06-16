@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Agente Numia — Gestión presencial</title>
+  <script src="https://cdn.jsdelivr.net/gh/debmedia/numiajb-widget@1.0.17/dist/build/static/js/bundle.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100dvh;
+      background: #fff;
+    }
+
+    .jb-shell {
+      position: fixed;
+      bottom: max(16px, env(safe-area-inset-bottom, 0px));
+      right: max(16px, env(safe-area-inset-right, 0px));
+      z-index: 2147483000;
+    }
+
+    journey-builder-chat {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="jb-shell">
+    <journey-builder-chat
+      window_title="Agente-Numia - Gestion presencial - para pruebas"
+      flow_id="dc3a0d7a-531b-4321-a0e4-5c1f161e6af3"
+      host_url="https://api.journeybuilder.numia.co"
+      api_key="sk-WfTsCY302RrciqoVRYAZWruD9mpyPKatAo8GU8tyzIM"
+      chat_position="top-left">
+    </journey-builder-chat>
+  </div>
+</body>
+</html>
