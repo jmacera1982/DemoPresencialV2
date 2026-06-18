@@ -90,10 +90,19 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .form-control:focus {
+    .form-control:focus,
+    .form-select:focus {
       border-color: var(--bp-green);
       box-shadow: 0 0 0 3px rgba(0, 133, 63, 0.12);
       outline: none;
+    }
+
+    .form-select {
+      border: 2px solid var(--bp-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .btn-primary {
@@ -310,6 +319,16 @@
           <label class="form-label" for="email">Email</label>
           <input type="email" class="form-control" id="email" name="email" required autocomplete="email">
         </div>
+        <div class="col-12">
+          <label class="form-label" for="interes">Interés</label>
+          <select class="form-select" id="interes" name="interes" required>
+            <option value="" disabled selected>Seleccioná un producto</option>
+            <option value="Prestamos personales">Préstamos personales</option>
+            <option value="Hipotecario">Hipotecario</option>
+            <option value="Prendario">Prendario</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
       </form>
     </div>
 
@@ -416,6 +435,30 @@
     const btnEnviarTurno = document.getElementById('btnEnviarTurno');
     const $ = (id) => document.getElementById(id);
 
+    const SHOWABLE_WORKSTATION = [{ in: 'workstation', format: 'both' }];
+
+    function buildEnqueuePayload(data) {
+      return {
+        firstName: data.firstName.trim(),
+        lastName: data.lastName.trim(),
+        dni: data.dni.trim(),
+        email: data.email.trim(),
+        phone: data.phone.trim(),
+        extraFields: [
+          {
+            showable: SHOWABLE_WORKSTATION,
+            Interes: data.interes.trim(),
+            Canal: 'web'
+          }
+        ],
+        customerExtraFields: [
+          {
+            showable: SHOWABLE_WORKSTATION
+          }
+        ]
+      };
+    }
+
     function setFormAlert(type, msg) {
       formAlert.className = `alert alert-${type}`;
       formAlert.textContent = msg;
@@ -431,7 +474,7 @@
       clearFormAlert();
       const data = Object.fromEntries(new FormData(formEl).entries());
 
-      if (!data.firstName || !data.lastName || !data.dni || !data.email || !data.phone) {
+      if (!data.firstName || !data.lastName || !data.dni || !data.email || !data.phone || !data.interes) {
         setFormAlert('danger', 'Completá todos los campos.');
         return;
       }
@@ -447,13 +490,7 @@
             'x-api-token': FV_TOKEN,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            firstName: data.firstName.trim(),
-            lastName: data.lastName.trim(),
-            dni: data.dni.trim(),
-            email: data.email.trim(),
-            phone: data.phone.trim()
-          })
+          body: JSON.stringify(buildEnqueuePayload(data))
         });
 
         const out = await res.json().catch(() => ({}));
@@ -482,7 +519,7 @@
 
         $('turnInfoSection').classList.add('active');
 
-        formEl.querySelectorAll('input').forEach(input => { input.disabled = true; });
+        formEl.querySelectorAll('input, select').forEach(el => { el.disabled = true; });
         btnEnviarTurno.disabled = true;
         btnEnviarTurno.style.display = 'none';
 
