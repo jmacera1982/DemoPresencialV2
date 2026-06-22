@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BBVA — Mi Banca (demo)</title>
-  <link rel="icon" type="image/png" href="images/logo-bbva.png" />
+  <link rel="icon" type="image/svg+xml" href="images/favicon-bbva.svg" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/gh/debmedia/numiajb-widget@1.0.4/dist/build/static/js/bundle.min.js"></script>
   <style>
     :root {
       --bbva-navy: #072146;
@@ -2258,6 +2259,38 @@
       display: block;
     }
 
+    .jb-chat-shell {
+      position: absolute;
+      inset: 0;
+      z-index: 400;
+      pointer-events: none;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      overflow: visible;
+    }
+
+    .jb-chat-shell.visible {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .jb-chat-shell journey-builder-chat {
+      display: none;
+      pointer-events: auto;
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      left: 10px;
+      width: auto;
+      height: min(420px, calc(100% - 72px));
+      max-height: calc(100% - 72px);
+    }
+
+    .jb-chat-shell.visible journey-builder-chat {
+      display: block;
+    }
+
     .bbva-cita-submit {
       margin-top: 0.5rem;
     }
@@ -2868,6 +2901,16 @@
       </div>
 
     </div>
+
+    <div class="jb-chat-shell" id="jbChatShell" aria-hidden="true">
+      <journey-builder-chat
+        window_title="Asistente BBVA"
+        flow_id="2c47f677-226d-4157-9f93-092f484ce42f"
+        host_url="https://api.journeybuilder.numia.co"
+        api_key="sk-Q6K4cRLD_l3L7ZuTNIRVl8hSwR8nMwuHWFqiwhv4st0"
+        chat_position="bottom-right">
+      </journey-builder-chat>
+    </div>
   </div>
   </div>
 
@@ -3007,7 +3050,6 @@
       </div>
     </div>
   </div>
-
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -4081,6 +4123,7 @@
         if (screenCita && screenCita.classList.contains('active')) {
           limpiarPanelAgenteCita(true);
         }
+        ocultarChatCita();
         if (screenHome) screenHome.classList.add('active');
         if (screenAyuda) screenAyuda.classList.remove('active');
         if (screenCita) screenCita.classList.remove('active');
@@ -4306,6 +4349,28 @@
           logContainer.classList.remove('visible');
         }
         if (citaFormRest) citaFormRest.classList.remove('visible');
+      }
+
+      function mostrarChatCita() {
+        var shell = document.getElementById('jbChatShell');
+        if (!shell) return;
+        shell.classList.add('visible');
+        shell.setAttribute('aria-hidden', 'false');
+        var chat = shell.querySelector('journey-builder-chat');
+        if (chat && typeof chat.open === 'function') {
+          chat.open();
+        }
+      }
+
+      function ocultarChatCita() {
+        var shell = document.getElementById('jbChatShell');
+        if (!shell) return;
+        shell.classList.remove('visible');
+        shell.setAttribute('aria-hidden', 'true');
+        var chat = shell.querySelector('journey-builder-chat');
+        if (chat && typeof chat.close === 'function') {
+          chat.close();
+        }
       }
 
       function getNombreClienteCita() {
@@ -4588,7 +4653,7 @@
       var btnCitaGuiaChat = document.getElementById('btnCitaGuiaChat');
       if (btnCitaGuiaChat) {
         btnCitaGuiaChat.addEventListener('click', function () {
-          showAyuda();
+          mostrarChatCita();
         });
       }
 
@@ -4626,6 +4691,7 @@
 
       function resetCitaForm() {
         limpiarPanelAgenteCita(true);
+        ocultarChatCita();
         citaMotivo = '';
         citaTipo = 'sucursal';
         if (citaMotivoInput) citaMotivoInput.value = '';
