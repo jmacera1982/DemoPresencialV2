@@ -51,12 +51,12 @@
     .phone-shell {
       position: relative;
       flex-shrink: 0;
-      padding: 14px 22px 18px;
+      padding: 8px 10px 10px;
       background: #111;
-      border-radius: 42px;
+      border-radius: 36px;
       box-shadow:
-        0 0 0 2px #333,
-        0 0 0 4px #1a1a1a,
+        0 0 0 1px #333,
+        0 0 0 2px #1a1a1a,
         0 24px 64px rgba(0, 0, 0, 0.35),
         inset 0 0 0 1px rgba(255, 255, 255, 0.06);
     }
@@ -64,13 +64,13 @@
     .phone-shell::before {
       content: '';
       position: absolute;
-      top: 10px;
+      top: 8px;
       left: 50%;
       transform: translateX(-50%);
-      width: 90px;
-      height: 24px;
+      width: 72px;
+      height: 20px;
       background: #111;
-      border-radius: 0 0 16px 16px;
+      border-radius: 0 0 12px 12px;
       z-index: 30;
       pointer-events: none;
     }
@@ -78,10 +78,10 @@
     .phone-shell::after {
       content: '';
       position: absolute;
-      bottom: 8px;
+      bottom: 6px;
       left: 50%;
       transform: translateX(-50%);
-      width: 110px;
+      width: 96px;
       height: 4px;
       background: rgba(255, 255, 255, 0.25);
       border-radius: 4px;
@@ -102,10 +102,10 @@
     
     /* Contenedor tipo app móvil */
     .mobile-app-container {
-      max-width: 360px;
-      width: 360px;
+      max-width: 392px;
+      width: 392px;
       background: #fff;
-      border-radius: 32px;
+      border-radius: 28px;
       box-shadow: none;
       overflow: hidden;
       position: relative;
@@ -422,7 +422,7 @@
 
       .phone-shell {
         width: 100%;
-        max-width: 430px;
+        max-width: 412px;
       }
       
       .mobile-app-container {
@@ -444,12 +444,12 @@
       }
 
       .phone-shell {
-        border-radius: 36px;
-        padding: 10px 8px 14px;
+        border-radius: 32px;
+        padding: 6px 8px 10px;
       }
       
       .mobile-app-container {
-        border-radius: 28px;
+        border-radius: 24px;
         height: calc(100vh - 1.5rem);
         max-height: none;
       }
