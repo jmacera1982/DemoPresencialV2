@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BBVA — Tótem de Atención</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon-bbva.svg" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bbva-navy: #072146;
+      --bbva-blue: #004481;
+      --bbva-blue-mid: #1464A5;
+      --bbva-accent: #2DCCCD;
+      --bbva-light: #E8F0F8;
+      --numia-azul: var(--bbva-blue);
+      --numia-azul-oscuro: var(--bbva-navy);
+      --numia-success: #10b981;
+      --numia-text: #444444;
+      --numia-text-light: #767676;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Source Sans 3', 'Open Sans', Arial, sans-serif;
+      background: #ececec;
+      color: var(--numia-text);
+      min-height: 100vh;
+      display: flex;
+      gap: 2rem;
+      padding: 2rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .totem-container {
+      max-width: 600px;
+      width: 100%;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(7, 33, 70, 0.18);
+      overflow: hidden;
+      height: calc(100vh - 4rem);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .totem-header {
+      background: #fff;
+      padding: 1.35rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    .totem-header .header-logo {
+      height: 44px;
+      width: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    .totem-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 0;
+    }
+
+    .totem-screen {
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      display: none;
+    }
+
+    .totem-screen.active { display: block; }
+
+    .totem-screen h2 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--bbva-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    .totem-screen .subtitle {
+      font-size: 0.95rem;
+      color: var(--numia-text-light);
+      margin-bottom: 1.25rem;
+    }
+
+    .instruction {
+      font-size: 1rem;
+      color: var(--bbva-blue);
+      margin-bottom: 1.25rem;
+      font-weight: 600;
+    }
+
+    .dni-display {
+      background: #fff;
+      color: var(--bbva-navy);
+      font-size: 1.5rem;
+      font-weight: 600;
+      padding: 1rem;
+      border: 3px solid var(--bbva-blue);
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.15rem;
+    }
+
+    .dni-display.empty { color: rgba(0, 0, 0, 0.3); }
+    .dni-display.empty::before { content: 'Ingrese su DNI'; letter-spacing: 0; font-family: 'Source Sans 3', sans-serif; }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      max-width: 350px;
+      margin: 0 auto 0.5rem;
+    }
+
+    .keypad-row-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.5rem;
+      max-width: 350px;
+      margin: 0 auto 0.75rem;
+    }
+
+    .keypad-btn {
+      background: #fff;
+      color: var(--bbva-navy);
+      border: 1.5px solid var(--bbva-blue);
+      border-radius: 10px;
+      padding: 1rem;
+      font-size: 1.4rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .keypad-btn:hover { background: var(--bbva-light); }
+    .keypad-btn.delete { font-size: 1.3rem; }
+    .keypad-btn.empty { border: none; background: transparent; cursor: default; }
+    .keypad-btn.empty:hover { background: transparent; }
+
+    .btn-continuar {
+      width: 100%;
+      max-width: 350px;
+      background: var(--bbva-blue);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 0.95rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0.5rem auto 0;
+      display: block;
+      transition: all 0.2s;
+    }
+
+    .btn-continuar:hover:not(:disabled) {
+      background: var(--bbva-navy);
+      transform: translateY(-1px);
+    }
+
+    .btn-continuar:disabled {
+      background: #c5cdd6;
+      cursor: not-allowed;
+    }
+
+    .opciones-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.85rem;
+    }
+
+    .opcion-card {
+      background: #fff;
+      border: 2px solid #dde3ea;
+      border-radius: 14px;
+      padding: 1.15rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .opcion-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 68, 129, 0.12);
+    }
+
+    .opcion-card.motivo {
+      border-color: var(--bbva-blue);
+      background: linear-gradient(135deg, #f0f6fb 0%, var(--bbva-light) 100%);
+    }
+
+    .opcion-card.cita-si {
+      border-color: var(--bbva-blue-mid);
+      background: linear-gradient(135deg, #f0f6fb 0%, #fff 100%);
+    }
+
+    .opcion-card.cita-no {
+      border-color: var(--bbva-navy);
+      background: linear-gradient(135deg, var(--bbva-light) 0%, #fff 100%);
+    }
+
+    .opcion-card.videollamada {
+      border-color: var(--numia-success);
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+
+    .opcion-card.videollamada.recomendada {
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+    }
+
+    .opcion-card.presencial {
+      border-color: var(--bbva-blue);
+      background: linear-gradient(135deg, #f0f6fb 0%, var(--bbva-light) 100%);
+    }
+
+    .opcion-card.presencial.recomendada {
+      box-shadow: 0 0 0 2px rgba(0, 68, 129, 0.2);
+    }
+
+    .opcion-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.35rem;
+      color: var(--bbva-blue);
+    }
+
+    .opcion-card.videollamada .opcion-icon { color: var(--numia-success); font-size: 2.5rem; }
+
+    .opcion-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--bbva-navy);
+    }
+
+    .opcion-badge {
+      display: inline-block;
+      background: var(--numia-success);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 8px;
+      margin-top: 0.35rem;
+    }
+
+    .opcion-badge.bbva {
+      background: var(--bbva-blue);
+    }
+
+    .opcion-desc {
+      font-size: 0.78rem;
+      color: var(--numia-text-light);
+      margin-top: 0.3rem;
+    }
+
+    .screen-confirmacion .success-icon {
+      font-size: 3.5rem;
+      color: var(--bbva-blue);
+      margin-bottom: 1rem;
+    }
+
+    .screen-confirmacion .message {
+      font-size: 1rem;
+      color: var(--numia-text-light);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .tiempo-espera {
+      background: var(--bbva-light);
+      border: 2px solid var(--bbva-blue);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .tiempo-espera-valor {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--bbva-navy);
+    }
+
+    .btn-video {
+      background: var(--numia-success);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 0.9rem 1.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-volver {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+      background: var(--bbva-navy);
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 999px;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 4px 16px rgba(7, 33, 70, 0.35);
+    }
+
+    .log-container {
+      flex: 1;
+      min-width: 400px;
+      max-width: 500px;
+      background: #1a1a1a;
+      border-radius: 12px;
+      display: none;
+      flex-direction: column;
+      height: calc(100vh - 4rem);
+      overflow: hidden;
+    }
+
+    .log-container.visible { display: flex; }
+
+    .log-header {
+      background: #2d2d2d;
+      padding: 1rem 1.5rem;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-bottom: 2px solid #fff;
+    }
+
+    .log-header::before { content: '▶ '; }
+
+    .log-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      color: #e0e0e0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+    }
+
+    .atencion-section { display: none; }
+    .atencion-section.active { display: block; }
+
+    .step-item {
+      background: #2d2d2d;
+      border-left: 3px solid var(--bbva-accent);
+      border-radius: 4px;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .step-item.completed { border-left-color: #fff; }
+
+    .step-title {
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .step-duration { color: #888; font-size: 0.75rem; }
+
+    .summary-section {
+      background: #2d2d2d;
+      border-left: 3px solid #fff;
+      border-radius: 4px;
+      padding: 1rem;
+      margin-top: 1rem;
+      color: #e0e0e0;
+    }
+
+    .summary-title {
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .conversation-line { margin-bottom: 0.35rem; line-height: 1.45; }
+    .conversation-line.title { color: #fff; font-weight: 600; margin-top: 0.5rem; }
+
+    @media (max-width: 1024px) {
+      body { flex-direction: column; padding: 1rem; }
+      .totem-container, .log-container {
+        max-width: 100%;
+        min-width: 0;
+        height: auto;
+        max-height: 70vh;
+      }
+      .log-container { height: 50vh; }
+    }
+  </style>
+</head>
+<body>
+  <script src="auth-portal.js"></script>
+  <script>AuthPortal.require();</script>
+
+  <button type="button" class="btn-volver" id="btnVolver"><i class="bi bi-arrow-left"></i> Volver al inicio</button>
+
+  <div class="totem-container">
+    <div class="totem-header">
+      <img src="images/logo-bbva.png" alt="BBVA" class="header-logo" />
+    </div>
+    <div class="totem-content">
+      <!-- DNI -->
+      <div class="totem-screen active" id="screenDni">
+        <p class="instruction">Bienvenido a BBVA. Ingrese su DNI</p>
+        <div class="dni-display empty" id="dniDisplay"></div>
+        <div class="keypad">
+          <button type="button" class="keypad-btn" data-number="1">1</button>
+          <button type="button" class="keypad-btn" data-number="2">2</button>
+          <button type="button" class="keypad-btn" data-number="3">3</button>
+          <button type="button" class="keypad-btn" data-number="4">4</button>
+          <button type="button" class="keypad-btn" data-number="5">5</button>
+          <button type="button" class="keypad-btn" data-number="6">6</button>
+          <button type="button" class="keypad-btn" data-number="7">7</button>
+          <button type="button" class="keypad-btn" data-number="8">8</button>
+          <button type="button" class="keypad-btn" data-number="9">9</button>
+        </div>
+        <div class="keypad-row-bottom">
+          <button type="button" class="keypad-btn empty" tabindex="-1"></button>
+          <button type="button" class="keypad-btn" data-number="0">0</button>
+          <button type="button" class="keypad-btn delete" id="btnDelete"><i class="bi bi-backspace"></i></button>
+        </div>
+        <button type="button" class="btn-continuar" id="btnContinuarDni" disabled>Continuar</button>
+      </div>
+
+      <!-- ¿Tiene cita? -->
+      <div class="totem-screen" id="screenCitaMenu">
+        <h2>¿Cómo podemos ayudarte?</h2>
+        <p class="subtitle">Indique si tiene una cita agendada</p>
+        <div class="opciones-grid">
+          <div class="opcion-card cita-si" id="btnTengoCita">
+            <div class="opcion-icon"><i class="bi bi-calendar-check"></i></div>
+            <div class="opcion-title">Tengo una cita</div>
+            <div class="opcion-desc">Ya agendé turno en sucursal</div>
+          </div>
+          <div class="opcion-card cita-no" id="btnNoTengoCita">
+            <div class="opcion-icon"><i class="bi bi-person-plus"></i></div>
+            <div class="opcion-title">No tengo una cita</div>
+            <div class="opcion-desc">Necesito orientación o atención</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Motivos -->
+      <div class="totem-screen" id="screenMotivos">
+        <h2>¿Cuál es el motivo de tu consulta?</h2>
+        <p class="subtitle">Seleccione una opción</p>
+        <div class="opciones-grid" id="motivosGrid">
+          <div class="opcion-card motivo" data-motivo="Prestamos">
+            <div class="opcion-icon"><i class="bi bi-cash-coin"></i></div>
+            <div class="opcion-title">Préstamos</div>
+          </div>
+          <div class="opcion-card motivo" data-motivo="Tarjetas">
+            <div class="opcion-icon"><i class="bi bi-credit-card"></i></div>
+            <div class="opcion-title">Tarjetas</div>
+          </div>
+          <div class="opcion-card motivo" data-motivo="Transferencias">
+            <div class="opcion-icon"><i class="bi bi-arrow-left-right"></i></div>
+            <div class="opcion-title">Transferencias</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canal de atención -->
+      <div class="totem-screen" id="screenOpciones">
+        <h2 id="opcionesTitle">Seleccione tipo de atención</h2>
+        <p class="subtitle" id="opcionesSubtitle">Según el análisis del agente</p>
+        <div class="opciones-grid" id="opcionesGrid"></div>
+      </div>
+
+      <!-- Confirmación -->
+      <div class="totem-screen" id="screenConfirmacion">
+        <div class="success-icon"><i class="bi bi-check-circle-fill"></i></div>
+        <h2 id="confirmTitle">¡Atención solicitada!</h2>
+        <div class="message" id="confirmMessage">En breve uno de nuestros asesores lo atenderá.</div>
+        <div class="tiempo-espera" id="tiempoEspera" style="display:none;">
+          <div class="tiempo-espera-label">Tiempo de espera estimado</div>
+          <div class="tiempo-espera-valor" id="tiempoEsperaValor">--</div>
+        </div>
+        <div id="videoLinkContainer" style="display:none; margin-top:1rem;">
+          <a href="#" id="btnVideoLink" class="btn-video" target="_blank" rel="noopener">
+            <i class="bi bi-camera-video me-1"></i> Iniciar videollamada
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="log-container" id="logContainer">
+    <div class="log-header">Análisis del Agente</div>
+    <div class="log-content">
+      <div id="atencionSection" class="atencion-section">
+        <div id="stepsContainer"></div>
+        <div id="summarySection" class="summary-section" style="display:none;">
+          <div class="summary-title"><i class="bi bi-check-circle-fill"></i> Resumen del análisis</div>
+          <div id="summaryContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var FV_TOKEN = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
+      var FV_BRANCH = 10750;
+      var FV_QUEUE_PRESENCIAL = 16221;
+      var FV_QUEUE_VIDEO = 16223;
+
+      var dniIngresado = '';
+      var motivoActual = '';
+      var analisisTimeouts = [];
+      var ultimoDetalleExtraFields = 'El cliente cuenta con un Score crediticio >700. Adicionalmente registro el abandono de un proceso de oboarding digital. Se recomienda ofrecer Prestamo personal';
+
+      var screens = {
+        dni: document.getElementById('screenDni'),
+        cita: document.getElementById('screenCitaMenu'),
+        motivos: document.getElementById('screenMotivos'),
+        opciones: document.getElementById('screenOpciones'),
+        confirmacion: document.getElementById('screenConfirmacion')
+      };
+
+      var dniDisplay = document.getElementById('dniDisplay');
+      var btnContinuarDni = document.getElementById('btnContinuarDni');
+      var btnDelete = document.getElementById('btnDelete');
+      var logContainer = document.getElementById('logContainer');
+      var atencionSection = document.getElementById('atencionSection');
+      var stepsContainer = document.getElementById('stepsContainer');
+      var summarySection = document.getElementById('summarySection');
+      var summaryContent = document.getElementById('summaryContent');
+      var opcionesGrid = document.getElementById('opcionesGrid');
+
+      function showScreen(name) {
+        Object.keys(screens).forEach(function (k) {
+          if (screens[k]) screens[k].classList.toggle('active', k === name);
+        });
+      }
+
+      function limpiarPanelAgente() {
+        analisisTimeouts.forEach(function (id) { clearTimeout(id); });
+        analisisTimeouts = [];
+        if (stepsContainer) stepsContainer.innerHTML = '';
+        if (summaryContent) summaryContent.innerHTML = '';
+        if (summarySection) summarySection.style.display = 'none';
+        if (atencionSection) atencionSection.classList.remove('active');
+        if (logContainer) logContainer.classList.remove('visible');
+      }
+
+      function resetTotem() {
+        limpiarPanelAgente();
+        dniIngresado = '';
+        motivoActual = '';
+        actualizarDisplayDni();
+        showScreen('dni');
+      }
+
+      function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function actualizarDisplayDni() {
+        if (!dniDisplay) return;
+        if (!dniIngresado) {
+          dniDisplay.textContent = '';
+          dniDisplay.classList.add('empty');
+          btnContinuarDni.disabled = true;
+        } else {
+          dniDisplay.textContent = dniIngresado;
+          dniDisplay.classList.remove('empty');
+          btnContinuarDni.disabled = false;
+        }
+      }
+
+      function agregarNumero(n) {
+        if (dniIngresado.length < 15) {
+          dniIngresado += n;
+          actualizarDisplayDni();
+        }
+      }
+
+      document.querySelectorAll('.keypad-btn[data-number]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          agregarNumero(btn.getAttribute('data-number'));
+        });
+      });
+
+      if (btnDelete) {
+        btnDelete.addEventListener('click', function () {
+          dniIngresado = dniIngresado.slice(0, -1);
+          actualizarDisplayDni();
+        });
+      }
+
+      if (btnContinuarDni) {
+        btnContinuarDni.addEventListener('click', function () {
+          if (!dniIngresado) return;
+          showScreen('cita');
+        });
+      }
+
+      document.getElementById('btnTengoCita').addEventListener('click', function () {
+        confirmarCitaAgendada();
+      });
+
+      document.getElementById('btnNoTengoCita').addEventListener('click', function () {
+        showScreen('motivos');
+      });
+
+      document.querySelectorAll('[data-motivo]').forEach(function (card) {
+        card.addEventListener('click', function () {
+          motivoActual = card.getAttribute('data-motivo');
+          iniciarAnalisisAgente(motivoActual);
+        });
+      });
+
+      document.getElementById('btnVolver').addEventListener('click', resetTotem);
+
+      function buildExtraFields(detalle) {
+        return [{ showable: [{ in: 'workstation', format: 'both' }], Detalle: detalle }];
+      }
+
+      function buildDatosEnqueue() {
+        return {
+          dni: dniIngresado,
+          extraFields: buildExtraFields(ultimoDetalleExtraFields)
+        };
+      }
+
+      function obtenerResumenDemo(motivo) {
+        var id = dniIngresado || 'cliente';
+        if (motivo === 'Prestamos') {
+          return 'Recomendación para DNI ' + id + ':\n\n**Tipo de atención sugerida**: Videollamada inmediata\n\nConsultas recientes sobre préstamos y perfil compatible con precalificación digital. Score: 720.\n\n- Sugerir videollamada: Sí\n- Tiempo estimado videollamada: ~8 min\n- Tiempo estimado sucursal: ~45 min';
+        }
+        if (motivo === 'Tarjetas') {
+          return 'Recomendación para DNI ' + id + ':\n\n**Tipo de atención sugerida**: Sucursal\n\nHistorial de gestiones sobre tarjeta de crédito. Para aumento de límite conviene atención presencial.\n\n- Sugerir videollamada: No\n- Videollamada disponible para consultas generales.';
+        }
+        if (motivo === 'Transferencias') {
+          return 'Recomendación para DNI ' + id + ':\n\n**Tipo de atención sugerida**: Videollamada\n\nLa transferencia puede hacerse desde la app. Si necesita ayuda en sucursal, se sugiere videollamada con un especialista.\n\n- Sugerir videollamada: Sí\n- No requiere turno presencial';
+        }
+        return '';
+      }
+
+      function agregarPaso(titulo, detalle, index) {
+        var step = document.createElement('div');
+        step.className = 'step-item processing';
+        step.innerHTML =
+          '<div class="step-title">' + escapeHtml(titulo) + '</div>' +
+          '<div class="step-duration">Paso ' + (index + 1) + '</div>' +
+          '<div class="step-output-content"><em style="color:#ccc;">' + escapeHtml(detalle) + '</em></div>';
+        stepsContainer.appendChild(step);
+        setTimeout(function () { step.classList.add('completed'); }, 500);
+        var logContent = document.querySelector('.log-content');
+        if (logContent) logContent.scrollTop = logContent.scrollHeight;
+      }
+
+      function mostrarResumen(texto) {
+        ultimoDetalleExtraFields = texto;
+        var html = '';
+        texto.split('\n').forEach(function (linea) {
+          linea = linea.trim();
+          if (!linea) { html += '<br>'; return; }
+          if (linea.match(/^\*\*.*\*\*:/)) {
+            html += '<div class="conversation-line title">' + escapeHtml(linea.replace(/\*\*/g, '').replace(':', '')) + '</div>';
+          } else {
+            html += '<div class="conversation-line">' + escapeHtml(linea) + '</div>';
+          }
+        });
+        summaryContent.innerHTML = html;
+        summarySection.style.display = 'block';
+      }
+
+      function iniciarAnalisisAgente(motivo) {
+        limpiarPanelAgente();
+        showScreen('motivos');
+
+        logContainer.classList.add('visible');
+        atencionSection.classList.add('active');
+        stepsContainer.innerHTML = '';
+        summarySection.style.display = 'none';
+
+        var labels = {
+          Prestamos: 'Préstamos personales',
+          Tarjetas: 'Tarjetas de crédito',
+          Transferencias: 'Transferencias'
+        };
+        var label = labels[motivo] || motivo;
+        var pasos = [
+          { t: 'Analizando tipo de atención solicitada', d: 'Motivo: ' + label + '. Evaluando canal en sucursal.' },
+          { t: 'Analizando interacciones anteriores del cliente', d: 'Revisando consultas y productos del DNI ' + dniIngresado + '.' },
+          { t: 'Generando recomendación de asesoramiento', d: 'Determinando el canal más eficiente.' }
+        ];
+        var delay = 900;
+
+        pasos.forEach(function (p, i) {
+          analisisTimeouts.push(setTimeout(function () { agregarPaso(p.t, p.d, i); }, i * delay));
+        });
+
+        analisisTimeouts.push(setTimeout(function () {
+          var texto = obtenerResumenDemo(motivo);
+          mostrarResumen(texto);
+          mostrarOpcionesAtencion(motivo);
+        }, pasos.length * delay + 400));
+      }
+
+      function mostrarOpcionesAtencion(motivo) {
+        showScreen('opciones');
+        opcionesGrid.innerHTML = '';
+
+        document.getElementById('opcionesTitle').textContent = 'Seleccione tipo de atención';
+        document.getElementById('opcionesSubtitle').textContent = 'Según el análisis del agente';
+
+        if (motivo === 'Transferencias') {
+          opcionesGrid.appendChild(crearCardVideo(true, true));
+          return;
+        }
+
+        var recomiendaVideo = motivo === 'Prestamos';
+        if (recomiendaVideo) {
+          opcionesGrid.appendChild(crearCardVideo(true, true));
+          opcionesGrid.appendChild(crearCardPresencial(false));
+        } else {
+          opcionesGrid.appendChild(crearCardPresencial(true));
+          opcionesGrid.appendChild(crearCardVideo(false, false));
+        }
+      }
+
+      function crearCardVideo(recomendada, destacada) {
+        var card = document.createElement('div');
+        card.className = 'opcion-card videollamada' + (recomendada ? ' recomendada' : '');
+        card.innerHTML =
+          '<div class="opcion-icon"><i class="bi bi-camera-video"></i></div>' +
+          '<div class="opcion-title">Videollamada inmediata</div>' +
+          (recomendada ? '<div class="opcion-badge">Recomendado · Menos espera</div>' : '<div class="opcion-desc">Atención remota</div>') +
+          (destacada ? '<div class="opcion-desc">Conectate ahora con un especialista</div>' : '');
+        card.addEventListener('click', function () { solicitarAtencion('videollamada'); });
+        return card;
+      }
+
+      function crearCardPresencial(recomendada) {
+        var card = document.createElement('div');
+        card.className = 'opcion-card presencial' + (recomendada ? ' recomendada' : '');
+        card.innerHTML =
+          '<div class="opcion-icon"><i class="bi bi-geo-alt"></i></div>' +
+          '<div class="opcion-title">Atención en sucursal</div>' +
+          (recomendada
+            ? '<div class="opcion-badge bbva">Recomendado</div><div class="opcion-desc">Te llamaremos por tu DNI</div>'
+            : '<div class="opcion-badge less-recommended" style="background:#94a3b8;">Alternativa</div><div class="opcion-desc">Mayor tiempo de espera</div>');
+        card.addEventListener('click', function () { solicitarAtencion('presencial'); });
+        return card;
+      }
+
+      async function solicitarAtencion(tipo) {
+        try {
+          var queueId = tipo === 'videollamada' ? FV_QUEUE_VIDEO : FV_QUEUE_PRESENCIAL;
+          var res = await fetch('https://filavirtual2.debmedia.com/api/v1/queue/' + queueId + '/branch/' + FV_BRANCH + '/enqueue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-token': FV_TOKEN },
+            body: JSON.stringify(buildDatosEnqueue())
+          });
+          if (!res.ok) throw new Error('Error en servidor (' + res.status + ')');
+          var data = await res.json();
+          mostrarConfirmacion(data, tipo);
+        } catch (err) {
+          alert('Error: ' + err.message);
+        }
+      }
+
+      async function confirmarCitaAgendada() {
+        try {
+          var res = await fetch('https://filavirtual2.debmedia.com/api/v1/queue/' + FV_QUEUE_PRESENCIAL + '/branch/' + FV_BRANCH + '/enqueue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-token': FV_TOKEN },
+            body: JSON.stringify(buildDatosEnqueue())
+          });
+          if (!res.ok) throw new Error('Error en servidor (' + res.status + ')');
+          showScreen('confirmacion');
+          document.getElementById('confirmTitle').textContent = '¡Bienvenido! Registramos tu llegada';
+          document.getElementById('confirmMessage').innerHTML =
+            'Tenés cita agendada. Presentate en recepción.<br>Te llamaremos por tu DNI: <strong>' + escapeHtml(dniIngresado) + '</strong>';
+          document.getElementById('tiempoEspera').style.display = 'none';
+          document.getElementById('videoLinkContainer').style.display = 'none';
+        } catch (err) {
+          alert('Error: ' + err.message);
+        }
+      }
+
+      function mostrarConfirmacion(data, tipo) {
+        showScreen('confirmacion');
+        document.getElementById('confirmTitle').textContent = tipo === 'videollamada' ? '¡Videollamada solicitada!' : '¡Turno asignado!';
+        document.getElementById('confirmMessage').innerHTML =
+          'DNI: <strong>' + escapeHtml(dniIngresado) + '</strong><br>En breve un asesor te atenderá.';
+
+        var tiempoEl = document.getElementById('tiempoEspera');
+        var videoEl = document.getElementById('videoLinkContainer');
+        tiempoEl.style.display = 'none';
+        videoEl.style.display = 'none';
+
+        if (data && data.averageWaitingTime != null) {
+          var m = Math.floor(data.averageWaitingTime / 60);
+          var s = data.averageWaitingTime % 60;
+          tiempoEl.style.display = 'block';
+          document.getElementById('tiempoEsperaValor').textContent = m + ' min ' + s + ' seg';
+        }
+
+        if (tipo === 'videollamada' && data && data.videoCallUrl) {
+          var url = data.videoCallUrl + (data.videoCallUrl.indexOf('?') >= 0 ? '&' : '?') + 'videocallUser=mobile';
+          videoEl.style.display = 'block';
+          document.getElementById('btnVideoLink').href = url;
+        }
+      }
+
+      actualizarDisplayDni();
+    });
+  </script>
+</body>
+</html>
