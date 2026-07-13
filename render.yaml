@@ -1,0 +1,29 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: demopresencialv2
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: node index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_HTTPONLY
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: strict
+      - key: TRUST_PROXY
+        value: "true"
+      - key: DEMO_USERS_FILE
+        value: ./data/demo-users.example.json
+      - key: DEMO_PORTAL_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: JOURNEY_API_KEY
+        sync: false
