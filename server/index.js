@@ -41,7 +41,29 @@ const COOKIE_HTTPONLY = process.env.COOKIE_HTTPONLY !== 'false';
 const COOKIE_SAMESITE = (process.env.COOKIE_SAMESITE || 'strict').trim().toLowerCase();
 const TRUST_PROXY = process.env.TRUST_PROXY === 'true';
 const FORCE_HTTPS = process.env.FORCE_HTTPS === 'true' || COOKIE_SECURE;
-const DEMO_USERS_FILE = process.env.DEMO_USERS_FILE || path.join(__dirname, 'data', 'demo-users.json');
+
+function resolveDemoUsersFilePath() {
+  const configured = (process.env.DEMO_USERS_FILE || '').trim();
+  const candidates = [];
+
+  if (configured) {
+    candidates.push(path.isAbsolute(configured) ? configured : path.resolve(__dirname, configured));
+  }
+
+  candidates.push(path.join(__dirname, 'data', 'demo-users.json'));
+  candidates.push(path.join(__dirname, 'data', 'demo-users.example.json'));
+
+  for (let i = 0; i < candidates.length; i += 1) {
+    if (fs.existsSync(candidates[i])) {
+      return candidates[i];
+    }
+  }
+
+  return candidates[candidates.length - 1];
+}
+
+const DEMO_USERS_FILE = resolveDemoUsersFilePath();
+console.log('[demo-users] usando', DEMO_USERS_FILE);
 
 const journeyFlows = createJourneyFlows({
   flowAppCliente: process.env.JOURNEY_FLOW_APP_CLIENTE || '',
@@ -342,12 +364,16 @@ async function proxyCustomAuthRequest(baseUrl, authHeader, token, relativePath, 
 }
 
 app.get('/api/health', function (_req, res) {
+  const users = loadDemoUsers();
+  const salud = users.salud || {};
   res.json({
     ok: true,
     authConfigured: security.isAuthConfigured(),
     journeyConfigured: Boolean(JOURNEY_API_KEY),
     journeyFlows: journeyFlows.listFlowKeys(),
     filaVirtualConfigured: Boolean(FILA_VIRTUAL_API_TOKEN),
+    demoUsersFile: path.basename(DEMO_USERS_FILE),
+    saludAliases: Object.keys(salud),
     rateLimits: security.rateLimitPolicy
   });
 });

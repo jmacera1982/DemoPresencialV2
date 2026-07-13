@@ -544,6 +544,8 @@
           tel: tel
         });
 
+        console.log('[cancel-cita]', { usuario: selectedUser, tel: tel, fecha: fecha, hora: hora });
+
         cancelledUsers.add(selectedUser);
         mariaAppointments.push({
           usuario: selectedUser,
