@@ -60,7 +60,8 @@
     const noAvailability = document.getElementById('noAvailability');
     const selectFecha = document.getElementById('selectFecha');
     const userNameDisplay = document.getElementById('userNameDisplay');
-    
+    const appointmentCard = document.getElementById('appointmentCard');
+
     async function getDisplayName(nombre) {
       const display = await NumiaDemoUsers.resolveDisplayName(nombre, 'salud');
       return display.toUpperCase();
