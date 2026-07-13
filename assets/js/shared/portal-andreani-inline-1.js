@@ -82,7 +82,12 @@ const DEMO_TRACK = 'AND123456789AR';
         try {
           schedules = await DebmediaApi.citasRequest('reducedSchedules', { profile: 'andreani' });
           selSchedule.innerHTML = '<option value="">Selecciona un servicio...</option>';
-          schedules.forEach((s) => selSchedule.insertAdjacentHTML('beforeend', `<option value="${s.id}">${s.name}</option>`));
+          schedules.forEach((s) => {
+            const opt = document.createElement('option');
+            opt.value = String(s.id);
+            opt.textContent = s.name;
+            selSchedule.appendChild(opt);
+          });
           const today = new Date();
           const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
           inputFecha.min = ymd(today);
@@ -110,7 +115,10 @@ const DEMO_TRACK = 'AND123456789AR';
         const seen = new Set();
         sched.branches.forEach((b) => {
           if (!seen.has(b.id)) {
-            selBranch.insertAdjacentHTML('beforeend', `<option value="${b.id}">${b.name}</option>`);
+            const opt = document.createElement('option');
+            opt.value = String(b.id);
+            opt.textContent = b.name;
+            selBranch.appendChild(opt);
             seen.add(b.id);
           }
         });

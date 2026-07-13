@@ -19,3 +19,7 @@ server.zip
 .cursor/
 Thumbs.db
 desktop.ini
+
+.tmp-*/
+.tmp-*.json
+

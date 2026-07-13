@@ -8,8 +8,9 @@ on:
         required: false
         default: ''
 
+# GITHUB_TOKEN no puede administrar rulesets. Usá el secret BRANCH_PROTECTION_TOKEN
+# (fine-grained PAT con Administration: Read and write) y ejecutá este workflow a mano.
 permissions:
-  administration: write
   contents: read
   actions: read
 
@@ -19,14 +20,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Aplicar ruleset de Security CI obligatorio
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::Falta el secret BRANCH_PROTECTION_TOKEN (PAT con permisos de Administration)."
+            echo "Sin ese token no se puede crear/actualizar rulesets desde Actions."
+            exit 1
+          fi
 
           EXISTING=$(gh api "repos/${REPO}/rulesets" --jq '.[] | select(.name=="Protección main — Security CI obligatorio") | .id' || true)
 
@@ -46,7 +53,7 @@ jobs:
 
       - name: Verificar ruleset activo
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
           gh api "repos/${REPO}/rulesets" --jq '.[] | select(.name=="Protección main — Security CI obligatorio") | {id, enforcement, rules: .rules}'

@@ -15,9 +15,6 @@ paths = [
   '''(^|/)assets/js/shared/sri-manifest\.json$''',
   '''(^|/)client/third-party-manifest\.json$''',
 ]
-
-[allowlist.regexes]
-description = "Placeholders documentados en .env.example"
 regexes = [
   '''<token-aleatorio-min-32-chars>''',
   '''<secreto-aleatorio-min-32-chars>''',

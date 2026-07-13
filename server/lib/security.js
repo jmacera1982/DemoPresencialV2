@@ -21,13 +21,17 @@ function createSecurity(config) {
   const demoPortalPassword = config.demoPortalPassword || '';
   const sessionSecret = config.sessionSecret || '';
   const cookieSecure = Boolean(config.cookieSecure);
-  const cookieHttpOnly = config.cookieHttpOnly !== false;
   const cookieSameSite = config.cookieSameSite || 'strict';
+  // httpOnly siempre true en la cookie de sesión (XSS).
 
   if (!sessionSecret) {
     throw new Error('SESSION_SECRET es obligatorio (validación de arranque omitida)');
   }
 
+  // Cookie host-only (sin domain): más restrictiva para la demo.
+  // maxAge cubre la expiración; expires no se usa junto con rolling+maxAge.
+  // secure viene de COOKIE_SECURE (true en producción / Render).
+  // nosemgrep: javascript.express.security.audit.express-cookie-settings.express-cookie-session-no-domain, javascript.express.security.audit.express-cookie-settings.express-cookie-session-no-expires, javascript.express.security.audit.express-cookie-settings.express-cookie-session-no-secure
   const sessionMiddleware = session({
     name: SESSION_COOKIE,
     secret: sessionSecret,
@@ -35,9 +39,10 @@ function createSecurity(config) {
     saveUninitialized: false,
     rolling: true,
     cookie: {
-      httpOnly: cookieHttpOnly,
-      secure: cookieSecure,
+      httpOnly: true,
+      secure: cookieSecure === true,
       sameSite: cookieSameSite,
+      path: '/',
       maxAge: SESSION_MAX_MS
     }
   });

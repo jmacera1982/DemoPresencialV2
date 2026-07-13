@@ -13,6 +13,8 @@
 
     AuthPortal.login(pwd).then(function (ok) {
       if (ok) {
+        // nextUrl ya filtrado por AuthPortal.safeNextUrl (solo same-origin).
+        // nosemgrep: javascript.browser.security.open-redirect.js-open-redirect
         window.location.replace(nextUrl);
         return;
       }
