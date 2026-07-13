@@ -346,6 +346,7 @@ app.get('/api/health', function (_req, res) {
     ok: true,
     authConfigured: security.isAuthConfigured(),
     journeyConfigured: Boolean(JOURNEY_API_KEY),
+    journeyFlows: journeyFlows.listFlowKeys(),
     filaVirtualConfigured: Boolean(FILA_VIRTUAL_API_TOKEN),
     rateLimits: security.rateLimitPolicy
   });
@@ -387,16 +388,18 @@ app.post('/api/journey/run', security.journeyRateLimit, requireProxyAuth, async 
 
   const flowKey = req.body && req.body.flowKey;
   const stream = Boolean(req.body && req.body.stream);
-  const payload = (req.body && req.body.payload) || req.body || {};
+  const payload = (req.body && req.body.payload) || {};
 
-  if (!journeyFlows.isValidFlowKey(flowKey)) {
+  if (!journeyFlows.isKnownFlowKey(flowKey)) {
     res.status(400).json({ error: 'flowKey inválido' });
     return;
   }
 
   const flowId = journeyFlows.resolveFlowId(flowKey);
   if (!flowId || !security.isUuid(flowId)) {
-    res.status(503).json({ error: 'Flujo no configurado en el servidor para flowKey: ' + flowKey });
+    res.status(503).json({
+      error: 'Flujo no configurado en el servidor para flowKey: ' + flowKey + '. Definí JOURNEY_FLOW_' + flowKey + ' en Render.'
+    });
     return;
   }
 

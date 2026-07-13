@@ -16,16 +16,20 @@ function createJourneyFlows(config) {
     DEFAULT: config.embedChatId || ''
   };
 
+  function isKnownFlowKey(flowKey) {
+    return typeof flowKey === 'string' && FLOW_KEY_RE.test(flowKey) && Object.prototype.hasOwnProperty.call(flows, flowKey);
+  }
+
   function isValidFlowKey(flowKey) {
-    return typeof flowKey === 'string' && FLOW_KEY_RE.test(flowKey) && Boolean(flows[flowKey]);
+    return isKnownFlowKey(flowKey) && Boolean(flows[flowKey]);
   }
 
   function resolveFlowId(flowKey) {
-    if (!isValidFlowKey(flowKey)) {
+    if (!isKnownFlowKey(flowKey)) {
       return null;
     }
 
-    return flows[flowKey];
+    return flows[flowKey] || null;
   }
 
   function listFlowKeys() {
@@ -45,6 +49,7 @@ function createJourneyFlows(config) {
 
   return {
     FLOW_KEY_RE: FLOW_KEY_RE,
+    isKnownFlowKey: isKnownFlowKey,
     isValidFlowKey: isValidFlowKey,
     resolveFlowId: resolveFlowId,
     listFlowKeys: listFlowKeys,

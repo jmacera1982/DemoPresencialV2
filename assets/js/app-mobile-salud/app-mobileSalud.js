@@ -518,17 +518,33 @@
     
     // Global function to cancel current user's appointment
     async function cancelCurrentAppointment() {
-      if (confirm('¿Está seguro que desea cancelar esta cita?')) {
-        const selectedUser = userSelector ? userSelector.value : '';
-        const contact = await NumiaDemoUsers.fetchSaludContact(selectedUser);
-        const tel = contact.tel || '';
-        const fecha = appointmentDate ? appointmentDate.textContent : '';
-        const hora = appointmentTime ? appointmentTime.textContent : '';
-        const especialidad = appointmentSpecialty ? appointmentSpecialty.textContent : '';
+      if (!confirm('¿Está seguro que desea cancelar esta cita?')) {
+        return;
+      }
+
+      const selectedUser = userSelector ? userSelector.value : '';
+      const fecha = appointmentDate ? appointmentDate.textContent : '';
+      const hora = appointmentTime ? appointmentTime.textContent : '';
+      const especialidad = appointmentSpecialty ? appointmentSpecialty.textContent : '';
+
+      try {
+        let tel = '';
+        try {
+          const contact = await NumiaDemoUsers.fetchSaludContact(selectedUser);
+          tel = (contact && contact.tel) || '';
+        } catch (contactErr) {
+          console.warn('No se pudo obtener contacto salud; se cancela sin tel.', contactErr);
+        }
+
         const inputValue = `Se ha cancelado una cita. Tel: ${tel}, Fecha: ${fecha}, Hora: ${hora}, Especialidad: ${especialidad}`;
-        
+
+        await NumiaJourneyApi.runJourney(NumiaJourneyApi.FLOWS.SALUD, {
+          input_value: inputValue,
+          input_type: 'chat',
+          tel: tel
+        });
+
         cancelledUsers.add(selectedUser);
-        
         mariaAppointments.push({
           usuario: selectedUser,
           fecha: fecha,
@@ -536,20 +552,17 @@
           especialidad: especialidad,
           status: 'new'
         });
-        
-        try {
-          await NumiaJourneyApi.runJourney(NumiaJourneyApi.FLOWS.SALUD, {
-              input_value: inputValue,
-              input_type: 'chat',
-              tel: tel
-            });
-        } catch (err) {
-          console.error('Error al invocar API de cancelación:', err);
-        }
-        
+
         alert('Cita cancelada');
         if (appointmentsSection) appointmentsSection.style.display = 'none';
         if (agendarSection) agendarSection.style.display = 'block';
+      } catch (err) {
+        console.error('Error al invocar API de cancelación:', err);
+        alert(
+          'No se pudo notificar a Journey Builder.\n' +
+          ((err && err.message) || 'Error desconocido') +
+          '\nRevisá en Render: JOURNEY_API_KEY y JOURNEY_FLOW_SALUD.'
+        );
       }
     }
     
