@@ -1,0 +1,4 @@
+# .npmrc: min-release-age rompe `npm ci` con lockfiles ya resueltos.
+# El riesgo de paquetes recién publicados se mitiga con cooldown de Dependabot.
+client/.npmrc
+server/.npmrc
