@@ -1,3 +1,5 @@
+(function () {
+'use strict';
 // Toggle DNI visibility
     document.querySelector('.user-dni i').addEventListener('click', function() {
       const dniText = this.previousSibling;
@@ -62,9 +64,6 @@
     async function getDisplayName(nombre) {
       const display = await NumiaDemoUsers.resolveDisplayName(nombre, 'salud');
       return display.toUpperCase();
-    }
-    
-    return nombre.toUpperCase();
     }
     
     // Set minimum date to tomorrow
@@ -625,3 +624,4 @@
         }
       });
     }
+})();

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: blob: https:; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https: wss:; frame-src 'self' https:; worker-src 'self' blob:; media-src 'self' data: blob: https:; form-action 'self' https:;">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>App Mobile Salud - Inicio</title>
+  <link rel="icon" type="image/png" href="images/N.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/app-mobile-salud/shared.css" />
+  <link rel="stylesheet" href="assets/css/app-mobile-salud/app-mobileSalud.css" />
+</head>
+<body data-require-auth="true">
+  <script src="auth-portal.js" integrity="sha384-lP/9P4siRLF7krhDZMPz8FVuhTdKS5W+KuL7giDaxfuBg7lUsdlX4c6Caz9kcftE" crossorigin="anonymous"></script>
+
+  <a href="https://filavirtual.preprod.debmedia.com/Numiabot/#/aAsDTThHwOIrsB3C2uVh" target="_blank" rel="noopener noreferrer" class="btn-numiabot" title="Abrir Numia Bot">
+    <i class="bi bi-chat-dots-fill"></i>
+  </a>
+
+  <div class="mobile-container">
+    <div class="mobile-screen">
+      <div class="status-bar">
+        <div class="status-left">
+          <span>Tuenti</span>
+          <i class="bi bi-signal-4"></i>
+        </div>
+        <div class="status-center">14:31</div>
+        <div class="status-right">
+          <i class="bi bi-wifi"></i>
+          <i class="bi bi-lock-fill"></i>
+          <span>71%</span>
+          <i class="bi bi-battery-full"></i>
+        </div>
+      </div>
+
+      <div class="app-header">
+        <h1>Inicio</h1>
+      </div>
+
+      <div class="user-selector-container">
+        <select id="userSelector" class="user-selector" aria-label="Seleccionar usuario demo">
+          <option value="Maria" selected>Maria</option>
+          <option value="Jorge">Jorge</option>
+          <option value="Joaquin">Joaquin</option>
+          <option value="Gustavo">Gustavo</option>
+          <option value="Martin">Martin</option>
+          <option value="Juanma S">Juanma S</option>
+          <option value="Juanma L">Juanma L</option>
+          <option value="Nico">Nico</option>
+          <option value="Natalia">Natalia</option>
+          <option value="Aldo">Aldo</option>
+          <option value="Eduardo">Eduardo</option>
+          <option value="Manuel">Manuel</option>
+          <option value="Juanca">Juanca</option>
+          <option value="demo">demo</option>
+        </select>
+      </div>
+
+      <div class="main-content">
+        <div class="covid-banner">
+          <div class="covid-image">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <div class="covid-content">
+            <div class="covid-title">COVID-19</div>
+            <button type="button" class="covid-button">Más información</button>
+          </div>
+        </div>
+
+        <div class="carousel-indicators">
+          <div class="indicator active"></div>
+          <div class="indicator"></div>
+          <div class="indicator"></div>
+        </div>
+
+        <div class="section-header">
+          <div class="section-title">Mis credenciales</div>
+          <i class="bi bi-chevron-right section-arrow"></i>
+        </div>
+
+        <div class="credentials-card">
+          <div class="user-info">
+            <div class="user-avatar">
+              <i class="bi bi-person-fill"></i>
+            </div>
+            <div class="user-details">
+              <div class="user-name" id="userNameDisplay">MARIA USUARIO</div>
+              <div class="user-dni">
+                DNI: 99999999
+                <i class="bi bi-eye cursor-pointer"></i>
+              </div>
+            </div>
+          </div>
+          <div class="user-code">800006 1312731 01 0002</div>
+          <button type="button" class="token-button">
+            <i class="bi bi-lock-fill"></i>
+            <span>Generar Token</span>
+          </button>
+        </div>
+
+        <div id="appointmentsSection" class="appointments-section is-hidden">
+          <div class="section-header">
+            <div class="section-title">Mis Citas</div>
+          </div>
+          <div id="appointmentCard" class="appointment-card">
+            <div class="appointment-header">
+              <div class="appointment-title">Cita Médica</div>
+            </div>
+            <div class="appointment-date" id="appointmentDate"></div>
+            <div class="appointment-details">
+              <div>Especialidad: <strong id="appointmentSpecialty"></strong></div>
+              <div>Horario: <strong id="appointmentTime"></strong></div>
+            </div>
+            <div class="appointment-actions">
+              <button type="button" class="btn-confirm" data-action="openCurrentUserAuthModal">
+                <i class="bi bi-shield-check"></i>
+                <span>Autorizar</span>
+              </button>
+              <button type="button" class="btn-cancel-appointment" data-action="cancelCurrentAppointment">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="agendarSection" class="appointments-section">
+          <div class="section-header">
+            <div class="section-title">Mis Citas</div>
+          </div>
+
+          <div id="cancelledAppointmentsContainer"></div>
+
+          <div id="noCitasCard" class="appointment-card">
+            <div class="empty-state">
+              <i class="bi bi-calendar-x empty-state-icon"></i>
+              <div class="empty-state-text">No tenés citas agendadas</div>
+              <button type="button" class="btn-agendar" id="btnAgendarCita">
+                <i class="bi bi-plus-circle"></i>
+                Agendar una cita
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <div class="section-title">Favoritos de cartilla</div>
+          <i class="bi bi-chevron-right section-arrow"></i>
+        </div>
+
+        <div class="favorites-card">
+          <i class="bi bi-heart favorites-icon"></i>
+          <div class="favorites-text">Todavía no tenés favoritos</div>
+          <a href="#" class="favorites-link">Buscar y agregar</a>
+        </div>
+
+        <div class="section-header">
+          <div class="section-title">Sucursal más cercana</div>
+        </div>
+
+        <div class="branch-card">
+          <div class="branch-card-message">
+            Cargando información...
+          </div>
+        </div>
+      </div>
+
+      <div id="modalAgendar" class="modal-overlay">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="modal-title">Agendar Cita</div>
+            <button type="button" class="modal-close" id="closeModal" aria-label="Cerrar">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="selectEspecialidad">Especialidad</label>
+            <select id="selectEspecialidad" class="form-select">
+              <option value="">Seleccione una especialidad</option>
+              <option value="Cardiología">Cardiología</option>
+              <option value="Dermatología">Dermatología</option>
+              <option value="Neurología">Neurología</option>
+              <option value="Pediatría">Pediatría</option>
+              <option value="Traumatología">Traumatología</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="selectFecha">Fecha</label>
+            <input type="date" id="selectFecha" class="form-input" min="">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="selectHorario">Horario</label>
+            <select id="selectHorario" class="form-select">
+              <option value="">Seleccione un horario</option>
+              <option value="09:00">09:00</option>
+              <option value="10:00">10:00</option>
+              <option value="11:00">11:00</option>
+              <option value="14:00">14:00</option>
+              <option value="15:00">15:00</option>
+              <option value="16:00">16:00</option>
+              <option value="17:00">17:00</option>
+            </select>
+          </div>
+
+          <div id="noAvailability" class="no-availability is-hidden">
+            <i class="bi bi-exclamation-triangle"></i> No hay disponibilidad para la fecha y horario seleccionados
+          </div>
+
+          <button type="button" class="btn-submit" id="btnBuscarDisponibilidad">Buscar Disponibilidad</button>
+        </div>
+      </div>
+
+      <div id="modalAutorizar" class="modal-overlay">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="modal-title">Autorizar Cita</div>
+            <button type="button" class="modal-close" id="closeModalAutorizar" aria-label="Cerrar">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+
+          <div class="auth-modal-body" id="authModalBody">
+            <div class="auth-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="auth-description">
+              Para iniciar el proceso de autorización, adjunte la documentación requerida (orden médica, estudios previos, etc.)
+            </div>
+
+            <div class="file-upload-area" id="fileUploadArea">
+              <input type="file" id="authFileInput" class="is-hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+              <div class="file-upload-icon">
+                <i class="bi bi-cloud-arrow-up"></i>
+              </div>
+              <div class="file-upload-text">
+                Toque para <strong>adjuntar documento</strong>
+              </div>
+              <div class="file-name-display" id="fileNameDisplay">
+                <i class="bi bi-check-circle-fill"></i>
+                <span id="fileNameText"></span>
+              </div>
+            </div>
+
+            <button type="button" class="btn-authorize" id="btnAuthorize">
+              <i class="bi bi-shield-check"></i>
+              Iniciar Autorización
+            </button>
+
+            <div class="auth-success-message" id="authSuccessMessage">
+              <i class="bi bi-check-circle-fill"></i>
+              <p>Se ha iniciado el proceso de autorización.<br>Recibirá una notificación cuando esté resuelta.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <a href="#" class="nav-item active">
+          <i class="bi bi-house-door"></i>
+          <span>Inicio</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="bi bi-file-text"></i>
+          <span>Cartilla</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="bi bi-people"></i>
+          <span>Turnos</span>
+        </a>
+        <a href="https://filavirtual.preprod.debmedia.com/Numiabot/#/aAsDTThHwOIrsB3C2uVh" class="nav-item" rel="noopener noreferrer">
+          <i class="bi bi-camera-video"></i>
+          <span>E-consulta</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="bi bi-three-dots"></i>
+          <span>Más</span>
+        </a>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/shared/api-client.js" integrity="sha384-b/p40FT/5XXkNy7YC6XbaXRp1igzcpWmGB1YAGJzJJBvqKuwOpLgWb6MhHHM06wI" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/journey-api.js" integrity="sha384-Xb8m/gvtKBnY8JsY7/KQ98EAH5m+DN6AUdnZCr3lYNGL0p1ganb2J5NIXpp30dm1" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/demo-users.js" integrity="sha384-nB/29ALja1dmbA/DCxcettK/CfregLg9eF0vDP5bYHm8UzAJkW5m88A84ueKKJqR" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/fila-virtual-api.js" integrity="sha384-W2FVZuoQ/r9cqrSpNbk0wehzKOCRZCRnNfimodwlQaOJldMVGjdfZJjBqhzJxZuF" crossorigin="anonymous"></script>
+  <script src="assets/js/app-mobile-salud/shared.js" integrity="sha384-yodZpVApIt9USvXuyMpJXME1y249C3QNFwNGVwWYM6BWBInLTBmJ+2qKUK2py6Yq" crossorigin="anonymous"></script>
+  <script src="assets/js/app-mobile-salud/app-mobileSalud.js" integrity="sha384-FGi/nMZh7KBdwS3qM5WKIapmjYqzGNsLl2lCw0eBNtrTxXGWisKOjKETiClDOYXD" crossorigin="anonymous"></script>
+</body>
+</html>
