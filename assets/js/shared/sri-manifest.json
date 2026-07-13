@@ -3,22 +3,22 @@
   "generatedBy": "scripts/apply-sri.py",
   "files": {
     "assets/js/app-cliente/app-cliente.js": "sha384-PaATVkW8qrLNpfVO4V+vYJ8xJNSF0LtnEpFy/OFMmzVeHpRzuKigfYu+MZCGXhnP",
-    "assets/js/app-cliente/appcliente-en.js": "sha384-Xs9undNkZEC7uuoS+XoLQqIymW6n6fiy33omXXCs8/quGdi2eSsUsaCT1gaNV4Kz",
+    "assets/js/app-cliente/appcliente-en.js": "sha384-gKxFezVp+CM0qYYe5qkcE9mHYxCwYwUhe5aGRm1WYjDG5rorYhJETCyfuKODOLlb",
     "assets/js/app-cliente/base.js": "sha384-0fvP9Z9+AROVUjq27jkZPbZuzsNXXgssCe3NdBj+ojMlXgo4QNw6DkNnmlNb9gdr",
-    "assets/js/pages/citas.js": "sha384-kA07/eSXuoxf2CME+W2qnyln4yHSXZOeNZbUHbFk+gZVLO93yvCwjLc4qor79r5e",
-    "assets/js/pages/numia-repo-scanner.js": "sha384-J2sO3h42j6RzYZlP5MymtTEzQ98UbpKuM0bz+GN7H4FnsxjOWQcIbjbq2Kfw9Gci",
+    "assets/js/pages/citas.js": "sha384-nQXp2fm7OWHsoAcNDuE7cYqsrPzpnNWCl9eLxQqNhCcVHo6kTbJ6FIB3a4zeiUoV",
+    "assets/js/pages/numia-repo-scanner.js": "sha384-JTzDENB/l9Xak5Gexcf2d8gtrmLSX4YkCoHrJbh/zJwTHivDVgq9SDcqcIFlpNey",
     "assets/js/shared/api-client.js": "sha384-b/p40FT/5XXkNy7YC6XbaXRp1igzcpWmGB1YAGJzJJBvqKuwOpLgWb6MhHHM06wI",
     "assets/js/shared/debmedia-api.js": "sha384-e9oSnKuGgXBcmVjm05j+XJITuSHKtIT1aN4NvLIf7P3B7C7az/0GFI6Tun1q3yua",
     "assets/js/shared/demo-users.js": "sha384-nB/29ALja1dmbA/DCxcettK/CfregLg9eF0vDP5bYHm8UzAJkW5m88A84ueKKJqR",
     "assets/js/shared/fila-virtual-api.js": "sha384-W2FVZuoQ/r9cqrSpNbk0wehzKOCRZCRnNfimodwlQaOJldMVGjdfZJjBqhzJxZuF",
-    "assets/js/shared/index-inline-1.js": "sha384-8Xslq/hyJBm67kReWZgsQh1JQXu/+OaD2dJPnmv8iJfZqP0Wh/kbiZYRbodsYljx",
+    "assets/js/shared/index-inline-1.js": "sha384-wudsLZ6djvepk/sz8c2//5bxZcOJWQrNhKs+cTj2/EEqWoIMY0rlCu2et29qTEqK",
     "assets/js/shared/journey-api.js": "sha384-Xb8m/gvtKBnY8JsY7/KQ98EAH5m+DN6AUdnZCr3lYNGL0p1ganb2J5NIXpp30dm1",
     "assets/js/shared/journey-chat-bootstrap.js": "sha384-Yza3q6qFCeaQdG3cIcyOrFZDAPgZkg1/ON9n4UzjFO/3u2sVLCjbjHAAbQ3ckSnt",
-    "assets/js/shared/login-inline-1.js": "sha384-STWepH3Ub8QQSlZDik89lX55NxVdNy8CuiwVaUnaVP0g6HJWPen3al708oHtLj6a",
+    "assets/js/shared/login-inline-1.js": "sha384-wkp8gQwvj4mRWj45tUtePMdMAl2ZFwJOQQ5He5tZYrbyfKq7EWkt9GCr4Lp4msDe",
     "assets/js/shared/workforce-management-inline-1.js": "sha384-eB2kXBbJKMCIdXTMhInBiDNTErI3deQWk9OxCDIp9IVrBDs4Ig/QVspjatK5q4nU",
-    "assets/js/totem/auth-portal-init.js": "sha384-qtXa0BOCcvU3oXrTG9qhBBFxjJy25O1tc6Q811yuP0DPD91J5JPXk5XXYVuc2uzh",
-    "assets/js/totem/qr.js": "sha384-OqkzkmyImHJojjNdECWKnnSQWjSS6rTrHUb7cDed7eKRMEE1qjLmHttwT1MQ6b0s",
-    "assets/js/totem/totem-salud.js": "sha384-MYBn1jZBF7/PFVgRhfDn2H2tx7cnyr8L3eosw8idHxeqd9lzwZwiuHWXcWVvdjmW",
-    "auth-portal.js": "sha384-74EWFvH2m+aMjmQBpBiZyYeyAqC6jGuHtfv/vSH++XsVRcNEOWeyMNyLNP0p/rG1"
+    "assets/js/totem/auth-portal-init.js": "sha384-Tcxj6GqvE1fuIJ7q+54/TeYJhpBD7vjPY6icDQZ8DwoydCG2/9Lwzktc/FslVm0u",
+    "assets/js/totem/qr.js": "sha384-LOmgvg6GMkFYIS16nf1/+ClmftNO3iCNdfD4OqKX/oW4lwCoORTeJKCXsvLtOZy3",
+    "assets/js/totem/totem-salud.js": "sha384-FPG4nptXAFFqRLCdLwM1UvFU60mToNjuUbR+z3DmDxS5ewI3A5+qeHdo2vu/tQeU",
+    "auth-portal.js": "sha384-huhS2ZvUEY3OK1lBMW1U/WRh4zoOVu51tUtGYikprvbto/8+diPRkYilgYA6SMoR"
   }
 }

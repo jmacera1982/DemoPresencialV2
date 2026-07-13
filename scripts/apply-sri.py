@@ -18,8 +18,19 @@ SCRIPT_TAG_RE = re.compile(
 )
 
 
+def file_bytes_for_sri(file_path: Path) -> bytes:
+    raw = file_path.read_bytes()
+    if file_path.suffix.lower() != '.js':
+        return raw
+
+    # Linux/Render sirve LF; normalizar evita SRI distinto entre Windows y producción.
+    text = raw.decode('utf-8')
+    text = text.replace('\r\n', '\n').replace('\r', '\n')
+    return text.encode('utf-8')
+
+
 def sha384_integrity(file_path: Path) -> str:
-    digest = hashlib.sha384(file_path.read_bytes()).digest()
+    digest = hashlib.sha384(file_bytes_for_sri(file_path)).digest()
     encoded = base64.b64encode(digest).decode('ascii')
     return 'sha384-' + encoded
 
