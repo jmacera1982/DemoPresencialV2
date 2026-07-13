@@ -5,6 +5,8 @@
   --phone-metal-mid: #2a2438;
   --phone-metal-lo: #14101c;
   --phone-bezel: #050505;
+  --phone-screen-w: 390px;
+  --phone-screen-h: 844px;
   position: relative;
   flex-shrink: 0;
   width: fit-content;
@@ -118,9 +120,25 @@
 .phone-frame__screen {
   position: relative;
   overflow: hidden;
+  width: var(--phone-screen-w);
+  height: var(--phone-screen-h);
+  max-width: 100%;
   border-radius: 40px;
   background: #fff;
   isolation: isolate;
+}
+
+/* Misma “pantalla” en ambas demos: sin barras de scroll visibles */
+.phone-frame__screen,
+.phone-frame__screen * {
+  scrollbar-width: none;
+}
+
+.phone-frame__screen::-webkit-scrollbar,
+.phone-frame__screen *::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .phone-frame__home-indicator {
