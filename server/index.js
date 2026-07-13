@@ -167,7 +167,7 @@ function resolveBankingUser(alias) {
 function resolveSaludUser(alias) {
   const users = loadDemoUsers().salud || {};
   const key = alias || 'Maria';
-  return users[key] || users.Maria || users.demo || null;
+  return users[key] || null;
 }
 
 function maskIdentifier(value) {
