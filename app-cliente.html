@@ -15,6 +15,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/gh/debmedia/numiajb-widget@1.0.4/dist/build/static/js/bundle.min.js" integrity="sha384-CjHhYYIDROu2XgUT8zxx6TEMT34/NFzE7Fo7y3+on6RfqqSWstCQ9ZhFlbsnq3UI" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="assets/css/shared/phone-frame.css" />
   <link rel="stylesheet" href="assets/css/app-cliente/base.css" />
   <link rel="stylesheet" href="assets/css/app-cliente/app-cliente.css" />
 
@@ -23,11 +24,31 @@
   <script src="auth-portal.js" integrity="sha384-lP/9P4siRLF7krhDZMPz8FVuhTdKS5W+KuL7giDaxfuBg7lUsdlX4c6Caz9kcftE" crossorigin="anonymous"></script>
   
   <!-- Recuadro de celular -->
-  <div class="phone-shell">
-    <span class="phone-side-btn vol-up" aria-hidden="true"></span>
-    <span class="phone-side-btn vol-down" aria-hidden="true"></span>
-    <span class="phone-side-btn power" aria-hidden="true"></span>
+  <div class="phone-frame">
+    <span class="phone-frame__btn phone-frame__btn--silent" aria-hidden="true"></span>
+    <span class="phone-frame__btn phone-frame__btn--vol-up" aria-hidden="true"></span>
+    <span class="phone-frame__btn phone-frame__btn--vol-down" aria-hidden="true"></span>
+    <span class="phone-frame__btn phone-frame__btn--power" aria-hidden="true"></span>
+    <div class="phone-frame__bezel">
+      <div class="phone-frame__island" aria-hidden="true">
+        <span class="phone-frame__island-camera"></span>
+      </div>
+      <div class="phone-frame__screen">
   <div class="mobile-app-container">
+    <div class="phone-status-bar phone-status-bar--on-brand" aria-label="Estado del dispositivo">
+      <div class="phone-status-bar__left">
+        <span class="phone-status-bar__time">14:31</span>
+        <span class="phone-status-bar__carrier">NumiaTel</span>
+        <i class="bi bi-reception-4" aria-hidden="true" title="Señal"></i>
+      </div>
+      <div class="phone-status-bar__right">
+        <i class="bi bi-wifi" aria-hidden="true" title="Wi‑Fi"></i>
+        <span class="phone-status-bar__battery-level">71%</span>
+        <span class="phone-status-bar__battery" aria-hidden="true" title="Batería">
+          <span class="phone-status-bar__battery-fill"></span>
+        </span>
+      </div>
+    </div>
     <!-- Header de la app móvil -->
     <div class="mobile-app-header">
       <button type="button" id="btnHeaderBack" aria-label="Volver" class="ac-visibility-hidden"><i class="bi bi-arrow-left"></i></button>
@@ -328,6 +349,9 @@
 
     </div>
   </div>
+      <div class="phone-frame__home-indicator" aria-hidden="true"></div>
+      </div>
+    </div>
   </div>
 
   <div id="numiaCitaSuccess" class="numia-cita-success" aria-hidden="true" role="dialog">

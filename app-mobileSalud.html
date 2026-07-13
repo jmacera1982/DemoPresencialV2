@@ -12,6 +12,7 @@
   <link rel="icon" type="image/png" href="images/N.png" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/shared/phone-frame.css" />
   <link rel="stylesheet" href="assets/css/app-mobile-salud/shared.css" />
   <link rel="stylesheet" href="assets/css/app-mobile-salud/app-mobileSalud.css" />
 </head>
@@ -22,19 +23,30 @@
     <i class="bi bi-chat-dots-fill"></i>
   </a>
 
+  <div class="phone-frame">
+    <span class="phone-frame__btn phone-frame__btn--silent" aria-hidden="true"></span>
+    <span class="phone-frame__btn phone-frame__btn--vol-up" aria-hidden="true"></span>
+    <span class="phone-frame__btn phone-frame__btn--vol-down" aria-hidden="true"></span>
+    <span class="phone-frame__btn phone-frame__btn--power" aria-hidden="true"></span>
+    <div class="phone-frame__bezel">
+      <div class="phone-frame__island" aria-hidden="true">
+        <span class="phone-frame__island-camera"></span>
+      </div>
+      <div class="phone-frame__screen">
   <div class="mobile-container">
     <div class="mobile-screen">
-      <div class="status-bar">
-        <div class="status-left">
-          <span>Tuenti</span>
-          <i class="bi bi-signal-4"></i>
+      <div class="phone-status-bar" aria-label="Estado del dispositivo">
+        <div class="phone-status-bar__left">
+          <span class="phone-status-bar__time">14:31</span>
+          <span class="phone-status-bar__carrier">NumiaTel</span>
+          <i class="bi bi-reception-4" aria-hidden="true" title="Señal"></i>
         </div>
-        <div class="status-center">14:31</div>
-        <div class="status-right">
-          <i class="bi bi-wifi"></i>
-          <i class="bi bi-lock-fill"></i>
-          <span>71%</span>
-          <i class="bi bi-battery-full"></i>
+        <div class="phone-status-bar__right">
+          <i class="bi bi-wifi" aria-hidden="true" title="Wi‑Fi"></i>
+          <span class="phone-status-bar__battery-level">71%</span>
+          <span class="phone-status-bar__battery" aria-hidden="true" title="Batería">
+            <span class="phone-status-bar__battery-fill"></span>
+          </span>
         </div>
       </div>
 
@@ -283,6 +295,9 @@
           <span>Más</span>
         </a>
         <div class="home-indicator"></div>
+      </div>
+    </div>
+  </div>
       </div>
     </div>
   </div>
