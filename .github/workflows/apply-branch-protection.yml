@@ -1,0 +1,52 @@
+name: Apply branch protection
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Rama protegida (default = rama por defecto del repo)
+        required: false
+        default: ''
+
+permissions:
+  administration: write
+  contents: read
+  actions: read
+
+jobs:
+  apply-ruleset:
+    name: apply / branch-protection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Aplicar ruleset de Security CI obligatorio
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          EXISTING=$(gh api "repos/${REPO}/rulesets" --jq '.[] | select(.name=="Protección main — Security CI obligatorio") | .id' || true)
+
+          if [ -n "${EXISTING}" ]; then
+            echo "Actualizando ruleset existente id=${EXISTING}"
+            gh api "repos/${REPO}/rulesets/${EXISTING}" --method PUT --input .github/rulesets/main-security.json
+          else
+            echo "Creando ruleset nuevo"
+            gh api "repos/${REPO}/rulesets" --method POST --input .github/rulesets/main-security.json
+          fi
+
+          echo "Ruleset aplicado. Checks obligatorios:"
+          echo "  - security / gitleaks"
+          echo "  - security / semgrep"
+          echo "  - security / client-secrets"
+          echo "  - ci / required"
+
+      - name: Verificar ruleset activo
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api "repos/${REPO}/rulesets" --jq '.[] | select(.name=="Protección main — Security CI obligatorio") | {id, enforcement, rules: .rules}'

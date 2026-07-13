@@ -1,0 +1,51 @@
+
+    :root {
+      /* Colores inspirados en La Araucana */
+      --araucana-primary: #00539B; /* Azul principal de La Araucana */
+      --araucana-orange: #ff9600; /* Naranja característico */
+      --araucana-orange-dark: #e08500;
+      --araucana-secondary: #ffffff;
+      --araucana-muted: #6b7280;
+      --araucana-border: #e5e7eb;
+      --araucana-bg: #f8fafc;
+    }
+    body { background: var(--araucana-bg); font-family: 'Roboto', system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
+    
+    /* Sección superior con botones de sitio */
+    .site-selector { background: #fff; padding: 1rem 0; border-bottom: 1px solid var(--araucana-border); }
+    .site-selector .container { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .site-selector-text { color: var(--araucana-muted); font-size: 0.9rem; margin: 0; }
+    .site-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .site-btn { border-radius: 50px; padding: 0.5rem 1.25rem; font-weight: 500; font-size: 0.9rem; border: none; display: flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .site-btn.active { background: var(--araucana-primary); color: var(--araucana-secondary); }
+    .site-btn:not(.active) { background: #e3f2fd; color: var(--araucana-primary); }
+    .site-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .site-btn i { font-size: 1rem; }
+    
+    .araucana-navbar { background: var(--araucana-primary); padding: 0.75rem 0; }
+    .araucana-navbar .container { display: flex !important; align-items: center; flex-direction: row !important; }
+    .araucana-navbar .navbar-brand { color: var(--araucana-secondary); font-weight: 500; letter-spacing: .2px; text-decoration: none; flex-shrink: 0; margin-right: 2rem; }
+    .araucana-navbar .navbar-brand img { height: 50px; width: auto; }
+    .araucana-navbar .navbar-nav { display: flex !important; flex-direction: row !important; align-items: center; justify-content: space-around; flex: 1; gap: 0; list-style: none; margin: 0; padding: 0; }
+    .araucana-navbar .nav-link { color: var(--araucana-secondary); text-decoration: none; font-weight: 400; font-size: 0.95rem; padding: 0.5rem 0.75rem; transition: opacity 0.2s; white-space: nowrap; display: inline-block; }
+    .araucana-navbar .nav-link:hover { opacity: 0.8; }
+    .araucana-navbar .nav-link i { font-size: 0.7rem; margin-left: 0.25rem; }
+    .araucana-navbar .btn-accent { background: var(--araucana-orange); color: var(--araucana-secondary); border: none; font-weight: 500; border-radius: 25px; padding: 0.5rem 1.5rem; }
+    .araucana-navbar .btn-accent:hover { background: var(--araucana-orange-dark); }
+
+    /* Citas */
+    .card { border: 1px solid var(--araucana-border); box-shadow: 0 14px 40px rgba(0,0,0,.12); }
+    .cita-toolbar { position: sticky; top: 0; z-index: 2; background: #fff; padding-bottom: .5rem; margin-bottom: .75rem; border-bottom: 1px solid var(--araucana-border); }
+    #citaSchedule, #citaBranch, #citaFecha { border-radius: 25px; }
+    #citaSlots { display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:.5rem; max-height:320px; overflow:auto; padding-right:.25rem; }
+    #citaSlots .btn { border-radius: 25px; border:1px solid var(--araucana-border); font-weight:500; padding:.45rem .3rem; }
+    #citaSlots .btn:hover { background:#fff4e6; }
+    #citaSlots .btn.active, #citaSlots .btn:focus { background: var(--araucana-orange); color:#fff; border-color: var(--araucana-orange); }
+    #citaConfirmar { border-radius: 25px; padding: 0.5rem 2rem; font-weight: 500; }
+    .cita-legend { font-size:.8rem; color:var(--araucana-muted); }
+
+/* Inline cleanup helpers */
+.cita-card { border-radius: 16px; }
+.cita-card-header { border-radius: 16px 16px 0 0; }
+.cita-card-footer { border-radius: 0 0 16px 16px; }
+.cita-confirm-btn { background-color: var(--araucana-orange); color: #fff; border-color: var(--araucana-orange); }

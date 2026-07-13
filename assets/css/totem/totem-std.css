@@ -1,0 +1,28 @@
+:root {
+  --totem-font-family: 'Roboto', Arial, sans-serif;
+  --totem-text: #1f2937;
+  --totem-text-light: #6b7280;
+  --totem-brand-primary: #f60100;
+  --totem-brand-primary-dark: #8b0000;
+  --totem-brand-accent: #f60100;
+  --totem-success: #10b981;
+  --totem-header-bg: #ffffff;
+  --totem-header-text: #1f2937;
+  --totem-header-border: #e5e7eb;
+  --totem-header-padding: 1.5rem 2rem;
+  --totem-header-justify: flex-start;
+  --totem-logo-height: 40px;
+  --totem-dni-border: #ff8c42;
+  --totem-btn-primary: #ff8c42;
+  --totem-btn-primary-hover: #ff7a2e;
+  --totem-btn-primary-shadow: rgba(255, 140, 66, 0.4);
+  --totem-brand-card-start: #fff0f0;
+  --totem-brand-card-end: #ffe6e6;
+  --totem-brand-card-alt-start: #f5f3ff;
+  --totem-brand-card-alt-end: #ede9fe;
+  --totem-presential-card-start: #fff0f0;
+  --totem-presential-card-end: #ffe6e6;
+  --totem-brand-shadow: rgba(246, 1, 0, 0.2);
+  --totem-presential-shadow: rgba(246, 1, 0, 0.2);
+  --totem-video-btn-hover: #059669;
+}

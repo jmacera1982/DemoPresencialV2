@@ -1,0 +1,93 @@
+
+    /*
+      Si el panel sigue quedando debajo de una barra fija (p. ej. preview del IDE),
+      subí el valor en píxeles: --copiloto-chrome-top: 48px;
+    */
+    :root {
+      --copiloto-chrome-top: 0px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      min-height: 100dvh;
+    }
+
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      min-height: 100dvh;
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      overflow-x: hidden;
+    }
+
+    /*
+      Contenedor del chat: respeta safe-area para no quedar debajo de la barra del sistema
+      ni de la “franja” superior del navegador (notch / barra de estado).
+    */
+    .JB {
+      position: fixed;
+      /* Por encima de cobrowse/surfly y barras del navegador embebido */
+      z-index: 2147483000;
+      isolation: isolate;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      /* escritorio / tablet: anclado abajo-derecha, alto limitado restando áreas seguras */
+      top: auto;
+      bottom: max(16px, env(safe-area-inset-bottom, 0px));
+      right: max(16px, env(safe-area-inset-right, 0px));
+      left: auto;
+      width: min(100vw - 32px, 440px);
+      height: min(
+        100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--copiloto-chrome-top) - 32px,
+        720px
+      );
+      max-height: calc(
+        100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--copiloto-chrome-top) - 24px
+      );
+    }
+
+    @media (max-width: 576px) {
+      .JB {
+        /* No usar height:100dvh a secas: respeta barra de estado + offset opcional del entorno */
+        top: calc(env(safe-area-inset-top, 0px) + var(--copiloto-chrome-top));
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+        height: calc(
+          100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--copiloto-chrome-top)
+        );
+        max-height: none;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        padding-left: env(safe-area-inset-left, 0px);
+        padding-right: env(safe-area-inset-right, 0px);
+      }
+    }
+
+    journey-builder-chat {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      max-height: 100%;
+    }
+
+    /* Cobrowse / Surfly: no tapar el chat (iframe suele quedar encima si compite en z-index) */
+    iframe[id^="surfly"],
+    iframe.surfly-button {
+      z-index: 9990 !important;
+    }

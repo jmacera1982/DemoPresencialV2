@@ -1,0 +1,129 @@
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.is-hidden {
+  display: none;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 24px;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+
+.empty-state-text {
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+
+.branch-card-message {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-light);
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.appointment-actions-spaced {
+  margin-top: 12px;
+}
+
+.status-badge-full {
+  width: 100%;
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+.status-badge-authorized-full {
+  width: 100%;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 8px;
+}
+
+.btn-checkin-complete {
+  background: var(--checkin-success-bg, #047857);
+}
+
+.card-body-no-padding {
+  padding: 0;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+.clinical-note {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--text-dark);
+}
+
+.findings-grid-spaced {
+  margin-top: 0.65rem;
+}
+
+.section-note-tight {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
+.next-visit-date {
+  display: block;
+  margin-top: 0.35rem;
+  font-weight: 600;
+}
+
+.portfolio-card {
+  margin-bottom: 16px;
+}
+
+.portfolio-card-body {
+  padding: 8px;
+  text-align: center;
+  color: var(--text-light);
+}
+
+.portfolio-card-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  color: var(--primary-teal-light, var(--primary-purple-light, #a78bfa));
+}
+
+.mf-branch-card-body {
+  padding: 16px;
+}
+
+.mf-branch-card-title {
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.mf-branch-card-detail {
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
+.mf-branch-card-detail + .mf-branch-card-detail {
+  margin-top: 4px;
+}
+
+.mf-fv-turn-intro {
+  text-align: center;
+  margin-bottom: 0.85rem;
+}
+
+.mf-fv-turn-copy {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #059669;
+}

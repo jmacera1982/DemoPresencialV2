@@ -1,0 +1,315 @@
+:root {
+      --primary: #0033A0;
+      --success: #28A745;
+      --danger: #DC3545;
+      --warning: #FFC107;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+      min-height: 100vh;
+      padding: 2rem 0;  
+    }
+    
+    .container {
+      max-width: 1200px;
+    }
+    
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      border-radius: 12px 12px 0 0;
+    }
+    
+    .result-item {
+      padding: 1rem;
+      border-bottom: 1px solid #e0e0e0;
+      transition: background 0.2s;
+    }
+    
+    .result-item:hover {
+      background: #f8f9fa;
+    }
+    
+    .result-item:last-child {
+      border-bottom: none;
+    }
+    
+    .status-success {
+      color: var(--success);
+      font-weight: 600;
+    }
+    
+    .status-error {
+      color: var(--danger);
+      font-weight: 600;
+    }
+    
+    .badge {
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      border: none;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+      background: #00267A;
+    }
+    
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+      border-width: 0.15em;
+    }
+    
+    .summary {
+      background: #E3F2FD;
+      border-left: 4px solid var(--primary);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    /* Tabla Clientes y Scores */
+    #scoresContainer {
+      overflow-x: auto;
+    }
+    .table-score {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .table-score thead {
+      background: var(--primary);
+      color: white;
+    }
+    .table-score th {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      font-weight: 600;
+    }
+    .table-score td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e8ecf1;
+    }
+    .table-score tbody tr:hover {
+      background: #f8f9fa;
+    }
+    .table-score tbody tr:last-child td {
+      border-bottom: none;
+    }
+    /* Badge PRIORITARIO: color visible (verde) */
+    .badge.score-priority {
+      background: #0d6e2e;
+      color: white !important;
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    /* Celda con score prioritario */
+    .table-score td.score-priority {
+      color: #0d6e2e;
+      font-weight: 700;
+    }
+    .table-score td.score-normal {
+      color: #495057;
+    }
+    .table-score .badge.bg-secondary {
+      background: #6c757d !important;
+      color: white !important;
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+    /* Datos importantes */
+    .datos-importantes-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .datos-importantes-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e8ecf1;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .datos-importantes-list li:last-child {
+      border-bottom: none;
+    }
+    .datos-importantes-list .label {
+      font-weight: 600;
+      color: var(--primary);
+      min-width: 180px;
+    }
+    .datos-importantes-list a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .datos-importantes-list a:hover {
+      text-decoration: underline;
+    }
+    .datos-importantes-qr {
+      margin-bottom: 1rem;
+    }
+    .datos-importantes-qr img {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+    }
+    .datos-importantes-link {
+      display: block;
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      padding: 0.35rem 0;
+    }
+    .datos-importantes-link:hover {
+      text-decoration: underline;
+    }
+    
+    /* Estilos para el botón de ayuda de PlayerWeb */
+    .col-md-3 .d-flex {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .col-md-3 .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    /* Panel lateral de resultados */
+    .main-content-wrapper {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      overflow-x: hidden;
+    }
+    .results-sidebar {
+      width: 400px;
+      position: sticky;
+      top: 2rem;
+      max-height: calc(100vh - 4rem);
+      transition: all 0.3s ease;
+    }
+    .results-sidebar.collapsed {
+      width: 60px;
+    }
+    .results-sidebar.collapsed .card-body,
+    .results-sidebar.collapsed .card-header span:not(.toggle-icon),
+    .results-sidebar.collapsed #btnLimpiar {
+      display: none;
+    }
+    .results-sidebar.collapsed .card-header {
+      justify-content: center;
+    }
+    .results-sidebar.collapsed .toggle-results-btn {
+      margin: 0 auto;
+    }
+    .results-sidebar .card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .results-sidebar .card-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .toggle-results-btn {
+      background: none;
+      border: none;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .toggle-results-btn:hover {
+      opacity: 0.8;
+    }
+    @media (max-width: 992px) {
+      .main-content-wrapper {
+        flex-direction: column;
+      }
+      .results-sidebar {
+        width: 100% !important;
+        position: relative;
+        top: 0;
+        max-height: 500px;
+      }
+      .results-sidebar.collapsed {
+        max-height: 60px;
+      }
+    }
+    
+    /* Estilos para sección Usuarios Numia plegable */
+    #usuariosNumiaCollapse {
+      width: 100%;
+    }
+    
+    /* Títulos visibles en desplegables Banca y Salud */
+    .card-header.bg-white {
+      color: #212529 !important;
+    }
+    .card-header.bg-white i {
+      color: inherit;
+    }
+    
+    /* Opciones en fila (lado a lado, al terminar la línea continúa abajo) */
+    .activos-opciones-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .activos-opciones-row .activo-item {
+      flex: 0 0 auto;
+      min-width: 140px;
+      text-align: center;
+    }
+    
+    /* Animación del ícono del botón de colapsar */
+    [data-bs-toggle="collapse"] .bi-chevron-down {
+      transition: transform 0.3s ease;
+    }
+    
+    [data-bs-toggle="collapse"][aria-expanded="true"] .bi-chevron-down {
+      transform: rotate(180deg);
+    }
+
+/* Generated from former inline style attributes */
+.index-inline-1 { border-width: 2px; }
+.index-inline-2 { background: var(--primary); }
+.index-inline-3 { cursor: pointer; }
+.index-inline-4 { width: 120px; height: 120px; object-fit: contain; border: 2px solid var(--primary); border-radius: 8px; }
+.index-inline-5 { font-size: 3rem; color: var(--primary); }

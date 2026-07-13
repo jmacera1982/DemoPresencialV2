@@ -1,0 +1,21 @@
+{
+  "description": "Dependencias CDN del frontend — versiones resueltas en package-lock.json",
+  "resolvedVersions": {
+    "bootstrap": "5.3.8",
+    "bootstrap-icons": "1.11.3",
+    "chart.js": "4.5.1",
+    "flatpickr": "4.6.13",
+    "jszip": "3.10.1"
+  },
+  "securityNotes": {
+    "jszip": "3.10.1 es la última versión npm; sin CVEs conocidos (path traversal corregido en >=3.8.0, prototype pollution en >=3.7.0). Actualizaciones vía Dependabot + npm audit en CI."
+  },
+  "externalCdn": [
+    {
+      "name": "numiajb-widget",
+      "version": "1.0.4",
+      "url": "https://cdn.jsdelivr.net/gh/debmedia/numiajb-widget@1.0.4/dist/build/static/js/bundle.min.js",
+      "note": "Paquete GitHub — no auditable vía npm; revisar manualmente"
+    }
+  ]
+}

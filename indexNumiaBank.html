@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>NumiaBank - Innova tu banca</title>
   <link rel="icon" type="image/png" href="images/N.png" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/ integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
    <script src="https://debq2.debmedia.com/api/cobrowse/widget/5d8b569d2466aa0cd5b8b4756829f014"></script>
  
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
@@ -65,8 +65,8 @@
     .status-done{ color:#06b6d4; font-weight:700; }
     .status-err{ color:#ef4444; font-weight:700; }
     .modal-video .modal-dialog{ width:var(--video-width, 90vw); max-width:100%; }
-    .modal-video .modal-content{ height:var(--video-height, 80vh); }
-    .modal-video iframe{ width:100%; height:100%; border:0; border-radius:.5rem; }
+    .modal-video .modal-content{ min-height:220px; }
+    .video-launch-panel{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; min-height:160px; text-align:center; padding:1rem; }
 
     /* --------- Citas (estilos chips/horas) --------- */
     #modalCita .modal-dialog { max-width: 920px; }
@@ -387,12 +387,12 @@
       <div class="modal-content p-2">
         <div class="d-flex justify-content-between align-items-center px-2">
           <h6 class="m-0"><i class="bi bi-camera-video me-2"></i>Videollamada</h6>
-          <button class="btn btn-sm btn-outline-secondary" id="btnResizeVideo">Cambiar tamaño</button>
         </div>
-        <div class="mt-2 h-100">
-          <iframe id="videoFrame" src="about:blank"
-            allow="camera; microphone; autoplay; fullscreen; clipboard-write; display-capture"
-            referrerpolicy="no-referrer" allowfullscreen></iframe>
+        <div class="video-launch-panel">
+          <p class="mb-0">La videollamada ahora se abre en una nueva pestaña por seguridad.</p>
+          <button class="btn btn-primary" id="btnOpenVideoNewTab" type="button">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Abrir videollamada
+          </button>
         </div>
       </div>
     </div>
@@ -751,7 +751,12 @@
   </div>
 
   <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="auth-portal.js" integrity="sha384-74EWFvH2m+aMjmQBpBiZyYeyAqC6jGuHtfv/vSH++XsVRcNEOWeyMNyLNP0p/rG1" crossorigin="anonymous"></script>
+  <script>AuthPortal.require();</script>
+  <script src="assets/js/shared/api-client.js" integrity="sha384-b/p40FT/5XXkNy7YC6XbaXRp1igzcpWmGB1YAGJzJJBvqKuwOpLgWb6MhHHM06wI" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/fila-virtual-api.js" integrity="sha384-W2FVZuoQ/r9cqrSpNbk0wehzKOCRZCRnNfimodwlQaOJldMVGjdfZJjBqhzJxZuF" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/debmedia-api.js" integrity="sha384-e9oSnKuGgXBcmVjm05j+XJITuSHKtIT1aN4NvLIf7P3B7C7az/0GFI6Tun1q3yua" crossorigin="anonymous"></script>
 
   <!-- ===== Pestañas + Chat bubble ===== -->
   <script>
@@ -764,15 +769,15 @@
       else { tabDivisas.classList.remove('active'); tabTasas.classList.add('active'); tablaDivisas.style.display='none'; tablaTasas.style.display=''; }
     }
     document.addEventListener('DOMContentLoaded', function() {
-      const iframe = document.getElementById('numia-chat-bubble');
       const btn = document.getElementById('max-chat');
       const openBtn = document.getElementById('open-chat');
-      let maximized = false;
-      openBtn.onclick = function() { iframe.style.display='block'; btn.style.display='flex'; openBtn.style.display='none'; };
-      btn.onclick = function() {
-        if (!maximized) { iframe.style.width='98vw'; iframe.style.height='94vh'; iframe.style.bottom='3vh'; iframe.style.right='1vw'; iframe.style.boxShadow='none'; btn.style.bottom='calc(94vh + 3vh + 12px)'; btn.textContent='🗗'; maximized = true; }
-        else { iframe.style.width='370px'; iframe.style.height='550px'; iframe.style.bottom='24px'; iframe.style.right='24px'; iframe.style.boxShadow='none'; btn.style.bottom='590px'; btn.textContent='⛶'; maximized = false; }
-      };
+      if (btn) btn.remove();
+      if (openBtn && openBtn.dataset.chatUrl) {
+        openBtn.onclick = function(event) {
+          event.preventDefault();
+          window.open(openBtn.dataset.chatUrl, '_blank', 'noopener,noreferrer');
+        };
+      }
 
       // Modal de Inversiones (flujo: selección -> formulario -> API)
       const btnInversiones = document.getElementById('btnInversionesComenzar');
@@ -786,10 +791,8 @@
       const invBtnVolver = document.getElementById('invBtnVolver');
       const invBtnEnviar = document.getElementById('invBtnEnviar');
 
-      const INV_API_TOKEN = 'iyAUHKKJ2NTsxf4sAH1OWm3fljRsThvxF0kbCGWe';
       const INV_QUEUE = 8749;
       const INV_BRANCH = 11;
-      const INV_BASE = 'https://filavirtual2.debmedia.com/api/v1';
 
       let selectedInvDetalle = null;
 
@@ -855,7 +858,6 @@
         invBtnEnviar.disabled = true;
         invBtnEnviar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
         try {
-          const url = `${INV_BASE}/queue/${INV_QUEUE}/branch/${INV_BRANCH}/enqueue`;
           const body = {
             firstName: data.firstName,
             lastName: data.lastName,
@@ -874,16 +876,7 @@
               }
             ]
           };
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'x-api-token': INV_API_TOKEN,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-          });
-          const out = await res.json().catch(() => ({}));
-          if (!res.ok) throw new Error(out?.message || `Error en servidor (${res.status})`);
+          const out = await FilaVirtualApi.enqueue(INV_QUEUE, INV_BRANCH, body);
 
           // Replicar flujo de sala de espera (igual que Apertura de cuenta nómina)
           const turnCode = out.code || '—';
@@ -894,8 +887,6 @@
           const videoCallUrl = out.jsonDetails?.videoCallUrl || 'about:blank';
 
           window.currentVideoCallUrl = videoCallUrl;
-          const urlWithParam = videoCallUrl.includes('?') ? `${videoCallUrl}&videocallUser=mobile` : `${videoCallUrl}?videocallUser=mobile`;
-          document.getElementById('videoFrame').src = urlWithParam;
 
           window.fillWaitModal({
             code: turnCode,
@@ -910,7 +901,7 @@
           invResetModal();
           const modalWait = new bootstrap.Modal(document.getElementById('modalSalaEspera'), { backdrop: 'static', keyboard: false });
           modalWait.show();
-          window.startPolling(turnCode, INV_API_TOKEN);
+          window.startPolling(turnCode, true);
         } catch (err) {
           invSetAlert('danger', err.message);
         } finally {
@@ -923,15 +914,26 @@
 
   <!-- ===== Flujo Turno / Videollamada ===== -->
   <script>
-    const FV_TOKEN   = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
     const FV_QUEUE   = 16223;
     const FV_BRANCH  = 10750;
-    const FV_BASE    = 'https://filavirtual2.debmedia.com/api/v1';
     const VIDEO_CALL_URL = 'about:blank';
 
     let pollingInterval = null;
     let lastTurnCode = null;
     window.currentVideoCallUrl = 'about:blank';
+
+    function getVideoUrlWithParam(videoUrl){
+      if(!videoUrl || videoUrl === 'about:blank') return '';
+      return videoUrl.includes('videocallUser=mobile')
+        ? videoUrl
+        : (videoUrl.includes('?') ? `${videoUrl}&videocallUser=mobile` : `${videoUrl}?videocallUser=mobile`);
+    }
+
+    function openVideoCallInNewTab(videoUrl){
+      const launchUrl = getVideoUrlWithParam(videoUrl || window.currentVideoCallUrl);
+      if(!launchUrl) return;
+      window.open(launchUrl, '_blank', 'noopener,noreferrer');
+    }
 
     const btnNominaComenzar = document.getElementById('btnNominaComenzar');
     const modalForm = new bootstrap.Modal(document.getElementById('modalGuardiaForm'));
@@ -953,10 +955,7 @@
       if(!data.firstName || !data.lastName || !data.dni || !data.email || !data.phone){ setFormAlert('danger','Completa todos los campos.'); return; }
       btnEnviarTurno.disabled = true; btnEnviarTurno.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generando...';
       try{
-        const url = `${FV_BASE}/queue/${FV_QUEUE}/branch/${FV_BRANCH}/enqueue`;
-        const res = await fetch(url, { method:'POST', headers:{ 'x-api-token': FV_TOKEN, 'Content-Type':'application/json' }, body: JSON.stringify({ firstName:data.firstName, lastName:data.lastName, dni:data.dni, email:data.email, phone:data.phone })});
-        const out = await res.json().catch(()=> ({}));
-        if(!res.ok) throw new Error(out?.message || `Error en servidor (${res.status})`);
+        const out = await FilaVirtualApi.enqueue(FV_QUEUE, FV_BRANCH, { firstName:data.firstName, lastName:data.lastName, dni:data.dni, email:data.email, phone:data.phone });
         const turnCode = out.code || '—'; lastTurnCode = turnCode; localStorage.setItem('turnCode', turnCode);
         const turnNumber = out.jsonDetails?.turn || out.jsonDetails?.actualTurn || '—';
         const avgWait    = out.jsonDetails?.averageWaitingTime ?? out.jsonDetails?.serviceTime ?? 'N/A';
@@ -965,9 +964,6 @@
         const videoCallUrl = out.jsonDetails?.videoCallUrl || 'about:blank';
         window.currentVideoCallUrl = videoCallUrl; // Almacenar la URL de videollamada
         
-        // Actualizar el src del iframe con la URL de videollamada
-        const urlWithParam = videoCallUrl.includes('?') ? `${videoCallUrl}&videocallUser=mobile` : `${videoCallUrl}?videocallUser=mobile`;
-        document.getElementById('videoFrame').src = urlWithParam;
         fillWaitModal({ code:turnCode, number:turnNumber, avgWait:isFinite(avgWait)?`${Math.floor(parseFloat(avgWait))} min`:'N/A', queueName, waitingRoom:wrName });
         modalForm.hide(); modalWait.show(); startPolling(turnCode);
       }catch(err){ setFormAlert('danger', err.message);
@@ -989,17 +985,15 @@
       }
     }
 
-    // Función global para iniciar el polling del turno (token opcional para colas con API distinta, ej. Inversiones)
-    window.startPolling = function(turnCode, apiToken){
+    // Función global para iniciar el polling del turno (useTurnProfile=true para colas con perfil turn, ej. Inversiones)
+    window.startPolling = function(turnCode, useTurnProfile){
       stopPolling();
-      const token = apiToken || FV_TOKEN;
-      const url = `${FV_BASE}/turn/code/${encodeURIComponent(turnCode)}`;
       const mapStatus = (s)=> s==='ANNOUNCED'?{text:'Lo estamos llamando',cls:'status-ok'}: s==='WAITING_TO_BE_CALLED'?{text:'En breve lo llamaremos',cls:'status-warn'}: s==='FINALIZED'?{text:'Atención finalizada',cls:'status-done'}:{text:s||'Desconocido',cls:'status-warn'};
       const tick = async ()=>{
         try{
-          const res = await fetch(url, { headers: { 'x-api-token': token, 'Content-Type':'text/plain' }});
-          if(!res.ok) throw new Error(`Estado no disponible (${res.status})`);
-          const data = await res.json();
+          const data = useTurnProfile
+            ? await FilaVirtualApi.getTurnByCode(turnCode, { profile: 'turn' })
+            : await FilaVirtualApi.getTurnByCode(turnCode);
           const m = mapStatus(data.status); $('turnStatus').textContent = m.text; $('turnStatus').className = `info-value ${m.cls}`;
           const avg = (data.averageWaitingTime ?? data.serviceTime); if(avg!==undefined && avg!==null && !isNaN(avg)){ $('currentWaitingTime').textContent = `${Math.floor(parseFloat(avg))} min`; }
           if(data.status === 'ANNOUNCED'){ $('btnAbrirVideo').disabled = false; }
@@ -1014,40 +1008,16 @@
       const m = bootstrap.Modal.getInstance(document.getElementById('modalSalaEspera'));
       if (m) m.hide();
     });
-    document.getElementById('btnAbrirVideo').addEventListener('click', ()=>{ openVideoModal({ width:'90vw', height:'80vh', url: window.currentVideoCallUrl }); });
-    document.getElementById('btnResizeVideo').addEventListener('click', ()=>{
-      const dlg = document.querySelector('#modalVideo .modal-dialog');
-      const curW = dlg.style.getPropertyValue('--video-width') || '90vw';
-      const nextW = (curW.trim()==='90vw') ? '70vw' : '90vw';
-      const nextH = (nextW==='70vw') ? '60vh' : '80vh';
-      dlg.style.setProperty('--video-width', nextW);
-      document.querySelector('#modalVideo .modal-content').style.setProperty('--video-height', nextH);
-    });
+    document.getElementById('btnAbrirVideo').addEventListener('click', ()=>{ openVideoCallInNewTab(window.currentVideoCallUrl); });
+    document.getElementById('btnOpenVideoNewTab').addEventListener('click', ()=>{ openVideoCallInNewTab(window.currentVideoCallUrl); });
     function openVideoModal({width='90vw', height='80vh', url=null}={}){ 
-      const dlg=document.querySelector('#modalVideo .modal-dialog'); 
-      const content=document.querySelector('#modalVideo .modal-content'); 
-      dlg.style.setProperty('--video-width',width); 
-      content.style.setProperty('--video-height',height); 
-      
-      // Usar la URL almacenada globalmente o la proporcionada como parámetro
-      const videoUrl = url || window.currentVideoCallUrl || 'about:blank';
-      
-      // Agregar el parámetro ?videocallUser=mobile a la URL
-      const urlWithParam = videoUrl.includes('?') ? `${videoUrl}&videocallUser=mobile` : `${videoUrl}?videocallUser=mobile`;
-      
-      document.getElementById('videoFrame').src=urlWithParam; 
-      modalVideo.show(); 
+      openVideoCallInNewTab(url || window.currentVideoCallUrl); 
     }
   </script>
 
   <!-- ===== MÓDULO DE CITAS ===== -->
   <script>
     (function(){
-      const API_TOKEN = 's9ZmCOGzuRz0OlxtZyJYIvnG7WQVBtnLlNFrHD2U';
-      const SVC_LIST   = 'https://citas2.debmedia.com/api/v2/reducedSchedules';
-      const AVAIL_BASE = 'https://citas2.debmedia.com/api/v2/schedules';
-      const APPT_URL   = 'https://citas2.debmedia.com/api/v2/appointments';
-
       const modalEl = document.getElementById('modalCita');
       const modal = new bootstrap.Modal(modalEl);
       const btnPrimaryCards = document.querySelectorAll('.ad-card .btn.btn-primary');
@@ -1097,9 +1067,7 @@
 
       async function loadSchedules(){
         try{
-          const res = await fetch(SVC_LIST, { headers: { 'x-api-token': API_TOKEN } });
-          if(!res.ok) throw new Error(`No se pudieron obtener las agendas (${res.status})`);
-          schedules = await res.json();
+          schedules = await DebmediaApi.citasRequest('reducedSchedules', { profile: 'bank' });
 
           selSchedule.innerHTML = `<option value="">Selecciona un servicio...</option>`;
           schedules.forEach(s => selSchedule.insertAdjacentHTML('beforeend', `<option value="${s.id}">${s.name}</option>`));
@@ -1144,10 +1112,8 @@
         if(!schedId || !branchId || !dateStr){ return; }
 
         try{
-          const url = `${AVAIL_BASE}/${encodeURIComponent(schedId)}/branch/${encodeURIComponent(branchId)}/availability?strDate=${encodeURIComponent(dateStr)}`;
-          const res = await fetch(url, { headers: { 'x-api-token': API_TOKEN }});
-          if(!res.ok) throw new Error(`No se pudo obtener disponibilidad (${res.status})`);
-          const data = await res.json();
+          const path = `schedules/${encodeURIComponent(schedId)}/branch/${encodeURIComponent(branchId)}/availability?strDate=${encodeURIComponent(dateStr)}`;
+          const data = await DebmediaApi.citasRequest(path, { profile: 'bank' });
 
           const slots = Array.isArray(data) ? data : (Array.isArray(data.slots) ? data.slots : []);
           if(slots.length === 0){ setAlert('info','No hay horarios disponibles para la fecha seleccionada.'); return; }
@@ -1224,13 +1190,11 @@
         btnConfirm.disabled = true; btnConfirm.textContent = 'Confirmando...';
 
         try{
-          const res = await fetch(APPT_URL, {
+          const out = await DebmediaApi.citasRequest('appointments', {
             method: 'POST',
-            headers: { 'x-api-token': API_TOKEN, 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body,
+            profile: 'bank'
           });
-          const out = await res.json().catch(()=> ({}));
-          if(!res.ok){ throw new Error(out?.message || `Error al crear la cita (${res.status})`); }
           setAlert('success', `¡Cita creada! ID: ${out.id || '(recibido)'}`);
           setTimeout(()=> modal.hide(), 1400);
         }catch(err){
@@ -1303,24 +1267,17 @@
           
           // Invocar la API de NocoDB antes de cerrar
           try {
-            const response = await fetch('https://app.nocodb.com/api/v2/tables/mjg0v238imgxxvm/records', {
+            await DebmediaApi.nocoRequest('tables/mjg0v238imgxxvm/records', {
               method: 'POST',
-              headers: {
-                'xc-token': 'esMWeT85CmXjEnt5kvF1J97zD-d4_BX9rq228I9z',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
+              body: {
                 "Title": null,
                 "DNI": dniValue,
                 "Nombre": nombreValue || null,
                 "Apellido": apellidoValue || null,
                 "OnboardingPrestamoFinalizado": "No",
                 "OnboardingPrestamoIniciado": "Si"
-              })
+              }
             });
-            
-            // No importa si la respuesta es exitosa o no, simplemente continuar cerrando el modal
-            await response.json().catch(() => ({}));
           } catch (error) {
             // Silenciar errores de la API, solo cerrar el modal
             console.error('Error al invocar API:', error);
@@ -1562,10 +1519,8 @@
         }
         
         // Usar la misma API que el "generar turno"
-        const FV_TOKEN   = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
-    const FV_QUEUE   = 16223;
+        const FV_QUEUE   = 16223;
     const FV_BRANCH  = 10750;
-        const FV_BASE = 'https://filavirtual2.debmedia.com/api/v1';
         
         const data = {
           firstName: nombre,
@@ -1578,15 +1533,7 @@
         btnSolicitarAsistencia.disabled = true;
         btnSolicitarAsistencia.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Solicitando...';
         
-        fetch(`${FV_BASE}/queue/${FV_QUEUE}/branch/${FV_BRANCH}/enqueue`, {
-          method: 'POST',
-          headers: {
-            'x-api-token': FV_TOKEN,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        })
-        .then(res => res.json())
+        FilaVirtualApi.enqueue(FV_QUEUE, FV_BRANCH, data)
         .then(out => {
           if (out.code) {
             // Cerrar el modal del simulador
@@ -1603,10 +1550,6 @@
             
             // Almacenar la URL de videollamada globalmente
             window.currentVideoCallUrl = videoCallUrl;
-            
-            // Actualizar el src del iframe con la URL de videollamada
-            const urlWithParam = videoCallUrl.includes('?') ? `${videoCallUrl}&videocallUser=mobile` : `${videoCallUrl}?videocallUser=mobile`;
-            document.getElementById('videoFrame').src = urlWithParam;
             
             // Llenar el modal de sala de espera con los datos
             window.fillWaitModal({ 
@@ -1651,20 +1594,15 @@
   </script>
 
   <!-- CHAT -->
-  <iframe
-    src="https://filavirtual.preprod.debmedia.com/Numiabot/#/Ff5h9OOAsmhNELUjk1Dh"
-    id="numia-chat-bubble"
-    style="position: fixed; bottom: 24px; right: 24px; width: 370px; height: 550px; border: none; z-index: 9999; border-radius: 18px; overflow: hidden; transition: width .3s, height .3s, right .3s, bottom .3s; display: none;"
-    allow="camera; microphone"
-  ></iframe>
-  <button id="max-chat"
-    style="position: fixed; bottom: 590px; right: 24px; z-index: 10000; background: var(--numia-azul); color: #fff; border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.6rem; box-shadow: 0 2px 8px rgba(0,0,0,0.18); cursor: pointer; display: none; align-items: center; justify-content: center; transition: background .2s;"
-    title="Maximizar/minimizar chat">⛶</button>
-  <button id="open-chat"
-    style="position: fixed; bottom: 24px; right: 24px; z-index: 10001; background: var(--numia-azul); color: #fff; border: none; border-radius: 50%; width: 64px; height: 64px; font-size: 2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.18); cursor: pointer; display: flex; align-items: center; justify-content: center;"
-    title="Abrir chat">
+  <a id="open-chat"
+    href="https://filavirtual.preprod.debmedia.com/Numiabot/#/Ff5h9OOAsmhNELUjk1Dh"
+    data-chat-url="https://filavirtual.preprod.debmedia.com/Numiabot/#/Ff5h9OOAsmhNELUjk1Dh"
+    target="_blank"
+    rel="noopener noreferrer"
+    style="position: fixed; bottom: 24px; right: 24px; z-index: 10001; background: var(--numia-azul); color: #fff; border: none; border-radius: 50%; width: 64px; height: 64px; font-size: 2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.18); cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none;"
+    title="Abrir chat en una nueva pestaña">
     <span style="font-weight:bold;font-size:2rem;">N</span>
-  </button>
+  </a>
 </body>
 </html>
 

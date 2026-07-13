@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 56" role="img" aria-labelledby="title">
+  <title id="title">Banco de Bogot�</title>
+  <rect width="280" height="56" fill="#0050C8"/>
+  <text x="16" y="38" fill="#ffffff" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">Banco de Bogot�</text>
+  <g transform="translate(232 8)">
+    <path fill="#E4002B" d="M28 20c0-8-6-14-14-14-4 0-8 2-10 4 8 2 14 8 16 16 2-2 8-4 8-6z"/>
+    <path fill="#F5B700" d="M20 6c-6 1-11 6-12 12 6-1 12 2 16 6 4-4 4-12-4-18z"/>
+    <path fill="#F5B700" d="M22 28c4 6 10 10 18 8-6-4-10-10-10-16-4 4-6 6-8 8z"/>
+  </g>
+</svg>

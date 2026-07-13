@@ -1,0 +1,20 @@
+{
+  "name": "demopresencial-client",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dependencias CDN del frontend estático (auditoría npm + lockfile)",
+  "scripts": {
+    "audit": "npm audit --audit-level=moderate",
+    "audit:fix": "npm audit fix",
+    "predeploy": "node ../server/scripts/verify-lockfile.js . && npm audit --audit-level=moderate",
+    "lockfile:sync": "npm install --package-lock-only && node ../server/scripts/verify-lockfile.js . --update-meta",
+    "lockfile:verify": "node ../server/scripts/verify-lockfile.js .",
+    "deps:update": "npm update && npm audit --audit-level=moderate"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.0",
+    "chart.js": "^4.4.0",
+    "flatpickr": "^4.6.13",
+    "jszip": "^3.10.1"
+  }
+}

@@ -9,10 +9,10 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="images/N.png" />
   <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/ integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/ integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" integrity="sha384-RkASv+6KfBMW9eknReJIJ6b3UnjKOKC5bOUaNgIY778NFbQ8MtWq9Lr/khUgqtTt" crossorigin="anonymous">
  <style>
 
            @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800&display=swap');
@@ -1926,7 +1926,12 @@ z-index: 9999;
 
 
   <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="auth-portal.js" integrity="sha384-74EWFvH2m+aMjmQBpBiZyYeyAqC6jGuHtfv/vSH++XsVRcNEOWeyMNyLNP0p/rG1" crossorigin="anonymous"></script>
+  <script>AuthPortal.require();</script>
+  <script src="assets/js/shared/api-client.js" integrity="sha384-b/p40FT/5XXkNy7YC6XbaXRp1igzcpWmGB1YAGJzJJBvqKuwOpLgWb6MhHHM06wI" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/fila-virtual-api.js" integrity="sha384-W2FVZuoQ/r9cqrSpNbk0wehzKOCRZCRnNfimodwlQaOJldMVGjdfZJjBqhzJxZuF" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/debmedia-api.js" integrity="sha384-e9oSnKuGgXBcmVjm05j+XJITuSHKtIT1aN4NvLIf7P3B7C7az/0GFI6Tun1q3yua" crossorigin="anonymous"></script>
   <script>
     function showRatesTab(tab) {
       const eBtn = document.getElementById('tabEspecial'),
@@ -1946,47 +1951,27 @@ z-index: 9999;
     window.showRatesTab = showRatesTab;
 
     document.addEventListener('DOMContentLoaded', () => {
-      const iframe = document.getElementById('numia-chat-bubble'),
-            btn    = document.getElementById('max-chat'),
-            openBtn= document.getElementById('open-chat');
-      let maxed = false;
-      openBtn.onclick = () => {
-        iframe.style.display = 'block';
-        btn.style.display = 'flex';
-        openBtn.style.display = 'none';
-      };
-      btn.onclick = () => {
-        if (!maxed) {
-          iframe.style.width = '98vw';
-          iframe.style.height = '94vh';
-          iframe.style.bottom = '3vh';
-          iframe.style.right = '1vw';
-          btn.textContent = '🗗';
-        } else {
-          iframe.style.width = '370px';
-          iframe.style.height = '550px';
-          iframe.style.bottom = '24px';
-          iframe.style.right = '24px';
-          btn.textContent = '⛶';
-        }
-        maxed = !maxed;
-      };
+      const btn = document.getElementById('max-chat');
+      const openBtn = document.getElementById('open-chat');
+      if (btn) btn.remove();
+      if (openBtn && openBtn.dataset.chatUrl) {
+        openBtn.onclick = (event) => {
+          event.preventDefault();
+          window.open(openBtn.dataset.chatUrl, '_blank', 'noopener,noreferrer');
+        };
+      }
     });
   </script>
 
   <!-- Chat -->
-  <iframe
-    id="numia-chat-bubble"
-    src="https://filavirtual.preprod.debmedia.com/Numiabot/#/pgdiLWuEQLnMqKwHMsDj"
-    allow="camera; microphone"
-    style="position:fixed;bottom:24px;right:24px;width:370px;height:550px;border:none;z-index:9999;border-radius:18px;overflow:hidden;display:none;"
-  ></iframe>
-  <button id="open-chat"
-    style="position:fixed;bottom:24px;right:24px;width:64px;height:64px;border:none;border-radius:50%;background:var(--numia-purpura);color:#fff;font-size:2.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10001;"
-  >N</button>
-  <button id="max-chat"
-    style="position:fixed;bottom:590px;right:24px;width:48px;height:48px;border:none;border-radius:50%;background:var(--numia-purpura);color:#fff;font-size:1.6rem;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:10000;"
-  >⛶</button>
+  <a id="open-chat"
+    href="https://filavirtual.preprod.debmedia.com/Numiabot/#/pgdiLWuEQLnMqKwHMsDj"
+    data-chat-url="https://filavirtual.preprod.debmedia.com/Numiabot/#/pgdiLWuEQLnMqKwHMsDj"
+    target="_blank"
+    rel="noopener noreferrer"
+    style="position:fixed;bottom:24px;right:24px;width:64px;height:64px;border:none;border-radius:50%;background:var(--numia-purpura);color:#fff;font-size:2.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10001;text-decoration:none;"
+    title="Abrir chat en una nueva pestaña"
+  >N</a>
 
   
 
@@ -2198,7 +2183,7 @@ z-index: 9999;
   </div>
 </div>
 
- <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+ <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" integrity="sha384-5JqMv4L/Xa0hfvtF06qboNdhvuYXUku9ZrhZh3bSk8VXF0A/RuSLHpLsSV9Zqhl6" crossorigin="anonymous"></script>
   
 
   <!-- Pie de página con mt-auto para pegarlo al fondo -->
@@ -2207,7 +2192,12 @@ z-index: 9999;
   </footer>
 
   <!-- Bootstrap JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="auth-portal.js" integrity="sha384-74EWFvH2m+aMjmQBpBiZyYeyAqC6jGuHtfv/vSH++XsVRcNEOWeyMNyLNP0p/rG1" crossorigin="anonymous"></script>
+  <script>AuthPortal.require();</script>
+  <script src="assets/js/shared/api-client.js" integrity="sha384-b/p40FT/5XXkNy7YC6XbaXRp1igzcpWmGB1YAGJzJJBvqKuwOpLgWb6MhHHM06wI" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/fila-virtual-api.js" integrity="sha384-W2FVZuoQ/r9cqrSpNbk0wehzKOCRZCRnNfimodwlQaOJldMVGjdfZJjBqhzJxZuF" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/debmedia-api.js" integrity="sha384-e9oSnKuGgXBcmVjm05j+XJITuSHKtIT1aN4NvLIf7P3B7C7az/0GFI6Tun1q3yua" crossorigin="anonymous"></script>
 
   <!-- 
     JavaScript para:
@@ -2238,61 +2228,20 @@ z-index: 9999;
       window.showRatesTab = showRatesTab;
 
       // Control de la burbuja de chat
-      const iframe = document.getElementById('numia-chat-bubble');
       const btn = document.getElementById('max-chat');
       const openBtn = document.getElementById('open-chat');
-      let maximized = false;
-
-      // Al hacer clic en la burbuja, mostrar el iframe y el botón de maximizar
-      openBtn.onclick = function() {
-        iframe.style.display = 'block';
-        btn.style.display = 'flex';
-        openBtn.style.display = 'none';
-      };
-      // Al hacer clic en el botón de maximizar/minimizar
-      btn.onclick = function() {
-        if (!maximized) {
-          iframe.style.width = '98vw';
-          iframe.style.height = '94vh';
-          iframe.style.bottom = '3vh';
-          iframe.style.right = '1vw';
-          iframe.style.boxShadow = 'none';
-          btn.style.bottom = 'calc(94vh + 3vh + 12px)';
-          btn.textContent = '🗗';
-          maximized = true;
-        } else {
-          iframe.style.width = '370px';
-          iframe.style.height = '550px';
-          iframe.style.bottom = '24px';
-          iframe.style.right = '24px';
-          iframe.style.boxShadow = 'none';
-          btn.style.bottom = '590px';
-          btn.textContent = '⛶';
-          maximized = false;
-        }
-      };
+      if (btn) btn.remove();
+      if (openBtn && openBtn.dataset.chatUrl) {
+        openBtn.onclick = function(event) {
+          event.preventDefault();
+          window.open(openBtn.dataset.chatUrl, '_blank', 'noopener,noreferrer');
+        };
+      }
     });
   </script>
 
   <!-- CHAT -->
-  <iframe
-    src="https://filavirtual.preprod.debmedia.com/Numiabot/#/Ff5h9OOAsmhNELUjk1Dh"
-    id="numia-chat-bubble"
-    style="
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 370px;
-      height: 550px;
-      border: none;
-      z-index: 9999;
-      border-radius: 18px;
-      overflow: hidden;
-      transition: width 0.3s, height 0.3s, right 0.3s, bottom 0.3s;
-      display: none;
-    "
-    allow="camera; microphone"
-  ></iframe>
+  <!-- Chat embebido reemplazado por launcher externo -->
 </body>
 
 
@@ -2510,21 +2459,14 @@ window.hideForm = hideForm;
                     throw new Error(`ID de cola inválido: ${queueId}. Debe ser 6653 (Telemedicina) o 14003 (Guardia)`);
                 }
                 
-                const response = await fetch(`https://filavirtual2.debmedia.com/api/v1/queue/16223/branch/10750/enqueue`, {
-                    method: 'POST',
-                    headers: {
-                        'x-api-token': 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
+                const responseData = await FilaVirtualApi.enqueue('16223', '10750', data);
+                const response = { ok: true, status: 200 };
 
                 console.log('Respuesta del API:', response.status, response.ok);
                 console.log('Headers de respuesta:', response.headers);
                 console.log('URL de la respuesta:', response.url);
 
                 if (response.ok) {
-                    const responseData = await response.json();
                     console.log('Datos del API recibidos:', responseData);
                     
                     // Verificar la estructura de la respuesta
@@ -2625,21 +2567,10 @@ window.hideForm = hideForm;
             btn.disabled = true;
 
             try {
-                const response = await fetch('https://filavirtual2.debmedia.com/api/v1/queue/16223/branch/10588/enqueue', {
-                    method: 'POST',
-                    headers: {
-                        'x-api-token': 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                   
-                        dni: "29328703"
-                  
-                    })
-                });
+                const responseData = await FilaVirtualApi.enqueueByAlias('Jorge', '16223', '10588', 'dni-only');
+                const response = { ok: true };
 
                 if (response.ok) {
-                    const responseData = await response.json();
                     
                     // Extraer información del turno
                     const turnInfo = {
@@ -2677,21 +2608,10 @@ window.hideForm = hideForm;
             btn.disabled = true;
 
             try {
-                const response = await fetch('https://filavirtual2.debmedia.com/api/v1/queue/16224/branch/10588/enqueue', {
-                    method: 'POST',
-                    headers: {
-                        'x-api-token': 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                    
-                        dni: "29328703"
-                     
-                    })
-                });
+                const responseData = await FilaVirtualApi.enqueueByAlias('Jorge', '16224', '10588', 'dni-only');
+                const response = { ok: true };
 
                 if (response.ok) {
-                    const responseData = await response.json();
                     
                     // Extraer información del turno
                     const turnInfo = {
@@ -2989,25 +2909,18 @@ window.hideForm = hideForm;
                      throw new Error(`ID de cola inválido: ${queueId}. Debe ser 6653 (Telemedicina) o 14003 (Guardia)`);
                  }
                  
-                 const response = await fetch(`https://filavirtual2.debmedia.com/api/v1/queue/16223/branch/10750/enqueue`, {
-                     method: 'POST',
-                     headers: {
-                         'x-api-token': 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w',
-                         'Content-Type': 'application/json'
-                     },
-                     body: JSON.stringify({
+                 const responseData = await FilaVirtualApi.enqueue('16223', '10750', {
                          firstName,
                          lastName,
                          dni,
                          email,
                          phone
-                     })
-                 });
+                     });
+                 const response = { ok: true, status: 200 };
                  
                  console.log('Respuesta del API:', response.status, response.ok);
                  
                  if (response.ok) {
-                     const responseData = await response.json();
                      console.log('Datos del API recibidos:', responseData);
                      
                      // Log detallado de la estructura de la respuesta
@@ -3136,17 +3049,10 @@ window.hideForm = hideForm;
                      callCount++;
                      
                      // Consultar la API del estado del turno
-                     const response = await fetch(`https://filavirtual2.debmedia.com/api/v1/turn/code/${turnCode}`, {
-                         method: 'GET',
-                         headers: {
-                             'x-api-token': 'iyAUHKKJ2NTsxf4sAH1OWm3fljRsThvxF0kbCGWe',
-                             'Content-Type': 'text/plain'
-                         }
-                     });
+                     const response = { ok: true };
+                     const data = await FilaVirtualApi.getTurnByCode(turnCode, { profile: 'turn' });
                      
                      if (response.ok) {
-                         const data = await response.json();
-                         
                          // Actualizar estado del turno
                          const statusElement = document.getElementById('turnStatus');
                          if (statusElement) {
@@ -3257,75 +3163,25 @@ window.hideForm = hideForm;
           window.stopTurnStatusPolling = stopTurnStatusPolling;
           window.showVideoCall = showVideoCall;
           
-          // Función para mostrar la videollamada en el modal
+          // Función para abrir la videollamada en una nueva pestaña
           function showVideoCall(videoUrl) {
               try {
-                  console.log('Mostrando videollamada en el modal:', videoUrl);
-                  
-                  // Obtener elementos del DOM
-                  const message = document.getElementById('message');
-                  
-                  if (!message) {
-                      console.error('No se encontró el elemento message');
-                      return;
+                  console.log('Abriendo videollamada en nueva pestaña:', videoUrl);
+                  if (!videoUrl) {
+                      throw new Error('No se encontró una URL de videollamada válida');
                   }
-                  
-                  // Crear el HTML para la videollamada
-                  const videoCallHTML = `
-                      <div class="video-call-container">
-                          <div class="video-call-header">
-                              <h4 class="video-call-title">🎥 Videollamada en curso</h4>
-                              <p class="video-call-subtitle">Tu consulta virtual está lista</p>
-                          </div>
-                          
-                          <div class="video-call-frame-container">
-                              <iframe 
-                                  src="${videoUrl}" 
-                                  class="video-call-iframe"
-                                  allow="camera; microphone; fullscreen"
-                                  frameborder="0"
-                                  scrolling="no"
-                              ></iframe>
-                          </div>
-                          
-                          <div class="video-call-actions">
-                              <button class="video-call-back-btn" onclick="showTurnInfoInModal(window.lastTurnInfo)">
-                                  ← Volver al turno
-                              </button>
-                              <button class="video-call-close-btn" onclick="hideForm()">
-                                  Cerrar
-                              </button>
-                          </div>
-                      </div>
-                  `;
-                  
-                  // Reemplazar el contenido del mensaje con la videollamada
-                  message.innerHTML = videoCallHTML;
-                  
-                  // Guardar la información del turno para poder volver
-                  if (!window.lastTurnInfo) {
-                      window.lastTurnInfo = {
-                          turno: document.querySelector('.turn-info-value')?.textContent || 'N/A',
-                          tiempoEspera: document.querySelectorAll('.turn-info-value')[1]?.textContent || 'N/A',
-                          especialidad: document.querySelectorAll('.turn-info-value')[2]?.textContent || 'N/A',
-                          salaEspera: document.querySelectorAll('.turn-info-value')[3]?.textContent || 'N/A',
-                          codigo: document.getElementById('turnCodeDisplay')?.textContent || 'N/A',
-                          videoCallUrl: videoUrl
-                      };
-                  }
-                  
-                  console.log('Videollamada mostrada exitosamente en el modal');
+                  window.open(videoUrl, '_blank', 'noopener,noreferrer');
                   
               } catch (error) {
-                  console.error('Error al mostrar la videollamada:', error);
+                  console.error('Error al abrir la videollamada:', error);
                   
                   // Mostrar mensaje de error
                   const message = document.getElementById('message');
                   if (message) {
                       message.innerHTML = `
                           <div class="error-container">
-                              <h4 class="text-lg font-semibold text-center mb-4" style="color: #dc3545;">❌ Error al cargar la videollamada</h4>
-                              <p class="text-center mb-4">No se pudo cargar la videollamada. Intenta nuevamente.</p>
+                              <h4 class="text-lg font-semibold text-center mb-4" style="color: #dc3545;">❌ Error al abrir la videollamada</h4>
+                              <p class="text-center mb-4">No se pudo abrir la videollamada en una nueva pestaña. Intenta nuevamente.</p>
                               <div class="text-center">
                                   <button class="boton-fecha" onclick="showTurnInfoInModal(window.lastTurnInfo)">
                                       Volver al turno
@@ -3415,22 +3271,13 @@ window.duracionSeleccionadaGlobal = null;
       const resultados = document.getElementById("resultados");
       resultados.innerHTML = "Consultando disponibilidad...";
 
-      const baseUrl = "https://citas2.debmedia.com/api/v2/schedules";
       const strDateEncoded = encodeURIComponent(strDate);
               const branchId = document.getElementById("sucuComboValue").value;
               const scheduleId = document.getElementById("salaComboValue").value;
-      const url = `${baseUrl}/${scheduleId}/branch/${branchId}/availability?strDate=${strDateEncoded}`;
+      const citasPath = `${scheduleId}/branch/${branchId}/availability?strDate=${strDateEncoded}`;
 
       try {
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            "x-api-token": "GoEH5j9TMjWhWojrOLKT8qYEXbPlMH7atIo8Nsxh"
-          }
-        });
-
-        if (!response.ok) throw new Error("Error en la solicitud: " + response.status);
-        const data = await response.json();
+        const data = await DebmediaApi.citasRequest('schedules/' + citasPath, { profile: 'care' });
 
         const dias = Array.isArray(data) ? data : (Array.isArray(data.slots) ? data.slots : []);
 
@@ -3539,21 +3386,11 @@ window.mostrarFormulario = mostrarFormulario;
         reason: datosCliente.motivo
       };
       try {
-        const response = await fetch("https://citas2.debmedia.com/api/v2/appointments", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-token": "GoEH5j9TMjWhWojrOLKT8qYEXbPlMH7atIo8Nsxh"
-          },
-          body: JSON.stringify(data)
+        const resultado = await DebmediaApi.citasRequest('appointments', {
+          method: 'POST',
+          body: data,
+          profile: 'care'
         });
-
-
-        const resultado = await response.json();
-
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${resultado.message || JSON.stringify(resultado)}`);
-        }
 
 
 
@@ -3583,18 +3420,8 @@ async function cargarCombosDesdeAPI() {
   });
 
   // Cargar sucursales desde la API
-  const url = `https://citas2.debmedia.com/api/v2/reducedSchedules`;
-
   try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "x-api-token": "GoEH5j9TMjWhWojrOLKT8qYEXbPlMH7atIo8Nsxh"
-      }
-    });
-
-    if (!response.ok) throw new Error("No se pudo cargar la lista de sucursales");
-    const data = await response.json();
+    const data = await DebmediaApi.citasRequest('reducedSchedules', { profile: 'care' });
 
     // Limpiar y preparar el contenedor de sucursales
     sucuCombo.innerHTML = '';
@@ -3699,18 +3526,7 @@ async function cargarSalasPorEspecialidadYSucursal() {
   </div>`;
 
   try {
-    // Construir URL con parámetros usando directamente el data-value
-    const url = `https://citas2.debmedia.com/api/v2/schedules?tags.name=${encodeURIComponent(especialidadValue)}`;
-    
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "x-api-token": "GoEH5j9TMjWhWojrOLKT8qYEXbPlMH7atIo8Nsxh"
-      }
-    });
-
-    if (!response.ok) throw new Error("No se pudo cargar la lista de salas");
-    const data = await response.json();
+    const data = await DebmediaApi.citasRequest('schedules?tags.name=' + encodeURIComponent(especialidadValue), { profile: 'care' });
 
     // Limpiar contenedor de salas
     salaCombo.innerHTML = '';

@@ -1,0 +1,107 @@
+:root {
+      --numia-azul: #863DFF;
+      --numia-azul-claro: #e6ecf9;
+      --numia-azul-muy-claro: #eef2fc;
+    }
+    body { font-family: 'Roboto', Arial, sans-serif; background: #f7f7f7; }
+    .card.ad-card { border-radius: 1.2rem; box-shadow: 0 4px 18px rgba(0,0,0,0.08); transition: transform .18s, box-shadow .18s; min-width:210px; min-height:380px; display:flex; flex-direction:column; justify-content:stretch; height:100%; }
+    .card.ad-card:hover { transform: translateY(-4px) scale(1.025); box-shadow: 0 8px 32px rgba(0,19,145,0.17); }
+    .card-img-top-holder { width:100%; height:180px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#fff8f8; border-top-left-radius:1.2rem; border-top-right-radius:1.2rem; }
+    .card-img-top-holder img { width:100%; height:100%; object-fit:cover; object-position:center; transition: transform .3s; }
+    .ad-card .card-body { display:flex; flex-direction:column; justify-content:flex-start; height:100%; padding-bottom:1.5rem; }
+    .ad-card .card-title { font-weight:700; color:var(--numia-azul); font-size:1.25rem; margin-bottom:.25rem; margin-top:1rem; min-height:3rem; display:flex; align-items:center; justify-content:center; text-align:center; }
+    .ad-card .card-text { font-size:1.01rem; color:#2d2d2d; font-weight:500; opacity:.88; margin-bottom:1.1rem; min-height:56px; text-align:center; display:flex; align-items:center; justify-content:center; }
+    .carousel-item img { object-fit:cover; width:100%; height:340px; border-radius:.7rem; }
+    @media (max-width:991px){ .main-cards .col-lg-3 {flex:0 0 50%; max-width:50%; margin-bottom:1rem;} .carousel-item img{height:180px;} }
+    @media (max-width:767px){ .main-cards .col-lg-3 {flex:0 0 100%; max-width:100%;} .carousel-item img{height:140px;} .card-img-top-holder{height:140px;} .ad-card .card-title{font-size:1.08rem;} }
+
+    .rates-section{ display:flex; gap:2.2rem; align-items:stretch; margin:36px 0 0; width:100%; flex-wrap:wrap;}
+    .rates-col-table, .rates-col-side { background:#fff; border-radius:1.1rem; box-shadow:0 2px 12px rgba(0,0,0,0.07); padding:2.1rem 1.6rem 1.6rem 1.7rem; }
+    .rates-col-table{ min-width:340px; flex:2 1 540px; max-width:1000px; display:flex; flex-direction:column; justify-content:flex-start;}
+    .rates-col-side{ min-width:220px; flex:1 1 320px; max-width:420px; display:flex; flex-direction:column; justify-content:center; align-items:flex-start;}
+    .rates-col-side .bi{ font-size:2.6rem; color:var(--numia-azul); margin-bottom:.7rem;}
+    .rates-col-side h5{ color:var(--numia-azul); font-weight:700; margin-bottom:.5rem; font-size:1.2rem;}
+    .rates-col-side p{ color:#444; font-size:1.07rem; font-weight:500; margin-bottom:1.2rem; opacity:.93;}
+    .rates-col-side .btn{ background:var(--numia-azul); border:none; color:#fff; font-weight:700; border-radius:24px; padding:.7rem 2.1rem; font-size:1.07rem; box-shadow:0 2px 7px rgba(0,19,145,0.06);}
+    .rates-col-side .btn:hover{ background:#000d73; color:#fff;}
+    .rates-tab-btn{ padding:.7rem 0; border:none; border-radius:9px; font-weight:bold; font-size:1.1rem; background:#fff; color:var(--numia-azul); margin-bottom:0; cursor:pointer; border:2px solid #d1d9f9; min-width:70px;}
+    .rates-tab-btn.active,.rates-tab-btn:focus{ background:var(--numia-azul); color:#fff; border:2px solid var(--numia-azul);}
+    .rates-table{ width:100%; border-collapse:separate; border-spacing:0; background:#fff; border-radius:.8rem; overflow:hidden; margin-top:.7rem;}
+    .rates-table th,.rates-table td{ padding:12px 18px; font-size:1.04rem; text-align:left;}
+    .rates-table th{ color:var(--numia-azul); background:var(--numia-azul-claro); border:none; font-size:1.08rem; font-weight:700; text-align:center; letter-spacing:.02em;}
+    .rates-table tr:not(:last-child){ border-bottom:1px solid #cde0f8;}
+    .rates-table tr:nth-child(2){ background:var(--numia-azul-claro);} .rates-table tr:nth-child(3){ background:var(--numia-azul-muy-claro);}
+    .rates-table td{ color:#222; font-weight:500; text-align:center; vertical-align:middle;}
+    .rates-table td:first-child,.rates-table th:first-child{ text-align:left;}
+    @media (max-width:1300px){ .rates-col-table{min-width:0; flex-basis:400px;} .rates-col-side{min-width:0;} }
+    @media (max-width:991px){ .rates-section{flex-direction:column; gap:1.4rem;} .rates-col-table,.rates-col-side{min-width:0; max-width:100%;} .rates-col-side{align-items:flex-start; padding-top:1.2rem;} }
+
+    .btn-primary{ background-color:var(--numia-azul)!important; border-color:var(--numia-azul)!important;}
+    .btn-primary:hover{ background-color:#000d73!important; border-color:#000d73!important;}
+    .btn-outline-primary{ color:var(--numia-azul)!important; border-color:var(--numia-azul)!important;}
+    .btn-outline-primary:hover{ background-color:var(--numia-azul)!important; color:#fff!important;}
+    #max-chat{ background:var(--numia-azul)!important;} #open-chat{ background:var(--numia-azul)!important;}
+
+    /* --------- Sala de espera / Videollamada --------- */
+    .modal-wait .info-item{ display:flex; justify-content:space-between; align-items:center; padding:.8rem 1rem; border:1px solid #e7e9ff; border-radius:.6rem; background:linear-gradient(135deg,#f8f9ff,#eef2ff);}
+    .modal-wait .info-label{ font-weight:600; color:#4b5563; }
+    .modal-wait .info-value{ font-weight:700; color:#6d28d9; }
+    .badge-live{ background:#22c55e; }
+    .status-warn{ color:#f59e0b; font-weight:700; }
+    .status-ok{ color:#22c55e; font-weight:700; }
+    .status-done{ color:#06b6d4; font-weight:700; }
+    .status-err{ color:#ef4444; font-weight:700; }
+    .modal-video .modal-dialog{ width:var(--video-width, 90vw); max-width:100%; }
+    .modal-video .modal-content{ height:var(--video-height, 80vh); }
+    .modal-video iframe{ width:100%; height:100%; border:0; border-radius:.5rem; }
+
+    /* --------- Citas (estilos chips/horas) --------- */
+    #modalCita .modal-dialog { max-width: 920px; }
+    #modalCita .modal-content { border-radius: 16px; border: 0; box-shadow: 0 14px 40px rgba(0,0,0,.12); }
+    #modalCita .modal-header { border-bottom: 1px solid #eef2fc; }
+    #modalCita .modal-body { padding-top: .75rem; }
+    .cita-toolbar { position: sticky; top: 0; z-index: 2; background: #fff; padding-bottom: .5rem; margin-bottom: .75rem; border-bottom: 1px solid #eef2fc; }
+    #citaSchedule, #citaBranch, #citaFecha { border-radius: 10px; }
+    #citaSlots { display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:.5rem; max-height:320px; overflow:auto; padding-right:.25rem; }
+    #citaSlots .btn { border-radius:10px; border:1px solid #c9b6ff; font-weight:600; padding:.45rem .3rem; }
+    #citaSlots .btn:hover { background:#f6f3ff; }
+    #citaSlots .btn.active, #citaSlots .btn:focus { background:var(--numia-azul); color:#fff; border-color:var(--numia-azul); }
+    .cita-legend { font-size:.8rem; color:#6c6c7a; }
+    @media (max-width:576px){ #citaSlots { max-height:260px; } }
+
+    /* --------- Simulador de Crédito --------- */
+    .step-indicator { display: flex; flex-direction: column; align-items: center; position: relative; }
+    .step-number { width: 40px; height: 40px; border-radius: 50%; background: #e9ecef; color: #6c757d; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 8px; transition: all 0.3s; }
+    .step-indicator.active .step-number { background: var(--numia-azul); color: white; }
+    .step-indicator.completed .step-number { background: #28a745; color: white; }
+    .step-label { font-size: 0.875rem; font-weight: 600; color: #6c757d; }
+    .step-indicator.active .step-label { color: var(--numia-azul); }
+    .step-indicator.completed .step-label { color: #28a745; }
+    .step-line { width: 60px; height: 2px; background: #e9ecef; margin: 0 10px; margin-top: -20px; }
+    .step-indicator.completed + .step-line { background: #28a745; }
+    .step-content { min-height: 400px; }
+    .credit-type-card { cursor: pointer; transition: all 0.3s; border: 2px solid #e9ecef; }
+    .credit-type-card:hover { border-color: var(--numia-azul); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(134, 61, 255, 0.15); }
+    .credit-type-card.selected { border-color: var(--numia-azul); background: var(--numia-azul-muy-claro); }
+    .credit-details { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e9ecef; }
+
+    /* Modal Inversiones */
+    .inv-type-card:hover { border-color: var(--numia-azul) !important; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(134, 61, 255, 0.15); }
+    .inv-type-card.selected { border-color: var(--numia-azul) !important; background: var(--numia-azul-muy-claro); }
+
+/* Generated from former inline style attributes */
+.indexNumiaBank-inline-1 { max-height: 88px; }
+.indexNumiaBank-inline-2 { font-size: 1rem; }
+.indexNumiaBank-inline-3 { z-index: 1050; }
+.indexNumiaBank-inline-4 { text-shadow: 0 2px 12px rgba(0,0,0,0.36) }
+.indexNumiaBank-inline-5 { display: none; }
+.indexNumiaBank-inline-6 { font-size: 1rem; font-weight: 700; }
+.indexNumiaBank-inline-7 { font-weight: 700; }
+.indexNumiaBank-inline-8 { font-size: 0.95rem; color: var(--numia-azul); font-weight: 700; }
+.indexNumiaBank-inline-9 { font-size: 2rem; }
+.indexNumiaBank-inline-10 { cursor: pointer; transition: all 0.3s; border-color: #e9ecef; }
+.indexNumiaBank-inline-11 { font-size: 2.5rem; }
+.indexNumiaBank-inline-12 { position: fixed; bottom: 24px; right: 24px; width: 370px; height: 550px; border: none; z-index: 9999; border-radius: 18px; overflow: hidden; transition: width .3s, height .3s, right .3s, bottom .3s; display: none; }
+.indexNumiaBank-inline-13 { position: fixed; bottom: 590px; right: 24px; z-index: 10000; background: var(--numia-azul); color: #fff; border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.6rem; box-shadow: 0 2px 8px rgba(0,0,0,0.18); cursor: pointer; display: none; align-items: center; justify-content: center; transition: background .2s; }
+.indexNumiaBank-inline-14 { position: fixed; bottom: 24px; right: 24px; z-index: 10001; background: var(--numia-azul); color: #fff; border: none; border-radius: 50%; width: 64px; height: 64px; font-size: 2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.18); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.indexNumiaBank-inline-15 { font-weight: bold; font-size: 2rem; }

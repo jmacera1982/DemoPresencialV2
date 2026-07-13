@@ -1,0 +1,31 @@
+:root {
+  --totem-font-family: 'Roboto', Arial, sans-serif;
+  --totem-text: #333333;
+  --totem-text-light: #6b6b6b;
+  --totem-brand-primary: #013e7c;
+  --totem-brand-primary-dark: #012a56;
+  --totem-brand-accent: #00b5e2;
+  --totem-success: #00a651;
+  --totem-header-bg: #ffffff;
+  --totem-header-text: #013e7c;
+  --totem-header-border: #e8ecf0;
+  --totem-header-padding: 1.25rem 2rem;
+  --totem-header-justify: flex-start;
+  --totem-logo-height: 44px;
+  --totem-dni-border: #013e7c;
+  --totem-btn-primary: #013e7c;
+  --totem-btn-primary-hover: #012a56;
+  --totem-btn-primary-shadow: rgba(1, 62, 124, 0.35);
+  --totem-brand-card-start: #e8f0f8;
+  --totem-brand-card-end: #f0f9fc;
+  --totem-brand-card-alt-start: #e8f0f8;
+  --totem-brand-card-alt-end: #f0f9fc;
+  --totem-video-card-start: #e8f4fa;
+  --totem-video-card-end: #f0f9fc;
+  --totem-presential-card-start: #e8f0f8;
+  --totem-presential-card-end: #f0f9fc;
+  --totem-brand-shadow: rgba(1, 62, 124, 0.25);
+  --totem-presential-shadow: rgba(1, 62, 124, 0.25);
+  --totem-video-btn-hover: #008f47;
+  --totem-instruction-color: #00b5e2;
+}

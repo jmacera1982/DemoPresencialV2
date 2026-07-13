@@ -1,0 +1,13 @@
+{
+  "banking": {
+    "Jorge": { "dni": "00000000", "apellido": "Demo", "email": "demo@example.com" },
+    "demo": { "dni": "00000000", "apellido": "Demo", "email": "demo@example.com" }
+  },
+  "salud": {
+    "Maria": { "tel": "5491100000000", "apellido": "Demo" },
+    "demo": { "tel": "5491100000000", "apellido": "Demo" }
+  },
+  "portal": [
+    { "id": "demo", "firstName": "Demo", "lastName": "Usuario", "dni": "00000000", "email": "demo@example.com", "phone": "12345678" }
+  ]
+}

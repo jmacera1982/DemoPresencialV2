@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BBVA — Mi Banca (demo)</title>
   <link rel="icon" type="image/svg+xml" href="images/favicon-bbva.svg" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/ integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/gh/debmedia/numiajb-widget@1.0.4/dist/build/static/js/bundle.min.js"></script>
   <style>
@@ -2904,10 +2904,10 @@
 
     <div class="jb-chat-shell" id="jbChatShell" aria-hidden="true">
       <journey-builder-chat
+        data-journey-proxy="true"
+        data-flow-key="BBVA"
         window_title="Asistente BBVA"
-        flow_id="99cc4a04-ed6a-4f77-baba-edb37a726c53"
-        host_url="https://api.journeybuilder.numia.co"
-        api_key="sk-Q6K4cRLD_l3L7ZuTNIRVl8hSwR8nMwuHWFqiwhv4st0"
+        host_url=""
         chat_position="bottom-right">
       </journey-builder-chat>
     </div>
@@ -3052,47 +3052,24 @@
   </div>
 
   <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="../assets/js/shared/api-client.js" integrity="sha384-b/p40FT/5XXkNy7YC6XbaXRp1igzcpWmGB1YAGJzJJBvqKuwOpLgWb6MhHHM06wI" crossorigin="anonymous"></script>
+  <script src="../assets/js/shared/fila-virtual-api.js" integrity="sha384-W2FVZuoQ/r9cqrSpNbk0wehzKOCRZCRnNfimodwlQaOJldMVGjdfZJjBqhzJxZuF" crossorigin="anonymous"></script>
+  <script src="../assets/js/shared/journey-api.js" integrity="sha384-Xb8m/gvtKBnY8JsY7/KQ98EAH5m+DN6AUdnZCr3lYNGL0p1ganb2J5NIXpp30dm1" crossorigin="anonymous"></script>
+  <script src="../assets/js/shared/demo-users.js" integrity="sha384-nB/29ALja1dmbA/DCxcettK/CfregLg9eF0vDP5bYHm8UzAJkW5m88A84ueKKJqR" crossorigin="anonymous"></script>
+  <script src="../assets/js/shared/journey-chat-bootstrap.js" integrity="sha384-Yza3q6qFCeaQdG3cIcyOrFZDAPgZkg1/ON9n4UzjFO/3u2sVLCjbjHAAbQ3ckSnt" crossorigin="anonymous"></script>
   <script>
     // Esperar a que el DOM esté completamente cargado
     document.addEventListener('DOMContentLoaded', function() {
       // Configuración de la API Journey Builder
-      const JOURNEY_API_URL = 'https://api.journeybuilder.numia.co/api/v1/run/d83a2fbd-f8d0-468f-9ecd-375709fd149f?stream=false';
-      const JOURNEY_API_KEY = 'sk-WfTsCY302RrciqoVRYAZWruD9mpyPKatAo8GU8tyzIM';
+      const JOURNEY_FLOW_ID = NumiaJourneyApi.FLOWS.BBVA;
       const PASOS_ANALISIS_UI = [
         { titulo: 'Comportamiento digital', detalle: 'Evaluación de onboarding y señales digitales.' },
         { titulo: 'Scoring', detalle: 'Puntuación y mejor oferta disponible.' },
         { titulo: 'Sugerencia de canal', detalle: 'Priorización del canal de atención.' },
         { titulo: 'Calcular prioridad', detalle: 'Analisis del estado actual de la sucursal comparado con el cliente.' }
       ];
-
-      // Objeto con nombres y DNI
-      const usuarios = {
-        'Jorge': { dni: '29328703', apellido: 'Macera' },
-        'Joaquin': { dni: '33877733', apellido: 'Zolio' },
-        'Gustavo': { dni: '33689449', apellido: 'Lauria' },
-        'Martin': { dni: '34982731', apellido: 'Fernandez' },
-        'Alberto': { dni: '34982731', apellido: 'Villalpando' },
-        'Juanma S': { dni: '36592634', apellido: 'Suarez' },
-        'Juanma L': { dni: '38004650', apellido: 'Liza' },
-        'Andrea': { dni: '1020799451', apellido: 'Usuario' },
-        'Natalia': { dni: '1072655461', apellido: 'Pantoja' },
-        'Aldo': { dni: '5215610238745', apellido: 'Romero' },
-        'Eduardo': { dni: '33333333', apellido: 'Corona' },
-        'Manuel': { dni: '12345678', apellido: 'Ormachea' },
-        'Juanca': { dni: '1090378365', apellido: 'Soto' },
-        'Romy': { dni: '35975313', apellido: 'Cardenas' },
-        'demo': { dni: '12345678', apellido: 'Demo' }
-      };
-      
-      // Función para obtener el usuario actual
-      function getUsuarioActual() {
-        const selector = document.getElementById('nombreSelector');
-        const nombreSeleccionado = selector ? selector.value : 'Jorge';
-        return usuarios[nombreSeleccionado] || usuarios['Jorge'];
-      }
-      
-      // Función para obtener el nombre actual
+// Función para obtener el nombre actual
       function getNombreActual() {
         const selector = document.getElementById('nombreSelector');
         return selector ? selector.value : 'Jorge';
@@ -3166,15 +3143,14 @@
         }];
       }
 
-      function buildDatosEnqueue(usuarioActual, nombreActual) {
-        return {
-          firstName: nombreActual,
-          lastName: usuarioActual.apellido,
-          dni: usuarioActual.dni,
-          email: 'mail@mail.com',
-   
-          extraFields: buildExtraFields(ultimoDetalleExtraFields || DETALLE_EXTRA_FIELDS_DEFAULT)
-        };
+      async function buildDatosEnqueue(nombreActual) {
+        return NumiaDemoUsers.fetchEnqueueBody(
+          nombreActual,
+          buildExtraFields(ultimoDetalleExtraFields || DETALLE_EXTRA_FIELDS_DEFAULT)
+        );
+      }
+      
+      ;
       }
 
       // Event listener para el botón "Estoy en la sucursal"
@@ -3266,24 +3242,10 @@
 
           let messageText = null;
           try {
-            const response = await fetch(JOURNEY_API_URL, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': JOURNEY_API_KEY,
-                'Origin': 'journeybuilder.numia.co'
-              },
-              body: JSON.stringify({
-                input_value: mensaje,
-                input_type: 'chat'
-              })
-            });
-
-            if (!response.ok) {
-              throw new Error(`Error en servidor (${response.status})`);
-            }
-
-            const data = await response.json();
+            const data = await NumiaJourneyApi.runJourney(JOURNEY_FLOW_ID, {
+            input_value: mensaje,
+            input_type: 'chat'
+          });
             console.log('Respuesta completa de la API:', JSON.stringify(data, null, 2));
 
             if (data.outputs?.[0]?.outputs?.[0]) {
@@ -3840,24 +3802,10 @@
 
           let messageText = null;
           try {
-            const response = await fetch(JOURNEY_API_URL, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': JOURNEY_API_KEY,
-                'Origin': 'journeybuilder.numia.co'
-              },
-              body: JSON.stringify({
-                input_value: mensaje,
-                input_type: 'chat'
-              })
-            });
-
-            if (!response.ok) {
-              throw new Error(`Error en servidor (${response.status})`);
-            }
-
-            const data = await response.json();
+            const data = await NumiaJourneyApi.runJourney(JOURNEY_FLOW_ID, {
+            input_value: mensaje,
+            input_type: 'chat'
+          });
             console.log('Respuesta completa de la API:', JSON.stringify(data, null, 2));
 
             if (data.outputs?.[0]?.outputs?.[0]) {
@@ -3905,28 +3853,9 @@
           resultadoAtencionApp.style.display = 'block';
           resultadoAtencionApp.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split me-2"></i>Procesando solicitud...</div>';
           
-          const apiUrl = 'https://filavirtual2.debmedia.com/api/v1/queue/16221/branch/10750/enqueue';
-          const apiToken = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
-          
-          const usuarioActual = getUsuarioActual();
           const nombreActual = getNombreActual();
-          
-          const datos = buildDatosEnqueue(usuarioActual, nombreActual);
-          
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-token': apiToken
-            },
-            body: JSON.stringify(datos)
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Error en servidor (${response.status})`);
-          }
-          
-          const data = await response.json();
+          const datos = await buildDatosEnqueue(nombreActual);
+          const data = await NumiaDemoUsers.enqueueFilaVirtual('16221', '10750', datos);
           console.log('Respuesta de la API presencial:', data);
           
           // Mostrar mensaje de confirmación
@@ -3934,7 +3863,7 @@
             <div class="alert alert-success mt-3">
               <i class="bi bi-check-circle-fill me-2"></i>
               <strong>Atención presencial solicitada correctamente</strong>
-              <p class="mb-0 mt-2">Lo llamaremos con su DNI: <strong>${usuarioActual.dni}</strong></p>
+              <p class="mb-0 mt-2">Lo llamaremos con su DNI: <strong>${datos.dniMasked || '••••••••'}</strong></p>
             </div>
           `;
           
@@ -3953,28 +3882,9 @@
           resultadoAtencionApp.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split me-2"></i>Procesando solicitud...</div>';
           
           const queueId = tipo === 'videollamada' ? '16223' : '16221';
-          const apiUrl = `https://filavirtual2.debmedia.com/api/v1/queue/${queueId}/branch/10750/enqueue`;
-          const apiToken = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
-          
-          const usuarioActual = getUsuarioActual();
           const nombreActual = getNombreActual();
-          
-          const datos = buildDatosEnqueue(usuarioActual, nombreActual);
-          
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-token': apiToken
-            },
-            body: JSON.stringify(datos)
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Error en servidor (${response.status})`);
-          }
-          
-          const data = await response.json();
+          const datos = await buildDatosEnqueue(nombreActual);
+          const data = await NumiaDemoUsers.enqueueFilaVirtual(queueId, '10750', datos);
           console.log('Respuesta de la API:', data);
           
           // Mostrar resultados
@@ -4027,30 +3937,9 @@
           
           // Determinar la URL según el tipo
           const queueId = tipo === 'videollamada' ? '16223' : '16221';
-          const apiUrl = `https://filavirtual2.debmedia.com/api/v1/queue/${queueId}/branch/10750/enqueue`;
-          const apiToken = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
-          
-          // Datos a enviar
-          const usuarioActual = getUsuarioActual();
           const nombreActual = getNombreActual();
-          
-          const datos = buildDatosEnqueue(usuarioActual, nombreActual);
-          
-          // Llamar a la API
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-token': apiToken
-            },
-            body: JSON.stringify(datos)
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Error en servidor (${response.status})`);
-          }
-          
-          const data = await response.json();
+          const datos = await buildDatosEnqueue(nombreActual);
+          const data = await NumiaDemoUsers.enqueueFilaVirtual(queueId, '10750', datos);
           console.log('Respuesta de la API:', data);
           
           // Mostrar resultados
@@ -4724,10 +4613,8 @@
     })();
 
     (function () {
-      var FV_TOKEN = 'XlOIHNe0yDnF6htBZWhdv3uFHxQKanqdVNQZC17w';
       var FV_QUEUE = 16223;
       var FV_BRANCH = 10750;
-      var FV_BASE = 'https://filavirtual2.debmedia.com/api/v1';
       var fvPollingInterval = null;
       window.sanCurrentVideoCallUrl = 'about:blank';
 
@@ -4739,18 +4626,10 @@
       var fvLoadingEl = document.getElementById('sanFvLoading');
       var fv$ = function (id) { return document.getElementById(id); };
 
-      var SAN_USUARIOS = {
-        'Jorge': { firstName: 'Jorge', lastName: 'Macera', dni: '29328703', email: 'jmacera@gmail.com' },
-        'Joaquin': { firstName: 'Joaquin', lastName: 'Zolio', dni: '33877733', email: 'demo@bbva.com' },
-        'Gustavo': { firstName: 'Gustavo', lastName: 'Lauria', dni: '33689449', email: 'demo@bbva.com' },
-        'Martin': { firstName: 'Martin', lastName: 'Fernandez', dni: '34982731', email: 'demo@bbva.com' },
-        'demo': { firstName: 'Romy', lastName: 'Demo', dni: '12345678', email: 'demo@bbva.com' }
-      };
-
-      function getFvUser() {
+      async function getFvEnqueueBody() {
         var sel = document.getElementById('nombreSelector');
-        var key = sel ? sel.value : 'Jorge';
-        return SAN_USUARIOS[key] || SAN_USUARIOS['Jorge'];
+        var alias = sel ? sel.value : 'Jorge';
+        return NumiaDemoUsers.fetchEnqueueBody(alias, []);
       }
 
       function fvSetFormAlert(type, msg) {
@@ -4797,23 +4676,10 @@
         fvClearFormAlert();
         if (fvLoadingEl) fvLoadingEl.style.display = '';
         if (fvTurnInfoSection) fvTurnInfoSection.classList.remove('active');
-        var user = getFvUser();
 
         try {
-          var res = await fetch(FV_BASE + '/queue/' + FV_QUEUE + '/branch/' + FV_BRANCH + '/enqueue', {
-            method: 'POST',
-            headers: { 'x-api-token': FV_TOKEN, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              firstName: user.firstName,
-              lastName: user.lastName,
-              dni: user.dni,
-              email: user.email,
-              phone: user.phone || ''
-            })
-          });
-
-          var out = await res.json().catch(function () { return {}; });
-          if (!res.ok) throw new Error((out && out.message) || ('Error en servidor (' + res.status + ')'));
+          var payload = await getFvEnqueueBody();
+          var out = await NumiaDemoUsers.enqueueFilaVirtual(String(FV_QUEUE), String(FV_BRANCH), payload);
 
           var turnCode = out.code || '—';
           var turnNumber = (out.jsonDetails && (out.jsonDetails.turn || out.jsonDetails.actualTurn)) || '—';
@@ -4854,7 +4720,6 @@
 
       function fvStartPolling(turnCode) {
         fvStopPolling();
-        var url = FV_BASE + '/turn/code/' + encodeURIComponent(turnCode);
         var mapStatus = function (s) {
           if (s === 'ANNOUNCED') return { text: 'Lo estamos llamando', cls: 'san-fv-status-ok' };
           if (s === 'WAITING_TO_BE_CALLED') return { text: 'En breve lo llamaremos', cls: 'san-fv-status-warn' };
@@ -4864,11 +4729,7 @@
 
         var tick = async function () {
           try {
-            var res = await fetch(url, {
-              headers: { 'x-api-token': FV_TOKEN, 'Content-Type': 'text/plain' }
-            });
-            if (!res.ok) throw new Error('Estado no disponible (' + res.status + ')');
-            var data = await res.json();
+            var data = await FilaVirtualApi.getTurnByCode(turnCode);
             var m = mapStatus(data.status);
             fv$('sanFvTurnStatus').textContent = m.text;
             fv$('sanFvTurnStatus').className = 'san-fv-info-value ' + m.cls;
