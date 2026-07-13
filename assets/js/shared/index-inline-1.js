@@ -673,10 +673,12 @@ const FV_QUEUES = [16222, 16221]; // Alternar entre estos dos queueId
       if (!loggedOut || !loggedIn) return;
       var ok = typeof AuthPortal !== 'undefined' && AuthPortal.isAuthenticated();
       if (ok) {
+        document.documentElement.classList.add('portal-authenticated');
         loggedOut.classList.add('d-none');
         loggedIn.classList.remove('d-none');
         if (badge) badge.classList.remove('d-none');
       } else {
+        document.documentElement.classList.remove('portal-authenticated');
         loggedOut.classList.remove('d-none');
         loggedIn.classList.add('d-none');
         if (badge) badge.classList.add('d-none');
@@ -686,6 +688,13 @@ const FV_QUEUES = [16222, 16221]; // Alternar entre estos dos queueId
 
     // Cargar scores y monitor de sucursales al cargar la página
     document.addEventListener('DOMContentLoaded', () => {
+      if (typeof AuthPortal === 'undefined' || !AuthPortal.isAuthenticated()) {
+        if (typeof AuthPortal !== 'undefined' && typeof AuthPortal.require === 'function') {
+          AuthPortal.require();
+        }
+        return;
+      }
+
       syncPortalAuthCard();
       var btn = document.getElementById('portalAuthBtn');
       var pwd = document.getElementById('portalAuthPwd');
@@ -714,7 +723,10 @@ const FV_QUEUES = [16222, 16221]; // Alternar entre estos dos queueId
       if (lo) {
         lo.addEventListener('click', function () {
           if (typeof AuthPortal !== 'undefined') AuthPortal.logout();
-          syncPortalAuthCard();
+          document.documentElement.classList.remove('portal-authenticated');
+          if (typeof AuthPortal !== 'undefined' && typeof AuthPortal.require === 'function') {
+            AuthPortal.require();
+          }
         });
       }
 

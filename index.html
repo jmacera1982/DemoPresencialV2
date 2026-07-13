@@ -13,9 +13,11 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/ integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
   <link rel="stylesheet" href="assets/css/shared/index.css">
+  <script src="auth-portal.js" integrity="sha384-lP/9P4siRLF7krhDZMPz8FVuhTdKS5W+KuL7giDaxfuBg7lUsdlX4c6Caz9kcftE" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/index-auth-gate.js" integrity="sha384-5hKcCsukjJ6aPBfSgeFfpNV7FopAc8Ux/SCGIDqxqvyv4D+rqkoM3U10grQ+KONH" crossorigin="anonymous"></script>
 </head>
 <body>
-  <div class="container">
+  <div class="container hub-protected">
     <div class="card mb-3 border-primary index-inline-1" id="portalAuthCard">
       <div class="card-header text-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-2 index-inline-2">
         <span><i class="bi bi-shield-lock me-2"></i>Acceso demo unificado (Tótem · Tótem Salud · App cliente · QR · App Salud)</span>
@@ -487,7 +489,7 @@
   </div>
 
   <!-- Contenido popover Avatar Salud (oculto) -->
-  <div id="popoverAvatarSaludContent" class="d-none">
+  <div id="popoverAvatarSaludContent" class="d-none hub-protected">
     Hacer clic en la cámara del menú inferior (e-consulta)<br><br>
     Preguntarle al Avatar si el plan N1 posee cobertura internacional<br><br>
     El avatar indicará que solo los planes superiores poseen cobertura internacional<br><br>
@@ -496,7 +498,7 @@
   </div>
 
   <!-- Contenido popover App Mobile Salud (oculto) -->
-  <div id="popoverAppSaludContent" class="d-none">
+  <div id="popoverAppSaludContent" class="d-none hub-protected">
     Esta historia comienza con Maria buscando una cita médica, ella busca para el dia de mañana y no encuentra (Reducir No-Show)<br><br>
     En otro lugar de la ciudad esta [nuestro usuario (Natalia, Juanca, Juanma, Aldo o Edu], que cancela una cita para mañana<br><br>
     Llega un mensaje a la cuenta de whatsapp (recuerden que una vez al dia debemos iniciar una conversación con el agente con un Hola al menos)<br><br>
@@ -511,7 +513,7 @@
   </div>
 
   <!-- Modal para instrucciones de configuración de PlayerWeb -->
-  <div class="modal fade" id="modalPlayerWebConfig" tabindex="-1" aria-labelledby="modalPlayerWebConfigLabel" aria-hidden="true">
+  <div class="modal fade hub-protected" id="modalPlayerWebConfig" tabindex="-1" aria-labelledby="modalPlayerWebConfigLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
@@ -592,7 +594,7 @@
   </div>
 
   <!-- Modal para seleccionar nombre de cartelería -->
-  <div class="modal fade" id="modalSeleccionarCarteleria" tabindex="-1" aria-labelledby="modalSeleccionarCarteleriaLabel" aria-hidden="true">
+  <div class="modal fade hub-protected" id="modalSeleccionarCarteleria" tabindex="-1" aria-labelledby="modalSeleccionarCarteleriaLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -622,12 +624,11 @@
     </div>
   </div>
 
-  <script src="auth-portal.js" integrity="sha384-lP/9P4siRLF7krhDZMPz8FVuhTdKS5W+KuL7giDaxfuBg7lUsdlX4c6Caz9kcftE" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
   <script src="assets/js/shared/api-client.js" integrity="sha384-b/p40FT/5XXkNy7YC6XbaXRp1igzcpWmGB1YAGJzJJBvqKuwOpLgWb6MhHHM06wI" crossorigin="anonymous"></script>
   <script src="assets/js/shared/fila-virtual-api.js" integrity="sha384-W2FVZuoQ/r9cqrSpNbk0wehzKOCRZCRnNfimodwlQaOJldMVGjdfZJjBqhzJxZuF" crossorigin="anonymous"></script>
   <script src="assets/js/shared/debmedia-api.js" integrity="sha384-e9oSnKuGgXBcmVjm05j+XJITuSHKtIT1aN4NvLIf7P3B7C7az/0GFI6Tun1q3yua" crossorigin="anonymous"></script>
-  <script src="assets/js/shared/index-inline-1.js" integrity="sha384-wudsLZ6djvepk/sz8c2//5bxZcOJWQrNhKs+cTj2/EEqWoIMY0rlCu2et29qTEqK" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/index-inline-1.js" integrity="sha384-DItPKRasZX/aujmSBMjshG4jXiwyC5XM+ydweHB+xLWPwJV0YMyAT/t6cbOG+jzq" crossorigin="anonymous"></script>
 </body>
 </html>
 
