@@ -204,24 +204,22 @@ function maskIdentifier(value) {
   return '••••' + value.slice(-4);
 }
 
-const CUSTOMER_EXTRA_FECHA_ULTIMA_VISITA = {
-  key: 'Fecha de ultima visita',
-  value: '16/07/2026'
+const CUSTOMER_EXTRA_DEFAULTS = {
+  'Fecha de última visita': '16/07/2026',
+  'Motivo de última visita': 'Consultas comerciales'
 };
 const CUSTOMER_EXTRA_DEFAULT_SHOWABLE = [{ in: 'workstation', format: 'both' }];
 
-/** Asegura customerExtraFields con Fecha de ultima visita, preservando el resto. */
+/** Asegura customerExtraFields con fecha/motivo de última visita, preservando el resto. */
 function ensureEnqueueCustomerExtraFields(payload) {
   const body = payload && typeof payload === 'object' ? Object.assign({}, payload) : {};
   const existing = Array.isArray(body.customerExtraFields) ? body.customerExtraFields : [];
-  const key = CUSTOMER_EXTRA_FECHA_ULTIMA_VISITA.key;
-  const value = CUSTOMER_EXTRA_FECHA_ULTIMA_VISITA.value;
 
   if (existing.length === 0) {
     body.customerExtraFields = [
       Object.assign(
         { showable: CUSTOMER_EXTRA_DEFAULT_SHOWABLE.slice() },
-        { [key]: value }
+        CUSTOMER_EXTRA_DEFAULTS
       )
     ];
     return body;
@@ -233,7 +231,13 @@ function ensureEnqueueCustomerExtraFields(payload) {
     }
 
     const next = Object.assign({}, item);
-    next[key] = value;
+    // Quitar variante sin acento si venía de deploys anteriores
+    if (Object.prototype.hasOwnProperty.call(next, 'Fecha de ultima visita')) {
+      delete next['Fecha de ultima visita'];
+    }
+    Object.keys(CUSTOMER_EXTRA_DEFAULTS).forEach(function (key) {
+      next[key] = CUSTOMER_EXTRA_DEFAULTS[key];
+    });
     if (!next.showable) {
       next.showable = CUSTOMER_EXTRA_DEFAULT_SHOWABLE.slice();
     }
