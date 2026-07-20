@@ -208,12 +208,29 @@ const CUSTOMER_EXTRA_DEFAULTS = {
   'Fecha de última visita': '16/07/2026',
   'Motivo de última visita': 'Consultas comerciales'
 };
+const CUSTOMER_EXTRA_LEGACY_KEYS = ['Fecha de ultima visita'];
 const CUSTOMER_EXTRA_DEFAULT_SHOWABLE = [{ in: 'workstation', format: 'both' }];
+
+function stripLegacyCustomerExtraKeys(item) {
+  if (!item || typeof item !== 'object' || Array.isArray(item)) {
+    return item;
+  }
+
+  const next = Object.assign({}, item);
+  CUSTOMER_EXTRA_LEGACY_KEYS.forEach(function (legacyKey) {
+    if (Object.prototype.hasOwnProperty.call(next, legacyKey)) {
+      delete next[legacyKey];
+    }
+  });
+  return next;
+}
 
 /** Asegura customerExtraFields con fecha/motivo de última visita, preservando el resto. */
 function ensureEnqueueCustomerExtraFields(payload) {
   const body = payload && typeof payload === 'object' ? Object.assign({}, payload) : {};
-  const existing = Array.isArray(body.customerExtraFields) ? body.customerExtraFields : [];
+  const existing = Array.isArray(body.customerExtraFields)
+    ? body.customerExtraFields.map(stripLegacyCustomerExtraKeys)
+    : [];
 
   if (existing.length === 0) {
     body.customerExtraFields = [
@@ -231,10 +248,6 @@ function ensureEnqueueCustomerExtraFields(payload) {
     }
 
     const next = Object.assign({}, item);
-    // Quitar variante sin acento si venía de deploys anteriores
-    if (Object.prototype.hasOwnProperty.call(next, 'Fecha de ultima visita')) {
-      delete next['Fecha de ultima visita'];
-    }
     Object.keys(CUSTOMER_EXTRA_DEFAULTS).forEach(function (key) {
       next[key] = CUSTOMER_EXTRA_DEFAULTS[key];
     });
