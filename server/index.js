@@ -204,6 +204,45 @@ function maskIdentifier(value) {
   return '••••' + value.slice(-4);
 }
 
+const CUSTOMER_EXTRA_FECHA_ULTIMA_VISITA = {
+  key: 'Fecha de ultima visita',
+  value: '16/07/2026'
+};
+const CUSTOMER_EXTRA_DEFAULT_SHOWABLE = [{ in: 'workstation', format: 'both' }];
+
+/** Asegura customerExtraFields con Fecha de ultima visita, preservando el resto. */
+function ensureEnqueueCustomerExtraFields(payload) {
+  const body = payload && typeof payload === 'object' ? Object.assign({}, payload) : {};
+  const existing = Array.isArray(body.customerExtraFields) ? body.customerExtraFields : [];
+  const key = CUSTOMER_EXTRA_FECHA_ULTIMA_VISITA.key;
+  const value = CUSTOMER_EXTRA_FECHA_ULTIMA_VISITA.value;
+
+  if (existing.length === 0) {
+    body.customerExtraFields = [
+      Object.assign(
+        { showable: CUSTOMER_EXTRA_DEFAULT_SHOWABLE.slice() },
+        { [key]: value }
+      )
+    ];
+    return body;
+  }
+
+  body.customerExtraFields = existing.map(function (item, index) {
+    if (index !== 0 || !item || typeof item !== 'object' || Array.isArray(item)) {
+      return item;
+    }
+
+    const next = Object.assign({}, item);
+    next[key] = value;
+    if (!next.showable) {
+      next.showable = CUSTOMER_EXTRA_DEFAULT_SHOWABLE.slice();
+    }
+    return next;
+  });
+
+  return body;
+}
+
 function getFilaVirtualToken(profile) {
   if (profile === 'turn' && FILA_VIRTUAL_TURN_API_TOKEN) {
     return FILA_VIRTUAL_TURN_API_TOKEN;
@@ -621,13 +660,13 @@ app.post('/api/demo/portal-enqueue', requireProxyAuth, async function (req, res)
     return;
   }
 
-  const payload = {
+  const payload = ensureEnqueueCustomerExtraFields({
     firstName: persona.firstName,
     lastName: persona.lastName,
     dni: persona.dni,
     email: persona.email || 'demo@example.com',
     phone: persona.phone || '12345678'
-  };
+  });
 
   const url = FILA_VIRTUAL_BASE_URL + '/queue/' + encodeURIComponent(queueId) + '/branch/' + encodeURIComponent(branchId) + '/enqueue';
 
@@ -711,6 +750,8 @@ app.post('/api/demo/fv-enqueue-alias', requireProxyAuth, async function (req, re
     }
     payload = body;
   }
+
+  payload = ensureEnqueueCustomerExtraFields(payload);
 
   const url = FILA_VIRTUAL_BASE_URL + '/queue/' + encodeURIComponent(queueId) + '/branch/' + encodeURIComponent(branchId) + '/enqueue';
 
@@ -855,7 +896,7 @@ app.post('/api/fila-virtual/enqueue', requireProxyAuth, async function (req, res
 
   const queueId = req.body && req.body.queueId;
   const branchId = req.body && req.body.branchId;
-  const payload = (req.body && req.body.payload) || {};
+  const payload = ensureEnqueueCustomerExtraFields((req.body && req.body.payload) || {});
 
   if (!queueId || !branchId) {
     res.status(400).json({ error: 'queueId y branchId son obligatorios' });
