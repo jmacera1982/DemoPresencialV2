@@ -42,9 +42,11 @@ body {
 
 .app-header .fleni-logo {
   display: block;
-  width: 250px;
-  max-width: 86%;
-  height: auto;
+  width: 280px;
+  max-width: 92%;
+  height: 66px;
+  object-fit: cover;
+  object-position: center;
 }
 
 .user-selector-container {
