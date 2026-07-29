@@ -1,0 +1,143 @@
+:root {
+  /* Paleta institucional Fleni */
+  --primary-purple: #00467f;
+  --primary-purple-hover: #00365f;
+  --primary-purple-light: #16b5d1;
+  --primary-purple-dark: #003b6a;
+  --text-dark: #0d2e47;
+  --text-light: #617887;
+  --bg-light: #f2f7fa;
+  --bg-white: #ffffff;
+  --border-color: #cfe1ea;
+  --fleni-navy: #00467f;
+  --fleni-cyan: #16b5d1;
+  --fleni-cyan-soft: #e7f8fb;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 50% 0%, #eef7fa 0%, #dbe9ef 55%, #cbdce4 100%);
+}
+
+.phone-frame {
+  --phone-metal-hi: #365d75;
+  --phone-metal-mid: #15394f;
+  --phone-metal-lo: #071f2d;
+}
+
+.phone-status-bar {
+  color: var(--fleni-navy);
+  background: #fff;
+}
+
+.app-header {
+  min-height: 70px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-bottom: 4px solid var(--fleni-cyan);
+}
+
+.app-header .fleni-logo {
+  display: block;
+  width: 250px;
+  max-width: 86%;
+  height: auto;
+}
+
+.user-selector-container {
+  border-bottom-color: var(--border-color);
+}
+
+.user-selector:focus {
+  border-color: var(--fleni-cyan);
+  box-shadow: 0 0 0 3px rgba(22, 181, 209, 0.18);
+  outline: none;
+}
+
+.covid-banner {
+  border: 1px solid #d9e9ef;
+}
+
+.covid-image,
+.auth-icon {
+  background: linear-gradient(135deg, #dff5f9 0%, #c6edf4 100%);
+}
+
+.covid-image i,
+.auth-icon i {
+  color: var(--fleni-navy);
+}
+
+.covid-button,
+.btn-confirm,
+.btn-agendar,
+.btn-submit,
+.btn-authorize {
+  background: var(--fleni-cyan);
+}
+
+.covid-button:hover,
+.btn-confirm:hover,
+.btn-agendar:hover,
+.btn-submit:hover,
+.btn-authorize:hover {
+  background: #079ab8;
+}
+
+.section-title,
+.user-code,
+.favorites-link,
+.file-upload-text strong {
+  color: var(--fleni-navy);
+}
+
+.user-avatar,
+.token-button {
+  background: linear-gradient(135deg, var(--fleni-navy) 0%, #087aa7 58%, var(--fleni-cyan) 100%);
+}
+
+.credentials-card,
+.appointment-card,
+.favorites-card,
+.branch-card,
+.maria-appointment-card {
+  border: 1px solid #dceaf0;
+  box-shadow: 0 4px 14px rgba(0, 70, 127, 0.08);
+}
+
+.indicator.active {
+  background: var(--fleni-cyan);
+}
+
+.bottom-nav {
+  border-top: 3px solid var(--fleni-cyan);
+}
+
+.nav-item.active i,
+.nav-item.active span {
+  color: var(--fleni-navy);
+}
+
+.btn-numiabot {
+  background: var(--fleni-cyan);
+  box-shadow: 0 4px 12px rgba(0, 70, 127, 0.3);
+}
+
+.btn-numiabot:hover {
+  background: var(--fleni-navy);
+  box-shadow: 0 6px 16px rgba(0, 70, 127, 0.4);
+}
+
+.file-upload-area:hover {
+  border-color: var(--fleni-cyan);
+  background: var(--fleni-cyan-soft);
+}
+
+@media (max-width: 480px) {
+  body {
+    background: var(--bg-light);
+  }
+}

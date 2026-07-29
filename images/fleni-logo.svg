@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" role="img" aria-labelledby="title desc">
+  <title id="title">Fleni</title>
+  <desc id="desc">Neurología, Neurocirugía y Rehabilitación</desc>
+  <g fill="none" stroke="#00467f" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M72 22 126 60v62l-54 36-54-36V60Z" stroke-width="13"/>
+    <path d="m37 85 35-25 21 15v44L72 134l-35-25" stroke-width="13"/>
+    <path d="m107 50-35 25v44l35 25" stroke-width="13"/>
+  </g>
+  <text x="155" y="125" fill="#00467f" font-family="Arial, Helvetica, sans-serif" font-size="112" font-weight="700" letter-spacing="-5">Fleni</text>
+  <g fill="#00467f" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700">
+    <text x="505" y="63">Neurología</text>
+    <text x="505" y="94">Neurocirugía</text>
+    <text x="505" y="125">Rehabilitación</text>
+  </g>
+</svg>
