@@ -1,0 +1,308 @@
+// Shared shell + primitives for Numia Speech Analytics
+const { useState, useEffect, useRef } = React;
+
+/* ── Icons via phosphor <i> ── */
+function Ph({ name, fill, style, className }) {
+  return <i className={(fill ? "ph-fill ph-" : "ph ph-") + name + (className ? " " + className : "")} style={style}></i>;
+}
+
+/* ── Sparkline ── */
+function Sparkline({ points, color = "#4B2D8F" }) {
+  // points: array of 0..1 values
+  const w = 220, h = 32, pad = 4;
+  const step = w / (points.length - 1);
+  const coords = points.map((p, i) => [i * step, pad + (1 - p) * (h - pad * 2)]);
+  const line = coords.map((c, i) => (i ? "L" : "M") + c[0].toFixed(1) + "," + c[1].toFixed(1)).join(" ");
+  const area = line + ` L${w},${h} L0,${h} Z`;
+  return (
+    <div className="metric-spark">
+      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true">
+        <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round"></path>
+        <path d={area} fill={color} opacity="0.06"></path>
+      </svg>
+    </div>
+  );
+}
+
+/* ── Trend chip ── */
+function Trend({ dir, value, tone }) {
+  const cls = tone || (dir === "up" ? "up" : dir === "down" ? "down" : "flat");
+  const icon = dir === "up" ? "arrow-up" : dir === "down" ? "arrow-down" : "minus";
+  return (
+    <span className={"trend " + cls}>
+      <i className={"ph-bold ph-" + icon}></i>{value}
+    </span>
+  );
+}
+
+/* ── Sentiment pill ── */
+function SentPill({ kind, label, count }) {
+  const map = { pos: "Positivo", neu: "Neutro", neg: "Negativo" };
+  return (
+    <span className={"pill " + kind}>
+      <span className="dot"></span>{label || map[kind]}{count != null ? <b style={{ fontWeight: 600 }}>{count}</b> : null}
+    </span>
+  );
+}
+
+/* ── Info tooltip (para KPIs y charts) ── */
+function InfoDot({ text }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span style={{ position: "relative", display: "inline-flex", marginLeft: 2 }}
+      onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <button aria-label={"Información: " + text} onFocus={() => setShow(true)} onBlur={() => setShow(false)}
+        style={{ border: "none", background: "none", color: "var(--ink-3)", cursor: "help", fontSize: 13, padding: 0, display: "flex" }}>
+        <i className="ph ph-info"></i>
+      </button>
+      {show ? (
+        <span role="tooltip" style={{
+          position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
+          background: "#1A1A2E", color: "#fff", fontSize: 12, lineHeight: 1.5, borderRadius: 8,
+          padding: "8px 10px", width: 220, zIndex: 40, boxShadow: "0 6px 18px rgba(0,0,0,0.2)",
+          fontWeight: 400, textTransform: "none", letterSpacing: 0, whiteSpace: "normal", textAlign: "left",
+        }}>{text}</span>
+      ) : null}
+    </span>
+  );
+}
+
+/* ── Metric card ── */
+function MetricCard({ label, tag, alertIcon, value, unit, trend, sub, spark, sparkColor, className, locked, lockedText, onDetail, info }) {
+  const body = (
+    <React.Fragment>
+      <div className="card-label">
+        {label}
+        {tag ? <span className="tag-estimado">{tag}</span> : null}
+        {alertIcon ? <i className="ph-fill ph-warning-circle alert-icon" title="Sobre el umbral definido"></i> : null}
+        {info ? <InfoDot text={info} /> : null}
+      </div>
+      <div className="metric-value-row">
+        <span className="metric-value">{value}{unit ? <span className="metric-unit">{unit}</span> : null}</span>
+        {trend}
+      </div>
+      {sub ? <div className="card-sub">{sub}</div> : null}
+      {spark ? <Sparkline points={spark} color={sparkColor} /> : null}
+    </React.Fragment>
+  );
+  if (locked) {
+    return (
+      <section className={"card locked " + (className || "")}>
+        <div className="locked-blur">{body}</div>
+        <div className="locked-overlay">
+          <div className="lock-circle"><Ph name="lock-simple" /></div>
+          <p>{lockedText || "Activá esta métrica cargando tu protocolo"}</p>
+          <button className="btn-secondary">Ir a configuración</button>
+        </div>
+      </section>
+    );
+  }
+  return (
+    <section className={"card hoverable " + (className || "")} onClick={onDetail}>
+      <span className="ver-detalle">Ver detalle →</span>
+      {body}
+    </section>
+  );
+}
+
+/* ── Filter chip with dropdown (controlled) ── */
+function FilterChip({ icon, label, options, active, single, selected, onApply }) {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const [checked, setChecked] = useState(() => new Set(selected || []));
+  const ref = useRef(null);
+  useEffect(() => {
+    if (open) setChecked(new Set(selected || []));
+  }, [open]);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+  const opts = (options || []).filter(o => o.toLowerCase().includes(q.toLowerCase()));
+  return (
+    <div ref={ref} style={{ position: "relative", display: "inline-flex" }}>
+      <button className={"chip" + (open ? " open" : "") + (active ? " active-filter" : "")}
+        aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(!open)}>
+        {icon ? <Ph name={icon} /> : null}{label}<Ph name="caret-down" />
+      </button>
+      {open && options ? (
+        <div className="dropdown">
+          <div className="dd-search">
+            <Ph name="magnifying-glass" style={{ fontSize: 13, color: "var(--ink-3)" }} />
+            <input placeholder="Buscar…" value={q} onChange={e => setQ(e.target.value)} autoFocus />
+          </div>
+          <div style={{ maxHeight: 180, overflowY: "auto" }}>
+            {opts.map(o => (
+              <label className="dd-opt" key={o}>
+                <input type={single ? "radio" : "checkbox"} name={single ? label : undefined}
+                  checked={checked.has(o)} onChange={() => {
+                    if (single) { setChecked(new Set([o])); return; }
+                    const n = new Set(checked); n.has(o) ? n.delete(o) : n.add(o); setChecked(n);
+                  }} />
+                {o}
+              </label>
+            ))}
+          </div>
+          <button className="dd-apply" onClick={() => { if (onApply) onApply([...checked]); setOpen(false); }}>Aplicar</button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+const PERIODO_DEFAULT = "Últimos 30 días";
+const SUCURSALES = ["Sucursal Centro", "Sucursal Norte", "Sucursal Providencia", "Sucursal Las Condes", "Sucursal Maipú"];
+const EJECUTIVOS = ["María González", "Carlos Fuentes", "Ana Riquelme", "Pedro Salas", "Lucía Vergara"];
+
+function FilterRow({ filters, onChange }) {
+  const f = filters;
+  return (
+    <div className="filter-row">
+      <FilterChip icon="calendar-blank" single
+        label={f.periodo || PERIODO_DEFAULT}
+        active={!!f.periodo}
+        selected={[f.periodo || PERIODO_DEFAULT]}
+        options={["Hoy", "Últimos 7 días", "Últimos 30 días", "Este trimestre", "Personalizado"]}
+        onApply={sel => onChange({ ...f, periodo: sel[0] === PERIODO_DEFAULT ? null : sel[0] })} />
+      <FilterChip icon="buildings"
+        label={f.sucursales.length ? `Sucursales (${f.sucursales.length})` : "Todas las sucursales"}
+        active={f.sucursales.length > 0}
+        selected={f.sucursales}
+        options={SUCURSALES}
+        onApply={sel => onChange({ ...f, sucursales: sel })} />
+      <FilterChip icon="user"
+        label={f.ejecutivos.length ? `Ejecutivos (${f.ejecutivos.length})` : "Todos los ejecutivos"}
+        active={f.ejecutivos.length > 0}
+        selected={f.ejecutivos}
+        options={EJECUTIVOS}
+        onApply={sel => onChange({ ...f, ejecutivos: sel })} />
+      <FilterChip icon="waveform" single
+        label={f.interpretable || "Interpretabilidad"}
+        active={!!f.interpretable}
+        selected={f.interpretable ? [f.interpretable] : []}
+        options={["Interpretable", "No interpretable"]}
+        onApply={sel => onChange({ ...f, interpretable: sel[0] || null })} />
+    </div>
+  );
+}
+
+/* ── Active filters bar (persistente en las 3 tabs) ── */
+function ActiveFiltersBar({ filters, onChange }) {
+  const items = [];
+  if (filters.periodo) items.push({ key: "periodo", label: "Período: " + filters.periodo, remove: () => onChange({ ...filters, periodo: null }) });
+  filters.sucursales.forEach(s => items.push({ key: "s:" + s, label: s, remove: () => onChange({ ...filters, sucursales: filters.sucursales.filter(x => x !== s) }) }));
+  filters.ejecutivos.forEach(e => items.push({ key: "e:" + e, label: e, remove: () => onChange({ ...filters, ejecutivos: filters.ejecutivos.filter(x => x !== e) }) }));
+  if (filters.interpretable) items.push({ key: "interp", label: filters.interpretable, remove: () => onChange({ ...filters, interpretable: null }) });
+  if (filters.keyword) items.push({ key: "kw", label: "Palabra: " + filters.keyword, remove: () => onChange({ ...filters, keyword: null }) });
+  if (!items.length) return null;
+  return (
+    <div className="active-filters" aria-label="Filtros activos">
+      <span className="af-label">Filtros activos:</span>
+      {items.map(it => (
+        <span className="af-chip" key={it.key}>
+          {it.label}
+          <button className="af-x" aria-label={"Quitar filtro " + it.label} onClick={it.remove}><Ph name="x" /></button>
+        </span>
+      ))}
+      <button className="af-clear" onClick={() => onChange({ periodo: null, sucursales: [], ejecutivos: [], interpretable: null, keyword: null })}>Limpiar todo</button>
+    </div>
+  );
+}
+
+/* ── Sidebar ── */
+function Sidebar() {
+  return (
+    <nav className="sidebar" aria-label="Navegación principal">
+      <div className="logo">N</div>
+      <button className="nav-item" title="Inicio" aria-label="Inicio"><Ph name="house" /></button>
+      <button className="nav-item" title="Monitoreo" aria-label="Monitoreo"><Ph name="monitor" /></button>
+      <button className="nav-item active" title="Speech Analytics" aria-label="Speech Analytics" aria-current="page"><Ph name="waveform" fill /></button>
+      <button className="nav-item" title="Conversaciones" aria-label="Conversaciones"><Ph name="chats-circle" /></button>
+      <button className="nav-item" title="Reportes" aria-label="Reportes"><Ph name="chart-bar" /></button>
+      <button className="nav-item" title="Alertas" aria-label="Alertas"><Ph name="bell" /></button>
+      <div className="spacer"></div>
+      <button className="nav-item" title="Configuración" aria-label="Configuración"><Ph name="gear" /></button>
+      <div className="avatar">MG</div>
+    </nav>
+  );
+}
+
+/* ── Tabs ── */
+function Tabs({ tab, onTab }) {
+  const tabs = ["Resumen", "Comercial", "Caja", "Transcripciones", "Temas", "Performance de usuarios", "Agencias"];
+  return (
+    <div className="tabs" role="tablist">
+      {tabs.map(t => (
+        <button key={t} role="tab" aria-selected={tab === t} className={"tab" + (tab === t ? " active" : "")} onClick={() => onTab(t)}>{t}</button>
+      ))}
+    </div>
+  );
+}
+
+/* ── AI FAB honesto (próximamente) ── */
+function AiFab() {
+  const [open, setOpen] = useState(false);
+  const [notified, setNotified] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+  return (
+    <div ref={ref} className="ai-fab-wrap">
+      {open ? (
+        <div className="ai-pop" role="dialog" aria-label="Numia AI próximamente">
+          <div className="ai-pop-head">
+            <Ph name="sparkle" fill /> Numia AI <span className="pill sm purple">próximamente</span>
+          </div>
+          <p>Pronto va a poder hacer preguntas en lenguaje natural sobre sus datos: “¿Por qué subieron las escalaciones esta semana?”, “¿Qué ejecutivos necesitan coaching en manejo de objeciones?”.</p>
+          {notified ? (
+            <span className="notified"><Ph name="check-circle" fill />Le avisaremos cuando esté disponible</span>
+          ) : (
+            <button className="btn-primary" style={{ width: "100%" }} onClick={() => setNotified(true)}>Avisarme cuando esté disponible</button>
+          )}
+        </div>
+      ) : null}
+      <button className="ai-fab" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <Ph name="sparkle" fill /> Pregúntale a Numia AI
+      </button>
+    </div>
+  );
+}
+
+/* ── Export menu (solo UI) ── */
+function ExportMenu({ compact }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+  return (
+    <div ref={ref} style={{ position: "relative", display: "inline-flex", marginLeft: "auto" }}>
+      <button className="chip" onClick={() => setOpen(!open)}>
+        <Ph name="export" />{compact ? "Exportar" : "Exportar"}<Ph name="caret-down" />
+      </button>
+      {open ? (
+        <div className="dropdown" style={{ width: 190, right: 0, left: "auto" }}>
+          <button className="dd-opt" style={{ width: "100%", border: "none", background: "none", fontFamily: "inherit" }} onClick={() => setOpen(false)}><Ph name="file-xls" style={{ fontSize: 15 }} />Excel (.xlsx)</button>
+          <button className="dd-opt" style={{ width: "100%", border: "none", background: "none", fontFamily: "inherit" }} onClick={() => setOpen(false)}><Ph name="file-csv" style={{ fontSize: 15 }} />CSV</button>
+          <button className="dd-opt" style={{ width: "100%", border: "none", background: "none", fontFamily: "inherit" }} onClick={() => setOpen(false)}><Ph name="link" style={{ fontSize: 15 }} />Compartir link</button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/* ── Toast ── */
+function Toast({ children }) {
+  return <div className="toast"><Ph name="check-circle" fill /> {children}</div>;
+}
+
+Object.assign(window, { Ph, Sparkline, Trend, SentPill, MetricCard, InfoDot, FilterChip, FilterRow, ActiveFiltersBar, Sidebar, Tabs, AiFab, ExportMenu, Toast });

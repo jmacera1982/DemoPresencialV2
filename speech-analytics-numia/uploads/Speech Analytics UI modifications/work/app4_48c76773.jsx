@@ -1,0 +1,365 @@
+// Screen 3 — Interaction detail
+const { useState: useStateT, useRef: useRefT, useEffect: useEffectT } = React;
+
+/* transcript data: segments with optional highlight types */
+const TRANSCRIPT = [
+  { who: "exec", t: "0:05", parts: [{ x: "Buenos días, le atiende María González del Banco. ¿En qué puedo ayudarle hoy?" }] },
+  { who: "client", t: "0:14", parts: [{ x: "Hola, llamo porque me llegó un " }, { x: "cargo que no reconozco", hl: "kw" }, { x: " en mi tarjeta de crédito." }] },
+  { who: "exec", t: "0:48", parts: [{ x: "Entiendo. Para poder revisar su cuenta necesito validar su identidad. ¿Me indica su RUT y los últimos cuatro dígitos de su tarjeta?" }] },
+  { who: "client", t: "1:10", parts: [{ x: "Sí, es 14.302.558-3 y la tarjeta termina en 7742." }] },
+  { who: "exec", t: "2:10", parts: [{ x: "Perfecto, confirmo entonces: un cargo no reconocido por $48.990 del 12 de junio. ¿Es correcto?" }] },
+  { who: "client", t: "2:24", parts: [{ x: "Exacto. La verdad " }, { x: "esto ya me pasó antes y nadie me solucionó nada", hl: "obj" }, { x: ". Estoy evaluando cambiarme de banco." }] },
+  { who: "exec", t: "2:41", parts: [{ x: "Lamento esa experiencia. Voy a dejar el reclamo ingresado ahora mismo y " }, { x: "le voy a enviar el comprobante por correo antes de las 18:00", hl: "commit" }, { x: "." }] },
+  { who: "client", t: "3:15", parts: [{ x: "Está bien. ¿Y cuánto demora la devolución?" }] },
+  { who: "exec", t: "3:22", parts: [{ x: "El plazo regulatorio es de 10 días hábiles, pero normalmente se resuelve en 5. " }, { x: "Le voy a hacer seguimiento personalmente", hl: "commit" }, { x: " y le aviso apenas tenga novedades." }] },
+  { who: "client", t: "5:02", parts: [{ x: "Ya que estamos, ¿me conviene juntar mis " }, { x: "ahorros", hl: "kw" }, { x: " en una cuenta de " }, { x: "inversión", hl: "kw" }, { x: "? He visto que otros bancos ofrecen fondos mutuos." }] },
+  { who: "exec", t: "5:22", parts: [{ x: "Es una buena pregunta. En este momento me enfoco en resolver su reclamo; el área comercial puede contactarle si lo desea." }] },
+  { who: "client", t: "7:12", parts: [{ x: "Perfecto, gracias por la gestión." }] },
+  { who: "exec", t: "7:30", parts: [{ x: "Le resumo los próximos pasos: reclamo ingresado con folio 88213, comprobante por correo hoy, y seguimiento en 5 días hábiles." }] },
+];
+
+const PROTOCOL = [
+  { ok: true, label: "Saludo", ts: "0:05" },
+  { ok: true, label: "Validación de identidad", ts: "0:48" },
+  { ok: true, label: "Escucha del motivo", ts: null },
+  { ok: true, label: "Confirmación del motivo", ts: "2:10" },
+  { ok: false, label: "Ofrecimiento de producto", ts: null },
+  { ok: true, label: "Manejo de objeciones", ts: "5:22" },
+  { ok: true, label: "Cierre con próximos pasos", ts: "7:30" },
+  { ok: false, label: "Despedida", ts: null },
+];
+
+/* tipos de detección: color + ícono + subrayado propio (accesible) */
+const HL_TYPES = {
+  kw:     { icon: "tag",                 label: "Keyword comercial" },
+  obj:    { icon: "warning",             label: "Objeción" },
+  commit: { icon: "check-circle",        label: "Compromiso" },
+  esc:    { icon: "arrow-bend-up-right", label: "Escalación" },
+};
+
+function Waveform({ progress, onSeek }) {
+  const bars = React.useMemo(() => Array.from({ length: 90 }, (_, i) => 0.25 + Math.abs(Math.sin(i * 0.55)) * 0.6 + (i % 7 === 0 ? 0.15 : 0)), []);
+  return (
+    <div className="waveform" onClick={e => {
+      const r = e.currentTarget.getBoundingClientRect();
+      onSeek((e.clientX - r.left) / r.width);
+    }}>
+      <svg viewBox="0 0 90 40" preserveAspectRatio="none" style={{ width: "100%", height: "100%", display: "block" }}>
+        {bars.map((b, i) => (
+          <rect key={i} x={i + 0.15} width="0.7" y={(1 - b) * 20} height={b * 40}
+            rx="0.35" fill={i / 90 <= progress ? "#4B2D8F" : "#DDD6EC"}></rect>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function InfoTip({ text }) {
+  const [show, setShow] = useStateT(false);
+  return (
+    <span className="info-icon" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <Ph name="info" />
+      {show ? <span className="tooltip-box">{text}</span> : null}
+    </span>
+  );
+}
+
+function Detail({ onBack, locked, drawer }) {
+  const [playing, setPlaying] = useStateT(false);
+  const [progress, setProgress] = useStateT(0.32);
+  const [q, setQ] = useStateT("");
+  const [matchIdx, setMatchIdx] = useStateT(0);
+  const [selDetection, setSelDetection] = useStateT(null);
+  const [popover, setPopover] = useStateT(false);
+  const [notified, setNotified] = useStateT(false);
+  const [modal, setModal] = useStateT(false);
+  const [toast, setToast] = useStateT(null);
+  const [note, setNote] = useStateT("");
+  const panelRef = useRefT(null);
+  const txRef = useRefT(null);
+
+  const DUR = 492; // 8m12s
+  const fmt = s => Math.floor(s / 60) + ":" + String(Math.round(s % 60)).padStart(2, "0");
+
+  useEffectT(() => {
+    if (!playing) return;
+    const id = setInterval(() => setProgress(p => (p >= 1 ? (setPlaying(false), 1) : p + 0.002)), 100);
+    return () => clearInterval(id);
+  }, [playing]);
+
+  useEffectT(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(id);
+  }, [toast]);
+
+  const seekTo = ts => { // "m:ss"
+    if (!ts) return;
+    const [m, s] = ts.split(":").map(Number);
+    setProgress((m * 60 + s) / DUR);
+    setPlaying(true);
+  };
+
+  const scrollPanelTo = id => {
+    const el = document.getElementById(id);
+    if (el && panelRef.current) {
+      const top = el.offsetTop - panelRef.current.offsetTop;
+      panelRef.current.scrollTo({ top: Math.max(0, top - 8), behavior: "smooth" });
+    }
+  };
+
+  // search matches
+  const matches = [];
+  if (q.length >= 2) {
+    TRANSCRIPT.forEach((b, bi) => {
+      b.parts.forEach((p, pi) => {
+        let idx = p.x.toLowerCase().indexOf(q.toLowerCase());
+        while (idx !== -1) {
+          matches.push({ bi, pi, idx });
+          idx = p.x.toLowerCase().indexOf(q.toLowerCase(), idx + 1);
+        }
+      });
+    });
+  }
+  const curMatch = matches.length ? matches[((matchIdx % matches.length) + matches.length) % matches.length] : null;
+
+  useEffectT(() => {
+    if (!curMatch || !txRef.current) return;
+    const el = txRef.current.querySelector(".hl-search.current");
+    if (el) {
+      const c = txRef.current;
+      c.scrollTo({ top: el.offsetTop - c.offsetTop - 80, behavior: "smooth" });
+    }
+  }, [q, matchIdx]);
+
+  const renderPart = (p, bi, pi) => {
+    let content = p.x;
+    // search highlighting
+    if (q.length >= 2) {
+      const pieces = [];
+      let last = 0, i = 0;
+      const lower = p.x.toLowerCase(), ql = q.toLowerCase();
+      let idx = lower.indexOf(ql);
+      while (idx !== -1) {
+        if (idx > last) pieces.push(p.x.slice(last, idx));
+        const isCur = curMatch && curMatch.bi === bi && curMatch.pi === pi && curMatch.idx === idx;
+        pieces.push(<mark key={idx} className={"hl-search" + (isCur ? " current" : "")}>{p.x.slice(idx, idx + q.length)}</mark>);
+        last = idx + q.length;
+        idx = lower.indexOf(ql, last);
+        i++;
+      }
+      if (last < p.x.length) pieces.push(p.x.slice(last));
+      content = pieces;
+    }
+    if (p.hl) {
+      const cfg = HL_TYPES[p.hl];
+      const dim = selDetection && selDetection !== p.hl;
+      return (
+        <span key={pi} className={"hl hl-" + p.hl} tabIndex={0} role="button"
+          aria-label={cfg.label + ": " + p.x}
+          style={dim ? { opacity: 0.45 } : null}
+          onClick={() => scrollPanelTo("card-detecciones")}
+          onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); scrollPanelTo("card-detecciones"); } }}>
+          <i className={"ph-fill ph-" + cfg.icon + " hl-ic"} aria-hidden="true"></i>
+          {content}
+          <span className="hl-label">{cfg.label}</span>
+        </span>
+      );
+    }
+    return <span key={pi}>{content}</span>;
+  };
+
+  const sentSegs = [
+    { w: 14, c: "#9CA3AF" }, { w: 12, c: "#1A7F5A" }, { w: 16, c: "#991B1B" },
+    { w: 18, c: "#9CA3AF" }, { w: 22, c: "#1A7F5A" }, { w: 18, c: "#1A7F5A" },
+  ];
+  let acc = 0;
+  const segStarts = sentSegs.map(s => { const st = acc; acc += s.w; return st; });
+
+  return (
+    <React.Fragment>
+      {drawer ? (
+        <div className="drawer-head" data-screen-label="Detalle de interacción">
+          <span style={{ fontSize: 13, color: "var(--ink-3)" }}>Interacciones · Sucursal Centro</span>
+          <button className="drawer-close" onClick={onBack} aria-label="Cerrar"><Ph name="x" /></button>
+        </div>
+      ) : (
+        <div className="breadcrumb" data-screen-label="Detalle de interacción">
+          <a href="#" onClick={e => { e.preventDefault(); onBack(); }}>Interacciones</a>
+          <Ph name="caret-right" style={{ fontSize: 11 }} />
+          <span>Sucursal Centro</span>
+          <Ph name="caret-right" style={{ fontSize: 11 }} />
+          <span style={{ color: "var(--ink)", fontWeight: 600 }}>#4521</span>
+        </div>
+      )}
+
+      <div className="detail-header">
+        <h1>Interacción #4521</h1>
+        <span className="meta-chip"><Ph name="calendar-blank" style={{ fontSize: 13 }} />15 jun 2026, 11:42</span>
+        <span className="meta-chip"><Ph name="clock" style={{ fontSize: 13 }} />8m 12s</span>
+        <span className="meta-chip"><Ph name="buildings" style={{ fontSize: 13 }} />Sucursal Centro</span>
+        <span className="meta-chip"><Ph name="cash-register" style={{ fontSize: 13 }} />Caja 3</span>
+        <span className="meta-chip"><Ph name="broadcast" style={{ fontSize: 13 }} />CAJA</span>
+        <span className="meta-chip" style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 11 }}><Ph name="identification-card" style={{ fontSize: 13 }} />187654981-20260714-210035-3f384d54-de75-4ec5-972b-8648e63bf3a0</span>
+        <span className="meta-chip"><span className="avatar sm">MG</span>M. González</span>
+        <SentPill kind="neu" />
+      </div>
+
+      <div className={"detail-layout" + (drawer ? " in-drawer" : "")}>
+        {/* ── LEFT: transcript ── */}
+        <section className="card transcript-card">
+          <div className="player">
+            <div className="player-top">
+              <button className="play-btn" onClick={() => setPlaying(!playing)} aria-label={playing ? "Pausar" : "Reproducir"}>
+                <Ph name={playing ? "pause" : "play"} fill />
+              </button>
+              <Waveform progress={progress} onSeek={p => setProgress(p)} />
+              <span className="player-time">{fmt(progress * DUR)} / 8:12</span>
+            </div>
+          </div>
+
+          <div className="tx-search">
+            <div className="search-bar">
+              <Ph name="magnifying-glass" />
+              <input placeholder="Buscar en la transcripción…" value={q} onChange={e => { setQ(e.target.value); setMatchIdx(0); }} />
+            </div>
+            {q.length >= 2 ? (
+              <React.Fragment>
+                <span className="match-count">{matches.length ? `${(((matchIdx % matches.length) + matches.length) % matches.length) + 1} de ${matches.length}` : "0 resultados"}</span>
+                <button className="tx-nav-btn" onClick={() => setMatchIdx(i => i - 1)} disabled={!matches.length}>↑</button>
+                <button className="tx-nav-btn" onClick={() => setMatchIdx(i => i + 1)} disabled={!matches.length}>↓</button>
+              </React.Fragment>
+            ) : null}
+          </div>
+
+          <div className="tx-body" ref={txRef}>
+            {TRANSCRIPT.map((b, bi) => (
+              <div key={bi} className={"bubble-row " + b.who}>
+                <span className={"avatar sm" + (b.who === "client" ? " gray" : "")}>{b.who === "exec" ? "MG" : "CL"}</span>
+                <div className="bubble">
+                  <div className="b-meta">
+                    {b.who === "exec" ? "M. González" : "Cliente"} <span style={{ fontWeight: 400 }}>{b.t}</span>
+                  </div>
+                  {b.parts.map((p, pi) => renderPart(p, bi, pi))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── RIGHT: analysis ── */}
+        <div className="analysis-panel">
+          <div className="analysis-scroll" ref={panelRef}>
+
+            <section className="card ai-card" id="card-feedback">
+              <div className="card-head" style={{ marginBottom: 0 }}>
+                <span className="card-label"><Ph name="sparkle" fill />Feedback general</span>
+              </div>
+              <p>
+                Gestión correcta de un reclamo por cargo no reconocido. La ejecutiva validó identidad,
+                confirmó el motivo y asumió compromisos claros con plazos. El cliente manifestó frustración
+                por experiencias previas y mencionó la posibilidad de cambiarse de banco.
+              </p>
+              <div style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--purple)", marginTop: 12 }}>Áreas de mejora</div>
+              <ul>
+                <li>El cliente preguntó por inversiones (5:02) y no hubo ofrecimiento ni derivación concreta.</li>
+                <li>Faltó despedida formal según protocolo bancario.</li>
+              </ul>
+            </section>
+
+            <section className="card" id="card-metricas">
+              <div className="card-label">Métricas de la interacción</div>
+              <div style={{ marginTop: 8 }}>
+                <div className="metric-row">
+                  <span className="mr-label">Satisfacción estimada <span className="tag-estimado">estimado</span></span>
+                  <div className="mr-bar-track"><div className="mr-bar" style={{ width: "70%", background: "var(--amber)" }}></div></div>
+                  <span className="mr-val">3.5/5</span>
+                </div>
+                <div className="metric-row">
+                  <span className="mr-label">Cumplimiento de protocolo</span>
+                  <div className="mr-bar-track"><div className="mr-bar" style={{ width: "75%", background: "var(--purple)" }}></div></div>
+                  <span className="mr-val">6 de 8</span>
+                </div>
+                <div className="metric-row">
+                  <span className="mr-label">Empatía <InfoTip text="Frases de validación emocional detectadas según el protocolo cargado" /></span>
+                  <div className="mr-bar-track"><div className="mr-bar" style={{ width: "50%", background: "var(--amber)" }}></div></div>
+                  <span className="mr-val">2 de 4</span>
+                </div>
+              </div>
+            </section>
+
+            <section className="card" id="card-ratio">
+              <div className="card-label">Ratio de escucha</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 12 }}>
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="30" fill="none" stroke="#C7BBE3" strokeWidth="12"></circle>
+                  <circle cx="40" cy="40" r="30" fill="none" stroke="#4B2D8F" strokeWidth="12"
+                    strokeDasharray={`${0.58 * 188.5} 188.5`} transform="rotate(-90 40 40)"></circle>
+                  <text x="40" y="45" textAnchor="middle" style={{ fontSize: 14, fontWeight: 600, fill: "var(--ink)", fontFamily: "Inter" }}>58%</text>
+                </svg>
+                <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.6 }}>
+                  <div><span style={{ display: "inline-block", width: 9, height: 9, borderRadius: 3, background: "#4B2D8F", marginRight: 6 }}></span>M. González <b>58%</b></div>
+                  <div><span style={{ display: "inline-block", width: 9, height: 9, borderRadius: 3, background: "#C7BBE3", marginRight: 6 }}></span>Cliente <b>42%</b></div>
+                  <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4 }}>saludable: 45–55%</div>
+                </div>
+              </div>
+            </section>
+
+            {locked ? null : null}
+
+            <section className="card" id="card-detecciones">
+              <div className="card-label">Detecciones</div>
+              <div className="det-chips">
+                {[
+                  ["commit", "blue", "Compromisos (2)"],
+                  ["obj", "amber", "Objeciones (1)"],
+                  ["esc", "gray", "Escalación (0)"],
+                  ["kw", "purple", "Keywords comerciales (3)"],
+                ].map(([key, color, label]) => (
+                  <button key={key} className={"det-chip " + color + (selDetection === key ? " selected" : "")}
+                    onClick={() => setSelDetection(selDetection === key ? null : key)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {selDetection ? <div className="card-sub" style={{ marginTop: 10 }}>Resaltando en la transcripción. Haga clic de nuevo para quitar el filtro.</div> : null}
+            </section>
+          </div>
+
+          <div className="panel-footer">
+            <button className="btn-primary" onClick={() => setModal(true)}>Enviar a coaching</button>
+            <button className="btn-secondary"><Ph name="export" style={{ marginRight: 4 }} />Exportar</button>
+            <button className="btn-secondary" onClick={() => setToast("Link copiado al portapapeles")}><Ph name="link" style={{ marginRight: 4 }} />Compartir por link</button>
+            <a href="#" className="flink" onClick={e => e.preventDefault()}>Ver perfil del ejecutivo →</a>
+          </div>
+        </div>
+      </div>
+
+      {modal ? (
+        <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) setModal(false); }}>
+          <div className="modal" role="dialog" aria-label="Enviar a coaching">
+            <h3>Enviar a coaching</h3>
+            <div className="m-sub">Interacción #4521 · M. González</div>
+            <label htmlFor="sup">Supervisor</label>
+            <select id="sup" defaultValue="">
+              <option value="" disabled>Seleccione un supervisor</option>
+              <option>Rodrigo Cáceres — Supervisor Centro</option>
+              <option>Paula Ibáñez — Jefa de calidad</option>
+              <option>Andrés Molina — Supervisor regional</option>
+            </select>
+            <label htmlFor="nota">Nota (opcional)</label>
+            <textarea id="nota" placeholder="Contexto para el supervisor…" value={note} onChange={e => setNote(e.target.value)}></textarea>
+            <div className="m-actions">
+              <button className="btn-secondary" onClick={() => setModal(false)}>Cancelar</button>
+              <button className="btn-primary" onClick={() => { setModal(false); setToast("Interacción enviada a coaching"); }}>Enviar</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? <Toast>{toast}</Toast> : null}
+    </React.Fragment>
+  );
+}
+
+window.Detail = Detail;
