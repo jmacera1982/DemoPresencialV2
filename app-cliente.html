@@ -9,7 +9,7 @@
   <meta name="referrer" content="strict-origin">
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Numia Bank - Mi Banca</title>
+  <title>Numia Bank (Demo) - Mi Banca</title>
   <link rel="icon" type="image/png" href="images/N.png" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/ integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
@@ -57,11 +57,18 @@
         <span id="numiaHeaderTitle" class="ac-header-title">Numia Bank</span>
       </div>
       <div class="mobile-app-header-actions">
+        <span class="numia-demo-chip" aria-hidden="true">DEMO</span>
         <i class="bi bi-bell ac-icon-md-soft"></i>
         <i class="bi bi-person-circle ac-icon-lg"></i>
       </div>
     </div>
-    
+
+    <!-- Banner persistente: recuerda en cada pantalla/navegación que es un entorno de demostración -->
+    <div class="numia-demo-banner" role="note" aria-label="Aviso de entorno de demostración">
+      <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+      <span>Estás en un <strong>entorno de demostración</strong> de Numia Bank. Los datos y operaciones son simulados.</span>
+    </div>
+
     <!-- Contenido de la app móvil -->
     <div class="mobile-app-content">
       <div id="sanScreenHome" class="san-screen active">
@@ -357,6 +364,7 @@
   <div id="numiaCitaSuccess" class="numia-cita-success" aria-hidden="true" role="dialog">
     <div class="numia-cita-success-backdrop" id="numiaCitaSuccessBackdrop"></div>
     <div class="numia-cita-success-panel">
+      <span class="numia-demo-chip numia-demo-chip--modal" aria-hidden="true">DEMO</span>
       <i class="bi bi-check-circle-fill ok"></i>
       <h3>¡Cita agendada!</h3>
       <p id="numiaCitaSuccessText">Tu cita quedó registrada correctamente.</p>
@@ -369,6 +377,7 @@
     <div class="san-promo-popup-panel">
       <div class="san-promo-popup-hero">
         <button type="button" class="san-promo-popup-close" id="btnPromoPopupClose" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+        <span class="numia-demo-chip numia-demo-chip--modal" aria-hidden="true">DEMO</span>
         <div class="san-promo-popup-logo">
           <img src="images/N.png" alt="Numia Bank" />
         </div>
