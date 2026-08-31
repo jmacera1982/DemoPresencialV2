@@ -1,16 +1,20 @@
 :root {
-      --numia-azul: #863DFF;
-      --numia-azul-claro: #e6ecf9;
-      --numia-azul-muy-claro: #eef2fc;
-      --numia-navy: #372069;
+      /* Paleta inspirada en el rojo corporativo de Scotiabank, aplicada al branding de Numia Bank */
+      --numia-azul: #EC111A;
+      --numia-azul-bright: #FF4B4F;
+      --numia-azul-claro: #FBDADC;
+      --numia-azul-muy-claro: #FDECEC;
+      --numia-navy: #7A0E14;
       --san-red: var(--numia-azul);
-      --san-red-dark: #6b28d9;
-      --san-red-light: #f3ebff;
+      --san-red-dark: #B5121B;
+      --san-red-light: #FBDADC;
       --numia-success: #10b981;
       --numia-text: #1f2937;
       --numia-text-light: #6b7280;
       --numia-border: #e5e7eb;
       --numia-bg: #f7f7f7;
+      --numia-demo-badge-bg: #1f2937;
+      --numia-demo-badge-text: #ffffff;
     }
     
     * {
@@ -60,12 +64,12 @@
     }
     
     .mobile-app-container > .phone-status-bar--on-brand {
-      background: linear-gradient(135deg, var(--numia-azul) 0%, #4a6cf7 55%);
+      background: linear-gradient(135deg, var(--numia-azul) 0%, var(--numia-azul-bright) 55%);
       padding-top: 14px;
     }
 
     .mobile-app-header {
-      background: linear-gradient(135deg, var(--numia-azul) 0%, #4a6cf7 100%);
+      background: linear-gradient(135deg, var(--numia-azul) 0%, var(--numia-azul-bright) 100%);
       padding: 0.55rem 1rem 0.85rem;
       color: white;
       display: grid;
@@ -338,12 +342,12 @@
     }
     
     .welcome-section {
-      background: linear-gradient(135deg, var(--numia-azul) 0%, #6d2dd4 100%);
+      background: linear-gradient(135deg, var(--numia-azul) 0%, var(--san-red-dark) 100%);
       border-radius: 16px;
       padding: 2rem;
       color: white;
       margin-bottom: 2rem;
-      box-shadow: 0 4px 20px rgba(134, 61, 255, 0.3);
+      box-shadow: 0 4px 20px rgba(236, 17, 26, 0.3);
     }
     
     .welcome-section h1 {
@@ -520,13 +524,13 @@
       font-size: 1.1rem;
       width: 100%;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(134, 61, 255, 0.3);
+      box-shadow: 0 4px 12px rgba(236, 17, 26, 0.3);
     }
     
     .btn-atencion:hover {
-      background: #6d2dd4;
+      background: var(--san-red-dark);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(134, 61, 255, 0.4);
+      box-shadow: 0 6px 20px rgba(236, 17, 26, 0.4);
     }
     
     .btn-atencion i {
@@ -792,6 +796,53 @@
       justify-self: end;
     }
 
+    /* Indicador persistente de entorno de demostración (visible en toda navegación) */
+    .numia-demo-chip {
+      display: inline-flex;
+      align-items: center;
+      background: var(--numia-demo-badge-bg);
+      color: var(--numia-demo-badge-text);
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      padding: 0.3rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      white-space: nowrap;
+    }
+
+    .numia-demo-chip--modal {
+      position: absolute;
+      top: 0.65rem;
+      left: 0.65rem;
+      z-index: 2;
+    }
+
+    .numia-demo-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #fff7e6;
+      color: #7a5b00;
+      border-bottom: 1px solid #f3d98b;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      line-height: 1.3;
+      flex-shrink: 0;
+    }
+
+    .numia-demo-banner i {
+      font-size: 0.85rem;
+      color: #b7791f;
+      flex-shrink: 0;
+    }
+
+    .numia-demo-banner strong {
+      font-weight: 800;
+    }
+
     .numia-agendar-card {
       display: flex;
       align-items: center;
@@ -805,13 +856,13 @@
       margin-bottom: 1.25rem;
       cursor: pointer;
       font-family: inherit;
-      box-shadow: 0 1px 4px rgba(134, 61, 255, 0.06);
+      box-shadow: 0 1px 4px rgba(236, 17, 26, 0.06);
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .numia-agendar-card:hover {
       border-color: var(--numia-azul);
-      box-shadow: 0 4px 12px rgba(134, 61, 255, 0.12);
+      box-shadow: 0 4px 12px rgba(236, 17, 26, 0.12);
     }
 
     .numia-agendar-card .icon-wrap {
@@ -860,7 +911,7 @@
 
     .san-promo-loan:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(134, 61, 255, 0.12);
+      box-shadow: 0 4px 14px rgba(236, 17, 26, 0.12);
     }
 
     .san-promo-loan-text {
@@ -1101,8 +1152,8 @@
     }
 
     .san-promo-popup-highlight {
-      background: #f5f0ff;
-      border: 1px solid #ddd6fe;
+      background: var(--numia-azul-muy-claro);
+      border: 1px solid #f8c9cb;
       border-radius: 12px;
       padding: 0.85rem 1rem;
       text-align: center;
@@ -1212,7 +1263,7 @@
 
     .numia-pill-toggle button.recomendado {
       border-width: 2px;
-      box-shadow: 0 0 0 2px rgba(134, 61, 255, 0.12);
+      box-shadow: 0 0 0 2px rgba(236, 17, 26, 0.12);
     }
 
     .numia-pill-toggle button.recomendado::after {
@@ -1227,7 +1278,7 @@
 
     .numia-cita-callout {
       display: none;
-      background: linear-gradient(135deg, #f5f0ff 0%, #ede9fe 100%);
+      background: linear-gradient(135deg, #fdeceb 0%, #fbe0e1 100%);
       border: 1.5px solid var(--numia-azul);
       border-radius: 12px;
       padding: 1rem;
@@ -1367,7 +1418,7 @@
     .numia-cita-form input[type="date"]:focus {
       outline: none;
       border-color: var(--numia-azul);
-      box-shadow: 0 0 0 3px rgba(134, 61, 255, 0.1);
+      box-shadow: 0 0 0 3px rgba(236, 17, 26, 0.1);
     }
 
     .numia-time-grid {
@@ -1409,7 +1460,7 @@
     }
 
     .numia-cita-submit:disabled {
-      background: #c4b5fd;
+      background: #f0a8ab;
       cursor: not-allowed;
     }
 
@@ -1428,7 +1479,7 @@
     .numia-cita-success-backdrop {
       position: absolute;
       inset: 0;
-      background: rgba(55, 32, 105, 0.45);
+      background: rgba(122, 14, 20, 0.45);
     }
 
     .numia-cita-success-panel {
