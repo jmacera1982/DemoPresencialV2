@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speech Analytics — Numia · Reportes demo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237B2FE8'/%3E%3Cg fill='%23fff'%3E%3Crect x='7' y='13' width='3' height='6' rx='1.5'/%3E%3Crect x='12.5' y='9' width='3' height='14' rx='1.5'/%3E%3Crect x='18' y='5' width='3' height='22' rx='1.5'/%3E%3Crect x='23.5' y='11' width='3' height='10' rx='1.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root{--purple:#7B2FE8;--purple-600:#5E18C7;--purple-soft:#EFE4FE;--purple-tint:#F8F2FF;--bg:#FAFAFA;--card:#FFFFFF;--border:#E5E5E5;--ink:#1A1A2E;--ink-2:#4A4A5A;--ink-3:#8A8A99;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:56px 24px 80px;}
+  .logo{width:40px;height:40px;border-radius:10px;background:var(--purple);display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+  .logo svg{display:block;}
+  h1{font-size:26px;font-weight:600;letter-spacing:-0.4px;}
+  .sub{font-size:14px;color:var(--ink-3);margin-top:8px;max-width:620px;line-height:1.6;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:36px;}
+  a.card{
+    display:flex;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:20px 22px;text-decoration:none;color:inherit;transition:box-shadow .15s,transform .15s;
+  }
+  a.card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(26,26,46,0.08);border-color:#DCD2F2;}
+  .card .tag{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;color:var(--purple);}
+  .card .title{font-size:16px;font-weight:600;}
+  .card .desc{font-size:12.5px;color:var(--ink-3);line-height:1.5;}
+  .featured{border-left:3px solid var(--purple);background:var(--purple-tint);}
+  footer{margin-top:48px;font-size:12px;color:var(--ink-3);}
+  footer a{color:var(--purple);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <svg width="20" height="20" viewBox="0 0 32 32"><g fill="#fff"><rect x="4" y="13" width="4" height="6" rx="2"/><rect x="10.5" y="8" width="4" height="16" rx="2"/><rect x="17" y="4" width="4" height="24" rx="2"/><rect x="23.5" y="11" width="4" height="10" rx="2"/></g></svg>
+  </div>
+  <h1>Speech Analytics — Reportes demo</h1>
+  <p class="sub">Prototipos de tablero de Speech Analytics de Numia, adaptados a distintas verticales. Cada enlace abre un demo autocontenido (sin backend, con datos de ejemplo ficticios, sin referencias a clientes reales).</p>
+
+  <div class="grid">
+    <a class="card featured" href="index.html">
+      <span class="tag">Tablero</span>
+      <span class="title">Speech Analytics — Numia</span>
+      <span class="desc">Tablero general de analítica de conversaciones: resumen ejecutivo, interacciones, detalle de llamada y performance de ejecutivos.</span>
+    </a>
+    <a class="card" href="mireporte.html">
+      <span class="tag">Nuevo</span>
+      <span class="title">Mi Reporte — Banca</span>
+      <span class="desc">Informe individual de coaching para un solo ejecutivo: sus oportunidades de mejora y buenas prácticas anónimas del equipo.</span>
+    </a>
+    <a class="card" href="indexbanca.html">
+      <span class="tag">Banca</span>
+      <span class="title">Tablero de Banca</span>
+      <span class="desc">Agencias, caja y plataforma: resumen, comercial, interacciones y performance de usuarios.</span>
+    </a>
+    <a class="card" href="index-automotriz.html">
+      <span class="tag">Automotriz</span>
+      <span class="title">Movilidad — red de concesionarios</span>
+      <span class="desc">Tablero adaptado a la vertical de movilidad y concesionarias (marcas y modelos ficticios).</span>
+    </a>
+    <a class="card" href="indexcrecer.html">
+      <span class="tag">Seguros</span>
+      <span class="title">Compañía de Seguros</span>
+      <span class="desc">Tablero adaptado a la vertical de seguros.</span>
+    </a>
+    <a class="card" href="indexfarmacia.html">
+      <span class="tag">Farmacia</span>
+      <span class="title">Cadena de Farmacias</span>
+      <span class="desc">Tablero adaptado a la vertical de farmacias y puntos de venta.</span>
+    </a>
+  </div>
+
+  <footer>Demos estáticas — se sirven directamente desde este repositorio, sin proceso de build. Volver al <a href="../index.html">inicio</a>.</footer>
+</div>
+</body>
+</html>

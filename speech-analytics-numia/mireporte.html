@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Reporte — Speech Analytics · Banca</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237B2FE8'/%3E%3Cg fill='%23fff'%3E%3Crect x='7' y='13' width='3' height='6' rx='1.5'/%3E%3Crect x='12.5' y='9' width='3' height='14' rx='1.5'/%3E%3Crect x='18' y='5' width='3' height='22' rx='1.5'/%3E%3Crect x='23.5' y='11' width='3' height='10' rx='1.5'/%3E%3C/g%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   Sistema de diseño del tablero de Speech Analytics: mismos tokens,
+   tipografías y reglas de componentes del tablero original. Debajo se
+   agregan solo los componentes propios de este tablero, escritos con
+   esos mismos tokens.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  --purple:#7B2FE8;
+  --purple-600:#5E18C7;
+  --purple-soft:#EFE4FE;
+  --purple-tint:#F8F2FF;
+  --green:#1A7F5A;
+  --green-bg:#E8F5EF;
+  --amber:#B45309;
+  --amber-bg:#FDF3E7;
+  --red:#991B1B;
+  --red-bg:#FBEAEA;
+  --blue:#1D4ED8;
+  --blue-bg:#EAF0FD;
+  --bg:#FAFAFA;
+  --card:#FFFFFF;
+  --border:#E5E5E5;
+  --ink:#1A1A2E;
+  --ink-2:#4A4A5A;
+  --ink-3:#8A8A99;
+  --neutral:#9CA3AF;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  font-family:'Inter',-apple-system,sans-serif;
+  background:var(--bg);color:var(--ink);font-size:14px;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--purple);text-decoration:none;}
+a:hover{color:var(--purple-600);text-decoration:underline;}
+button{font-family:inherit;}
+
+/* ── Sidebar ── */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:56px;
+  background:#fff;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;
+  padding:12px 0;gap:4px;z-index:40;
+}
+.sidebar .logo{
+  width:32px;height:32px;border-radius:8px;background:var(--purple);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;font-size:15px;margin-bottom:12px;
+}
+.nav-item{
+  width:40px;height:40px;border-radius:8px;border:none;background:transparent;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  color:var(--ink-3);font-size:20px;transition:background .12s,color .12s;
+}
+.nav-item:hover{background:#F3F1F8;color:var(--ink-2);}
+.nav-item.active{background:var(--purple-soft);color:var(--purple);}
+.sidebar .spacer{flex:1;}
+.avatar{
+  width:32px;height:32px;border-radius:50%;background:var(--purple-soft);
+  color:var(--purple);font-size:12px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.avatar.sm{width:26px;height:26px;font-size:10px;}
+.avatar.lg{width:52px;height:52px;font-size:17px;}
+.avatar.gray{background:#F0F0F3;color:var(--ink-2);}
+
+/* ── Layout ── */
+.main{margin:0 auto;padding:0 28px 90px;max-width:none;}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:20px 0 4px;}
+.page-title{font-size:20px;font-weight:600;letter-spacing:-0.3px;}
+.page-sub{font-size:12px;color:var(--ink-3);padding-top:3px;}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:10px 0 18px;}
+.tab{
+  padding:10px 16px;font-size:14px;font-weight:500;color:var(--ink-3);
+  background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;
+  transition:color .12s;margin-bottom:-1px;
+}
+.tab:hover{color:var(--ink-2);}
+.tab.active{color:var(--purple);border-bottom-color:var(--purple);font-weight:600;}
+
+/* chips */
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 12px;border-radius:999px;
+  background:#fff;border:1px solid var(--border);
+  font-size:13px;font-weight:500;color:var(--ink-2);
+  cursor:pointer;transition:border-color .12s,background .12s;position:relative;
+}
+.chip:hover{border-color:#C9C9D4;background:#FCFCFD;}
+.chip i{font-size:14px;color:var(--ink-3);}
+.chip.open,.chip.active-filter{border-color:var(--purple);color:var(--purple);background:var(--purple-soft);}
+.chip.open i,.chip.active-filter i{color:var(--purple);}
+.filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 0 18px;position:relative;}
+
+/* dropdown */
+.dropdown{
+  position:absolute;top:calc(100% + 6px);left:0;z-index:50;
+  width:260px;background:#fff;border:1px solid var(--border);border-radius:10px;
+  box-shadow:0 8px 24px rgba(26,26,46,0.12);padding:10px;
+}
+.dropdown .dd-search{
+  display:flex;align-items:center;gap:6px;border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;margin-bottom:8px;
+}
+.dropdown .dd-search input{border:none;outline:none;font-family:inherit;font-size:13px;width:100%;}
+.dd-opt{
+  display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;
+  font-size:13px;color:var(--ink);cursor:pointer;
+}
+.dd-opt:hover{background:var(--purple-tint);}
+.dd-opt input{accent-color:var(--purple);}
+.dd-apply{
+  width:100%;margin-top:8px;padding:8px;border-radius:8px;border:none;
+  background:var(--purple);color:#fff;font-size:13px;font-weight:600;cursor:pointer;
+}
+.dd-apply:hover{background:var(--purple-600);}
+
+/* ── Cards / grid ── */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;}
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:20px 24px;position:relative;display:flex;flex-direction:column;
+  transition:box-shadow .15s,transform .15s;
+}
+.card.hoverable{cursor:pointer;}
+.card.hoverable:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(26,26,46,0.08);}
+.card .ver-detalle{
+  position:absolute;top:18px;right:20px;font-size:12px;font-weight:500;color:var(--purple);
+  opacity:0;transition:opacity .15s;pointer-events:none;
+}
+.card.hoverable:hover .ver-detalle{opacity:1;}
+.span-3{grid-column:span 3;}
+.span-4{grid-column:span 4;}
+.span-6{grid-column:span 6;}
+.span-8{grid-column:span 8;}
+.span-12{grid-column:span 12;}
+
+.card-label{
+  font-size:12px;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--ink-3);font-weight:600;display:flex;align-items:center;gap:6px;
+}
+.card-title{font-size:14px;font-weight:600;color:var(--ink);}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;}
+.card-sub{font-size:12px;color:var(--ink-3);margin-top:6px;line-height:1.45;}
+
+.card.primary-card{}
+.card.alert-card{border-left:3px solid var(--red);}
+
+/* metric */
+.metric-value-row{display:flex;align-items:baseline;gap:10px;margin-top:10px;flex-wrap:wrap;}
+.metric-value{font-size:36px;font-weight:600;letter-spacing:-0.8px;line-height:1;}
+.metric-unit{font-size:18px;font-weight:500;color:var(--ink-3);}
+.trend{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;
+}
+.trend.up{color:var(--green);background:var(--green-bg);}
+.trend.down{color:var(--red);background:var(--red-bg);}
+.trend.warn{color:var(--amber);background:var(--amber-bg);}
+.trend.flat{color:var(--ink-2);background:#F0F0F3;}
+.metric-spark{margin-top:auto;padding-top:14px;height:auto;}
+.card:has(.metric-spark){display:flex;flex-direction:column;width:100%;}
+.metric-spark svg{display:block;width:100%;height:32px;}
+.tag-estimado{
+  font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;
+  color:var(--ink-3);background:#F0F0F3;border-radius:4px;padding:2px 6px;
+}
+.alert-icon{color:var(--red);font-size:15px;}
+
+/* pills */
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:500;padding:4px 10px;border-radius:999px;white-space:nowrap;
+}
+.pill .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pill.pos{background:var(--green-bg);color:var(--green);}
+.pill.pos .dot{background:var(--green);}
+.pill.neu{background:#F0F0F3;color:var(--ink-2);}
+.pill.neu .dot{background:var(--neutral);}
+.pill.neg{background:var(--red-bg);color:var(--red);}
+.pill.neg .dot{background:var(--red);}
+.pill.crit{background:var(--red-bg);color:var(--red);font-weight:600;}
+.pill.warn{background:var(--amber-bg);color:var(--amber);font-weight:600;}
+.pill.purple{background:var(--purple-soft);color:var(--purple);}
+.pill.blue{background:var(--blue-bg);color:var(--blue);}
+.pill.sm{font-size:11px;padding:2px 8px;}
+
+/* live */
+.live-badge{
+  display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
+  color:var(--green);text-transform:uppercase;letter-spacing:0.05em;
+}
+.live-badge .pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--green);position:relative;}
+.live-badge .pulse-dot::after{
+  content:"";position:absolute;inset:-4px;border-radius:50%;
+  border:2px solid var(--green);opacity:0;
+  animation:pulse-ring 2s cubic-bezier(0.4,0,0.2,1) infinite;
+}
+@keyframes pulse-ring{0%{transform:scale(0.5);opacity:0.8;}100%{transform:scale(1.4);opacity:0;}}
+.chart-pulse{transform-origin:center;transform-box:fill-box;animation:pulse-svg 2s cubic-bezier(0.4,0,0.2,1) infinite;}
+@keyframes pulse-svg{0%{opacity:0.6;transform:scale(0.6);}100%{opacity:0;transform:scale(2.4);}}
+@media (prefers-reduced-motion: reduce){
+  .live-badge .pulse-dot::after,.chart-pulse{animation:none !important;}
+}
+.axis-label{font-size:11px;fill:var(--ink-3);font-family:'Inter',sans-serif;}
+@keyframes ins-pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.18);opacity:.7;}}
+@keyframes ins-step{to{opacity:1;}}
+@keyframes ins-bar{from{width:0;}to{width:100%;}}
+.grid-line{stroke:#F0F0F3;stroke-width:1;}
+
+/* chart tooltip */
+.chart-tooltip{
+  position:absolute;background:#1A1A2E;color:#fff;border-radius:8px;padding:10px 12px;
+  font-size:12px;pointer-events:none;z-index:30;min-width:130px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.2);
+}
+.chart-tooltip .tt-date{font-weight:600;margin-bottom:6px;}
+.chart-tooltip .tt-row{display:flex;align-items:center;gap:6px;margin-top:3px;}
+.chart-tooltip .tt-row .dot{width:7px;height:7px;border-radius:50%;}
+.chart-tooltip .tt-row .v{margin-left:auto;font-weight:600;}
+
+/* ratio bar */
+.ratio-bar{display:flex;height:34px;border-radius:8px;overflow:hidden;margin-top:18px;position:relative;}
+.ratio-seg{display:flex;align-items:center;padding:0 12px;font-size:13px;font-weight:600;color:#fff;}
+.ratio-seg.exec{background:var(--purple);}
+.ratio-seg.cli{background:#C7BBE3;color:var(--purple);justify-content:flex-end;}
+.ratio-marker{position:absolute;top:-6px;bottom:-6px;width:0;border-left:2px dashed var(--ink-2);}
+.ratio-marker-label{font-size:11px;color:var(--ink-2);font-weight:500;padding-top:12px;white-space:nowrap;}
+
+/* compliance / moments list */
+.comp-list{display:flex;flex-direction:column;flex:1;margin:0 -12px;}
+.comp-row{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;
+  border:none;background:transparent;text-align:left;transition:background .12s;width:100%;
+}
+.comp-row:hover{background:var(--purple-tint);}
+.comp-row + .comp-row{border-top:1px solid #F0F0F3;}
+.comp-name{font-size:13px;font-weight:500;color:var(--ink);line-height:1.35;flex:1;min-width:0;}
+.comp-count{font-size:12px;font-weight:600;color:var(--ink-2);white-space:nowrap;}
+.comp-trend{font-size:13px;width:16px;text-align:center;}
+.comp-trend.up{color:var(--red);}
+.comp-trend.down{color:var(--green);}
+.comp-trend.flat{color:var(--ink-3);}
+
+/* leaderboard */
+.lb-row{display:flex;align-items:center;gap:10px;padding:9px 0;}
+.lb-row + .lb-row{border-top:1px solid #F0F0F3;}
+.lb-rank{font-size:12px;font-weight:600;color:var(--ink-3);width:18px;}
+.lb-name{font-size:13px;font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-bar-track{width:90px;height:6px;border-radius:3px;background:#F0F0F3;flex-shrink:0;}
+.lb-bar{height:6px;border-radius:3px;background:var(--purple);}
+.lb-score{font-size:13px;font-weight:600;width:28px;text-align:right;}
+.lb-row.top .lb-rank{color:var(--green);}
+.lb-row.low .lb-rank{color:var(--amber);}
+
+/* mini h-bars */
+.hbar-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
+.hbar-label{font-size:12px;color:var(--ink-2);width:110px;flex-shrink:0;}
+.hbar-track{flex:1;height:10px;border-radius:5px;background:#F0F0F3;}
+.hbar{height:10px;border-radius:5px;background:var(--purple);}
+.hbar-val{font-size:13px;font-weight:600;width:20px;text-align:right;}
+
+/* locked state */
+.card.locked .locked-blur{opacity:0.25;filter:grayscale(1);pointer-events:none;user-select:none;}
+.locked-overlay{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;padding:20px;text-align:center;z-index:5;
+}
+.locked-overlay .lock-circle{
+  width:38px;height:38px;border-radius:50%;background:#F0F0F3;color:var(--ink-2);
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.locked-overlay p{font-size:13px;color:var(--ink-2);font-weight:500;max-width:220px;line-height:1.45;}
+.btn-secondary{
+  padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;
+  font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;transition:border-color .12s;
+}
+.btn-secondary:hover{border-color:#C9C9D4;}
+.btn-primary{
+  padding:9px 16px;border-radius:8px;border:none;background:var(--purple);
+  font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:background .12s;
+}
+.btn-primary:hover{background:var(--purple-600);}
+.btn-primary:active,.btn-secondary:active{transform:translateY(1px);}
+
+/* day-1 banner */
+.banner-info{
+  display:flex;align-items:center;gap:10px;background:var(--purple-tint);
+  border:1px solid #DDD2F0;border-radius:10px;padding:12px 16px;margin-bottom:16px;
+  font-size:13px;color:var(--purple-600);font-weight:500;
+}
+.banner-info i{font-size:17px;color:var(--purple);}
+
+/* AI pill + popover próximamente */
+.ai-fab-wrap{position:fixed;right:24px;bottom:24px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+.ai-fab{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 18px;border-radius:999px;border:none;cursor:pointer;
+  background:var(--purple);color:#fff;font-size:14px;font-weight:600;
+  box-shadow:0 8px 24px rgba(75,45,143,0.35);transition:background .12s,transform .15s;
+}
+.ai-fab:hover{background:var(--purple-600);transform:translateY(-2px);}
+.ai-fab i{font-size:17px;}
+.ai-pop{
+  width:290px;background:#fff;border:1px solid var(--border);border-radius:12px;
+  padding:16px;box-shadow:0 14px 40px rgba(26,26,46,0.18);
+}
+.ai-pop-head{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;margin-bottom:8px;}
+.ai-pop-head i{color:var(--purple);font-size:16px;}
+.ai-pop p{font-size:13px;line-height:1.55;color:var(--ink-2);margin-bottom:14px;}
+
+/* ══ Screen 2: table ══ */
+.search-bar{
+  display:flex;align-items:center;gap:8px;flex:1;min-width:260px;max-width:420px;
+  background:#fff;border:1px solid var(--border);border-radius:999px;padding:7px 14px;
+}
+.search-bar input{border:none;outline:none;font-family:inherit;font-size:13px;width:100%;background:transparent;}
+.search-bar i{color:var(--ink-3);}
+.review-strip{margin-bottom:16px;}
+.review-strip .strip-title{
+  font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-3);
+  font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.review-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.review-card{
+  background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;
+  display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:box-shadow .15s;
+}
+.review-card:hover{box-shadow:0 4px 14px rgba(26,26,46,0.08);}
+.review-card.crit{border-left:3px solid var(--red);}
+.review-card.warn{border-left:3px solid var(--amber);}
+.review-card .rc-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.review-card .rc-reason{font-size:13px;font-weight:600;}
+.review-card .rc-meta{font-size:12px;color:var(--ink-3);display:flex;gap:8px;align-items:center;}
+
+table.data{width:100%;border-collapse:collapse;}
+table.data th{
+  font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-3);
+  font-weight:600;text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);
+  cursor:pointer;user-select:none;white-space:nowrap;
+}
+table.data th:hover{color:var(--ink-2);}
+table.data th .sort{font-size:10px;margin-left:3px;}
+table.data td{
+  padding:11px 12px;font-size:13px;border-bottom:1px solid #F0F0F3;vertical-align:middle;white-space:nowrap;
+}
+table.data tbody tr{cursor:pointer;transition:background .1s;}
+table.data tbody tr:hover{background:var(--purple-tint);}
+.chip-gray{
+  display:inline-block;font-size:12px;color:var(--ink-2);background:#F0F0F3;
+  border-radius:6px;padding:3px 8px;font-weight:500;
+}
+.alert-badges{display:flex;gap:4px;}
+.alert-badge{
+  width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;
+}
+.alert-badge.crit{background:var(--red-bg);color:var(--red);}
+.alert-badge.warn{background:var(--amber-bg);color:var(--amber);}
+.link-btn{
+  background:none;border:none;color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;padding:4px 8px;border-radius:6px;
+}
+.link-btn:hover{background:var(--purple-soft);}
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:14px 4px 0;font-size:13px;color:var(--ink-3);}
+.pag-btns{display:flex;gap:4px;}
+.pag-btn{
+  min-width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:#fff;
+  font-size:13px;color:var(--ink-2);cursor:pointer;padding:0 8px;
+}
+.pag-btn:hover{border-color:#C9C9D4;}
+.pag-btn.active{background:var(--purple);border-color:var(--purple);color:#fff;font-weight:600;}
+.pag-btn:disabled{opacity:0.4;cursor:default;}
+
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;gap:12px;text-align:center;
+}
+.empty-state .es-circle{
+  width:64px;height:64px;border-radius:50%;background:var(--purple-tint);color:var(--purple);
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+}
+.empty-state p{font-size:14px;color:var(--ink-2);font-weight:500;}
+
+/* ══ Screen 3: detail ══ */
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-3);padding:18px 0 8px;}
+.breadcrumb a{font-weight:500;}
+.detail-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:16px;}
+.detail-header h1{font-size:19px;font-weight:600;letter-spacing:-0.3px;margin-right:4px;}
+.meta-chip{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;
+  color:var(--ink-2);background:#fff;border:1px solid var(--border);border-radius:999px;padding:4px 10px;
+}
+.detail-layout{display:grid;grid-template-columns:3fr 2fr;gap:16px;align-items:start;}
+
+/* transcript */
+.transcript-card{padding:0;overflow:hidden;}
+.player{padding:16px 20px;border-bottom:1px solid var(--border);}
+.player-top{display:flex;align-items:center;gap:12px;}
+.play-btn{
+  width:40px;height:40px;border-radius:50%;border:none;background:var(--purple);color:#fff;
+  font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+}
+.play-btn:hover{background:var(--purple-600);}
+.waveform{flex:1;height:40px;position:relative;cursor:pointer;}
+.player-time{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;flex-shrink:0;}
+.sent-strip{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:10px;}
+.sent-seg{cursor:pointer;transition:opacity .12s;}
+.sent-seg:hover{opacity:0.75;}
+.sent-strip-label{font-size:11px;color:var(--ink-3);margin-top:6px;}
+
+.tx-search{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border);background:#FCFCFD;}
+.tx-search .search-bar{max-width:none;border-radius:8px;padding:6px 10px;}
+.tx-search .match-count{font-size:12px;color:var(--ink-3);white-space:nowrap;}
+.tx-nav-btn{
+  width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:#fff;
+  color:var(--ink-2);cursor:pointer;font-size:12px;
+}
+.tx-nav-btn:hover{border-color:#C9C9D4;}
+.tx-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px;max-height:560px;overflow-y:auto;}
+.bubble-row{display:flex;gap:10px;align-items:flex-end;}
+.bubble-row.client{flex-direction:row-reverse;}
+.bubble{
+  max-width:78%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.55;color:var(--ink);
+}
+.bubble-row.exec .bubble{background:var(--purple-tint);border:1px solid #E4DBF4;border-bottom-left-radius:4px;}
+.bubble-row.client .bubble{background:#F5F5F7;border:1px solid #ECECEF;border-bottom-right-radius:4px;}
+.bubble .b-meta{font-size:11px;color:var(--ink-3);margin-bottom:3px;font-weight:600;display:flex;gap:6px;align-items:center;}
+.hl-search{background:#FDE68A;border-radius:2px;}
+.hl-search.current{background:#F59E0B;color:#fff;}
+
+/* highlights accesibles: color + ícono + subrayado propio + borde izq */
+.hl{
+  position:relative;border-radius:3px;padding:1px 4px 1px 3px;cursor:pointer;
+  border-left:3px solid;text-decoration-line:underline;text-underline-offset:3px;
+}
+.hl:focus-visible{outline:2px solid currentColor;outline-offset:2px;}
+.hl .hl-ic{font-size:11px;margin-right:3px;}
+.hl .hl-label{
+  display:none;position:absolute;bottom:calc(100% + 4px);left:0;z-index:25;
+  background:#1A1A2E;color:#fff;font-size:10px;font-weight:600;letter-spacing:0.03em;
+  text-transform:uppercase;border-radius:4px;padding:2px 7px;white-space:nowrap;text-decoration:none;
+}
+.hl:hover .hl-label,.hl:focus .hl-label{display:inline-block;}
+.hl-kw{background:var(--purple-soft);color:var(--purple);border-left-color:var(--purple);text-decoration-style:solid;text-decoration-thickness:1.5px;}
+.hl-obj{background:var(--amber-bg);color:#92400E;border-left-color:#92400E;text-decoration-style:dotted;text-decoration-thickness:2px;}
+.hl-commit{background:var(--blue-bg);color:var(--blue);border-left-color:var(--blue);text-decoration-style:double;}
+.hl-esc{background:var(--red-bg);color:var(--red);border-left-color:var(--red);text-decoration-style:solid;text-decoration-thickness:3px;}
+
+/* right analysis panel */
+.analysis-panel{display:flex;flex-direction:column;gap:16px;position:relative;}
+.analysis-scroll{display:flex;flex-direction:column;gap:16px;max-height:640px;overflow-y:auto;padding-bottom:4px;}
+.card.ai-card{background:var(--purple-tint);border-color:#DDD2F0;}
+.ai-card .card-label{color:var(--purple);}
+.ai-card p{font-size:13px;line-height:1.6;color:var(--ink);margin-top:8px;}
+.ai-card ul{margin:8px 0 0 16px;font-size:13px;color:var(--ink-2);line-height:1.6;}
+.metric-row{display:flex;align-items:center;gap:10px;padding:9px 0;}
+.metric-row + .metric-row{border-top:1px solid #F0F0F3;}
+.metric-row .mr-label{font-size:13px;color:var(--ink-2);flex:1;display:flex;align-items:center;gap:5px;}
+.metric-row .mr-bar-track{width:80px;height:6px;border-radius:3px;background:#F0F0F3;flex-shrink:0;}
+.metric-row .mr-bar{height:6px;border-radius:3px;}
+.metric-row .mr-val{font-size:13px;font-weight:600;width:70px;text-align:right;white-space:nowrap;}
+.info-icon{color:var(--ink-3);font-size:14px;cursor:help;position:relative;}
+.tooltip-box{
+  position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:#1A1A2E;color:#fff;font-size:12px;line-height:1.5;border-radius:8px;
+  padding:8px 10px;width:210px;z-index:40;box-shadow:0 6px 18px rgba(0,0,0,0.2);font-weight:400;
+}
+
+/* checklist */
+.check-row{
+  display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:8px;cursor:pointer;
+  border:none;background:transparent;width:100%;text-align:left;transition:background .1s;
+}
+.check-row:hover{background:var(--purple-tint);}
+.check-row.fail{background:var(--red-bg);}
+.check-row.fail:hover{background:#F7DBDB;}
+.check-ic{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.check-ic.ok{background:var(--green-bg);color:var(--green);}
+.check-ic.no{background:var(--red);color:#fff;}
+.check-label{font-size:13px;flex:1;color:var(--ink);}
+.check-row.fail .check-label{color:var(--red);font-weight:500;}
+.check-ts{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;}
+
+/* detection chips */
+.det-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.det-chip{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;
+  font-size:12px;font-weight:600;border:1px solid transparent;cursor:pointer;transition:box-shadow .12s;
+}
+.det-chip:hover{box-shadow:0 2px 8px rgba(26,26,46,0.10);}
+.det-chip.blue{background:var(--blue-bg);color:var(--blue);}
+.det-chip.amber{background:var(--amber-bg);color:var(--amber);}
+.det-chip.gray{background:#F0F0F3;color:var(--ink-3);}
+.det-chip.purple{background:var(--purple-soft);color:var(--purple);}
+.det-chip.selected{border-color:currentColor;}
+
+/* sticky footer */
+.panel-footer{
+  position:sticky;bottom:0;background:#fff;border:1px solid var(--border);border-radius:12px;
+  padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 -4px 16px rgba(26,26,46,0.05);
+  flex-wrap:wrap;z-index:10;
+}
+.panel-footer .flink{margin-left:auto;font-size:13px;font-weight:500;}
+
+/* popover / modal / toast */
+.popover{
+  position:absolute;bottom:calc(100% + 8px);right:0;width:250px;background:#fff;
+  border:1px solid var(--border);border-radius:10px;padding:14px;z-index:45;
+  box-shadow:0 10px 30px rgba(26,26,46,0.15);
+}
+.popover p{font-size:13px;color:var(--ink);line-height:1.5;margin-bottom:12px;}
+.popover .pop-actions{display:flex;gap:8px;justify-content:flex-end;}
+.notified{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--green);}
+
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(26,26,46,0.45);z-index:80;
+  display:flex;align-items:center;justify-content:center;
+}
+.modal{
+  width:400px;max-width:calc(100vw - 40px);background:#fff;border-radius:14px;padding:22px;
+  box-shadow:0 24px 60px rgba(0,0,0,0.25);
+}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:4px;}
+.modal .m-sub{font-size:13px;color:var(--ink-3);margin-bottom:16px;}
+.modal label{font-size:12px;font-weight:600;color:var(--ink-2);display:block;margin:12px 0 5px;}
+.modal select,.modal textarea{
+  width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 10px;
+  font-family:inherit;font-size:13px;color:var(--ink);outline:none;background:#fff;
+}
+.modal select:focus,.modal textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(75,45,143,0.12);}
+.modal textarea{resize:vertical;min-height:70px;}
+.modal .m-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:90;
+  background:#1A1A2E;color:#fff;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  animation:toast-in .25s cubic-bezier(0.4,0,0.2,1);
+}
+.toast i{color:#4ADE80;font-size:16px;}
+@keyframes toast-in{from{opacity:0;transform:translate(-50%,10px);}to{opacity:1;transform:translate(-50%,0);}}
+
+/* ══ Screen 4: profile ══ */
+.profile-header{display:flex;align-items:center;gap:14px;padding:18px 0 4px;flex-wrap:wrap;}
+.profile-header .ph-info h1{font-size:19px;font-weight:600;letter-spacing:-0.3px;}
+.profile-header .ph-info p{font-size:13px;color:var(--ink-3);margin-top:2px;}
+.profile-header .chip{margin-left:auto;}
+.emp-bar-track{height:8px;border-radius:4px;background:#F0F0F3;margin-top:16px;}
+.emp-bar{height:8px;border-radius:4px;background:var(--amber);}
+.mini-row{display:flex;align-items:center;gap:10px;padding:10px 0;}
+.mini-row + .mini-row{border-top:1px solid #F0F0F3;}
+.mini-row .mr-date{font-size:12px;color:var(--ink-3);width:56px;flex-shrink:0;}
+.mini-row .mr-motivo{flex:1;min-width:0;}
+.mini-row .mr-score{font-size:13px;font-weight:600;width:34px;text-align:right;}
+.coaching-note{
+  font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:6px;margin-top:14px;
+}
+
+/* segmented toggle (dentro de card) */
+.seg{display:inline-flex;background:#F0F0F3;border-radius:8px;padding:2px;gap:2px;}
+.seg-btn{
+  border:none;background:transparent;font-size:12px;font-weight:600;color:var(--ink-3);
+  padding:4px 10px;border-radius:6px;cursor:pointer;transition:background .12s,color .12s;
+}
+.seg-btn:hover{color:var(--ink-2);}
+.seg-btn.on{background:#fff;color:var(--purple);box-shadow:0 1px 2px rgba(26,26,46,0.1);}
+
+/* sentimiento fusionado */
+.sent-merged{display:flex;gap:24px;flex:1;min-height:0;}
+.sent-aggregate{
+  width:190px;flex-shrink:0;border-left:1px solid #F0F0F3;padding-left:20px;
+  display:flex;flex-direction:column;
+}
+
+/* nube de palabras */
+.nube{
+  display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;justify-content:center;
+  padding:14px 4px;flex:1;align-content:center;
+}
+.nube-word{color:var(--purple);font-weight:600;cursor:default;line-height:1.3;white-space:nowrap;}
+.nube-word:hover{text-decoration:underline;}
+
+/* insights por temas (cards narrativas) */
+.insights-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+.insights-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.insight-card{
+  background:#FCFCFD;border:1px solid var(--border);border-radius:12px;
+  padding:20px 22px;display:flex;flex-direction:column;
+}
+.ic-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.ic-title{font-size:14px;font-weight:600;color:var(--ink);}
+.ic-meta{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink-3);margin-top:5px;}
+.ic-headline{font-size:14px;font-weight:700;color:var(--ink);margin-top:12px;line-height:1.4;}
+.ic-prosa{
+  font-size:13px;color:var(--ink-2);line-height:1.55;margin-top:6px;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.ic-prosa.open{-webkit-line-clamp:unset;display:block;}
+.ic-more{
+  align-self:flex-start;background:none;border:none;color:var(--purple);font-size:12px;
+  font-weight:600;cursor:pointer;padding:3px 0;margin-top:2px;
+}
+.ic-more:hover{text-decoration:underline;}
+.ic-recos{
+  margin-top:12px;padding-top:12px;border-top:1px solid #F0F0F3;
+}
+.ic-recos-title{
+  display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-3);margin-bottom:7px;
+}
+.ic-recos-title i{color:var(--amber);font-size:13px;}
+.ic-reco{font-size:12.5px;color:var(--ink);line-height:1.5;padding:3px 0;}
+.ic-ev{color:var(--ink-3);}
+.ic-drill{
+  margin-top:auto;padding-top:14px;align-self:flex-start;
+  background:none;border:none;color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;
+}
+.ic-drill:hover{text-decoration:underline;}
+.topic-quote{
+  font-size:13px;color:var(--ink-2);line-height:1.55;font-style:italic;
+  border-left:3px solid var(--purple-soft);padding-left:12px;margin:0;
+}
+
+/* active filters bar */
+.active-filters{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:0 0 14px;
+}
+.af-label{font-size:12px;color:var(--ink-3);font-weight:600;}
+.af-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:500;color:var(--purple);
+  background:var(--purple-soft);border-radius:999px;padding:4px 6px 4px 12px;
+}
+.af-x{
+  width:18px;height:18px;border-radius:50%;border:none;background:transparent;
+  color:var(--purple);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;
+}
+.af-x:hover{background:rgba(75,45,143,0.15);}
+.af-clear{
+  background:none;border:none;color:var(--ink-2);font-size:12px;font-weight:600;
+  cursor:pointer;padding:4px 8px;border-radius:6px;
+}
+.af-clear:hover{background:#F0F0F3;}
+
+/* setup banner */
+.setup-banner{
+  background:#fff;border:1px solid #DDD2F0;border-radius:12px;
+  padding:16px 20px;margin-bottom:16px;
+}
+.setup-banner .sb-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.setup-banner .sb-title{
+  display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink);
+}
+.setup-banner .sb-title i{color:var(--purple);font-size:16px;}
+.setup-banner .sb-sub{font-size:12px;color:var(--ink-3);margin-top:4px;}
+.sb-progress-label{font-size:12px;font-weight:600;color:var(--purple);white-space:nowrap;}
+.sb-progress{height:6px;border-radius:3px;background:#F0F0F3;margin:12px 0;}
+.sb-progress-fill{height:6px;border-radius:3px;background:var(--purple);}
+.sb-steps{display:flex;gap:20px;flex-wrap:wrap;}
+.sb-step{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2);}
+.sb-step.done{color:var(--ink);}
+.sb-step a{font-size:12px;font-weight:600;}
+
+/* histogram (leaderboard apagado) */
+.histo{display:flex;align-items:flex-end;gap:8px;height:120px;flex:1;padding-top:8px;}
+.histo-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;}
+.histo-n{font-size:11px;font-weight:600;color:var(--ink-2);}
+.histo-bar{width:100%;max-width:34px;border-radius:4px 4px 0 0;}
+.histo-range{font-size:10px;color:var(--ink-3);white-space:nowrap;}
+
+/* insufficient data + phrases */
+.insuf-state{display:flex;gap:12px;align-items:flex-start;margin-top:12px;}
+.insuf-state .es-circle{background:var(--purple-tint);color:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.phrases-toggle{
+  margin-top:12px;background:none;border:none;color:var(--purple);font-size:13px;font-weight:600;
+  cursor:pointer;padding:4px 0;display:inline-flex;align-items:center;gap:5px;text-align:left;
+}
+.phrases-toggle:hover{text-decoration:underline;}
+.phrases-list{margin-top:6px;display:flex;flex-direction:column;}
+.phrase-row{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:13px;}
+.phrase-row + .phrase-row{border-top:1px solid #F0F0F3;}
+.phrase-text{flex:1;min-width:0;}
+.phrase-ts{font-size:12px;font-weight:600;white-space:nowrap;}
+
+/* ── Drawer (detalle de interacción) ── */
+.drawer-backdrop{
+  position:fixed;inset:0;background:rgba(26,26,46,0.45);z-index:70;
+  display:flex;justify-content:flex-end;
+  animation:fade-in .18s ease;
+}
+@keyframes fade-in{from{opacity:0;}to{opacity:1;}}
+.drawer{
+  width:min(94vw,880px);height:100%;background:var(--bg);
+  box-shadow:-16px 0 48px rgba(26,26,46,0.25);
+  overflow-y:auto;padding:0 24px 24px;
+  animation:drawer-in .28s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes drawer-in{from{transform:translateX(40px);opacity:0.4;}to{transform:translateX(0);opacity:1;}}
+@media (prefers-reduced-motion: reduce){.drawer,.drawer-backdrop{animation:none !important;}}
+.drawer-head{
+  position:sticky;top:0;z-index:20;background:var(--bg);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0 10px;border-bottom:1px solid var(--border);margin-bottom:12px;
+}
+.drawer-close{
+  width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;
+  color:var(--ink-2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.drawer-close:hover{border-color:#C9C9D4;background:#FCFCFD;}
+.detail-layout.in-drawer{grid-template-columns:1fr;}
+.detail-layout.in-drawer .tx-body{max-height:420px;}
+.detail-layout.in-drawer .analysis-scroll{max-height:none;overflow:visible;}
+
+/* ── Responsive ── */
+@media (max-width:1150px){
+  .insights-grid{grid-template-columns:repeat(2,1fr);}
+  .span-3{grid-column:span 6;}
+  .span-4{grid-column:span 12;}
+  .span-8{grid-column:span 12;}
+  .detail-layout{grid-template-columns:1fr;}
+  .review-cards{grid-template-columns:1fr;}
+}
+@media (max-width:760px){
+  .main{margin-left:0;padding:0 14px 90px;}
+  .sidebar{
+    top:auto;bottom:0;left:0;right:0;width:auto;height:56px;
+    flex-direction:row;justify-content:center;padding:0 8px;gap:2px;
+    border-right:none;border-top:1px solid var(--border);
+  }
+  .sidebar .logo{display:none;}
+  .sidebar .spacer{display:none;}
+  .sidebar .avatar{display:none;}
+  .main{padding-bottom:150px;}
+  .span-3,.span-4,.span-6,.span-8{grid-column:span 12;}
+  .page-title{font-size:18px;}
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tab{white-space:nowrap;padding:10px 12px;}
+  .filter-row{overflow-x:auto;flex-wrap:nowrap;padding-bottom:12px;-webkit-overflow-scrolling:touch;}
+  .filter-row .chip{white-space:nowrap;flex-shrink:0;}
+  .search-bar{min-width:200px;}
+  .metric-value{font-size:30px;}
+  .drawer{width:100vw;padding:0 14px 14px;}
+  .ai-fab-wrap{right:14px;bottom:70px;}
+  .ai-fab{padding:10px 14px;font-size:13px;}
+  .sent-merged{flex-direction:column;gap:16px;}
+  .sent-aggregate{width:auto;border-left:none;padding-left:0;border-top:1px solid #F0F0F3;padding-top:14px;}
+  .insights-grid{grid-template-columns:1fr;}
+  .bubble{max-width:88%;}
+  .detail-header h1{font-size:17px;}
+  .panel-footer{flex-wrap:wrap;}
+  .panel-footer .flink{margin-left:0;width:100%;}
+  .modal{width:100%;}
+  .chart-wrap{min-height:180px;}
+}
+
+
+/* Refinamiento de UI + accesibilidad (se aplica sobre las reglas de arriba) */
+:root{
+  --ink-3:#6B6B7C; /* antes #8A8A99 — contraste 4.6:1 sobre blanco */
+  --shadow-card:0 1px 2px rgba(18,18,23,0.05);
+  --shadow-pop:0 10px 30px rgba(26,26,46,0.14);
+}
+
+/* foco visible consistente en todo elemento interactivo */
+:where(button,a,input,select,[tabindex]):focus-visible{
+  outline:2px solid var(--purple);outline-offset:2px;border-radius:6px;
+}
+.chip:focus-visible,.btn-primary:focus-visible,.btn-secondary:focus-visible{outline-offset:3px;}
+
+/* skip link */
+.skip-link{
+  position:fixed;top:-48px;left:16px;z-index:100;background:var(--purple);color:#fff;
+  padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;transition:top .15s;
+}
+.skip-link:focus{top:12px;color:#fff;text-decoration:none;}
+
+/* cards: elevación sutil y consistente */
+.card{box-shadow:var(--shadow-card);}
+.card .card-head{gap:12px;}
+.card-label{color:var(--ink-3);}
+
+/* KPIs: respiro entre cards y dentro de la card */
+.grid{gap:14px;}.grid > .span-3 > .card, .grid > .span-4 > .card, .grid > .span-6 > .card, .grid > .span-8 > .card, .grid > .span-12 > .card{flex:1 1 auto;width:100%;}
+.span-3 .card,.card.primary-card,.card.alert-card{padding:22px 26px;}
+.metric-value{font-size:38px;letter-spacing:-1px;}
+.metric-value-row{margin-top:12px;align-items:center;gap:12px;}
+.trend{font-variant-numeric:tabular-nums;}
+.card-label{gap:7px;line-height:1.4;}
+
+/* tabs: hit area y estado activo más claro */
+.tab{padding:11px 16px;min-height:44px;}
+.tab:focus-visible{outline-offset:-2px;}
+
+/* chips y dropdowns */
+.chip{min-height:36px;}
+.dropdown{box-shadow:var(--shadow-pop);}
+.dd-opt{min-height:36px;}
+
+/* filas clickeables: affordance */
+.comp-row{min-height:44px;border-radius:8px;}
+.comp-row:focus-visible{outline-offset:-2px;}
+.comp-row .comp-name{font-weight:500;}
+
+/* leaderboard: números tabulares */
+.lb-score,.comp-count,.hbar-val{font-variant-numeric:tabular-nums;}
+
+/* sidebar: área táctil y separación del activo */
+.nav-item{width:44px;height:44px;}
+.nav-item.active{box-shadow:inset 3px 0 0 var(--purple);}
+
+/* heatmap: celdas con borde hairline para no depender solo del color */
+.hm-cell{border:1px solid rgba(26,26,46,0.06);}
+.hm-cell:focus-visible{outline:2px solid var(--purple);outline-offset:1px;z-index:2;position:relative;}
+
+/* jerarquía de página */
+.page-title{font-size:21px;}
+.topbar{padding-top:24px;}
+
+/* estados hover más silenciosos y consistentes */
+.card.hoverable:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(26,26,46,0.08);}
+.hbar-row.drill,.comp-row.drill,.lb-row.drill{cursor:pointer;border-radius:6px;transition:background .12s;}
+.hbar-row.drill:hover,.comp-row.drill:hover,.lb-row.drill:hover{background:var(--purple-tint);}
+
+/* ── Apto daltonismo: los estados nunca dependen solo del color ── */
+/* pills de sentimiento: forma del dot distinta por estado */
+.pill.pos .dot{border-radius:50%;}
+.pill.neu .dot{border-radius:2px;}
+.pill.neg .dot{border-radius:0;transform:rotate(45deg);}
+/* trends: siempre ícono + texto (ya presente); refuerzo de peso */
+.trend i{font-size:11px;}
+/* alerta de KPI: borde + ícono, no solo color */
+.card.alert-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition-duration:0.01ms !important;animation-duration:0.01ms !important;}
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Componentes propios de este tablero (identificación del cliente,
+   informe del período, panel de demostración). Se escriben con los
+   tokens del sistema original: no se introduce ningún color nuevo.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* el sidebar es fijo: el contenido arranca después de sus 56px */
+.main{margin-left:56px;}
+.sidebar .logo{padding:0;}
+.sidebar .logo svg{display:block;width:20px;height:20px;}
+
+/* identificación del cliente en la barra superior */
+.tenant-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--purple-tint);border:1px solid #E4DBF4;color:var(--purple);
+  border-radius:999px;padding:5px 12px 5px 6px;font-size:12px;font-weight:600;white-space:nowrap;
+}
+.tenant-chip .tc-dot{
+  width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid #E4DBF4;
+  display:flex;align-items:center;justify-content:center;
+}
+.tenant-chip .tc-dot svg{display:block;}
+
+/* pills adicionales */
+.pill.brand{background:var(--purple-soft);color:var(--purple);}
+.btn-brand{
+  padding:9px 16px;border-radius:8px;border:none;background:var(--purple);
+  font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:background .12s;
+}
+.btn-brand:hover{background:var(--purple-600);}
+
+/* informe del período */
+.report-sheet{background:#fff;padding:0 0 40px;}
+.report-hero{background:var(--purple);color:#fff;padding:28px 36px;}
+.report-hero .rh-kicker{font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.8;font-weight:600;}
+.report-hero h2{font-size:27px;font-weight:600;letter-spacing:-0.4px;margin-top:6px;line-height:1.2;}
+.report-hero p{font-size:13.5px;line-height:1.65;margin-top:10px;max-width:760px;opacity:0.94;}
+.report-body{padding:26px 36px 0;display:flex;flex-direction:column;gap:24px;}
+.report-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+.report-kpi{border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:10px;padding:14px 16px;}
+.report-kpi .rk-v{font-size:27px;font-weight:600;letter-spacing:-0.6px;line-height:1;}
+.report-kpi .rk-l{font-size:11.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-top:6px;}
+.report-h3{font-size:15px;font-weight:600;display:flex;align-items:center;gap:9px;}
+.report-h3 i{color:var(--purple);font-size:17px;}
+.report-list{display:flex;flex-direction:column;gap:10px;}
+.report-item{border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.report-item .ri-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.report-item .ri-name{font-size:14px;font-weight:600;}
+.report-item p{font-size:13px;color:var(--ink-2);line-height:1.6;}
+.report-action{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:10px;padding:12px 14px;}
+.report-action .ra-n{font-size:16px;font-weight:600;color:var(--purple);width:22px;flex-shrink:0;}
+table.export-preview th{background:#F0F0F3;font-weight:600;color:var(--ink-2);}
+
+/* panel de estados para la demostración */
+.demo-panel{
+  position:fixed;right:24px;bottom:88px;z-index:65;width:290px;background:#fff;
+  border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--shadow-pop);
+}
+.demo-panel h4{font-size:14px;font-weight:600;margin-bottom:2px;}
+.demo-panel .dp-sub{font-size:11.5px;color:var(--ink-3);margin-bottom:12px;line-height:1.45;}
+.dp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;font-size:12.5px;color:var(--ink-2);}
+.dp-row + .dp-row{border-top:1px solid #F0F0F3;}
+.dp-row select{border:1px solid var(--border);border-radius:7px;padding:5px 8px;font-family:inherit;font-size:12px;background:#fff;color:var(--ink);}
+.switch{width:38px;height:22px;border-radius:999px;border:none;background:#DCDCE3;position:relative;cursor:pointer;flex-shrink:0;transition:background .15s;}
+.switch.on{background:var(--purple);}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s;}
+.switch.on::after{transform:translateX(16px);}
+
+@media (max-width:760px){
+  .main{margin-left:0;}
+  .demo-panel{right:14px;bottom:136px;width:calc(100vw - 28px);}
+  .report-hero,.report-body{padding-left:18px;padding-right:18px;}
+  .report-hero h2{font-size:22px;}
+}
+
+/* El informe del período se imprime solo: el resto del tablero se oculta */
+@media print{
+  .sidebar,.main,.ai-fab-wrap,.demo-panel,.drawer-backdrop,.report-toolbar{display:none !important;}
+  .modal-backdrop{position:static !important;background:#fff !important;display:block !important;backdrop-filter:none !important;}
+  .report-modal{width:100% !important;height:auto !important;max-width:none !important;border-radius:0 !important;box-shadow:none !important;overflow:visible !important;}
+  .report-scroll{overflow:visible !important;max-height:none !important;}
+  .report-hero{background:var(--purple) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .report-item,.report-action,.report-kpi{break-inside:avoid;}
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Componentes propios de "Mi reporte": informe individual de coaching,
+   comparación anónima con el equipo y selector de ejecutivo (demo).
+   Reutiliza los mismos tokens y componentes del tablero de Banca.
+   ══════════════════════════════════════════════════════════════════════ */
+.back-link{display:inline-flex;align-items:center;gap:4px;font-weight:600;font-size:12px;}
+.viewer-select{
+  display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);
+  border-radius:999px;padding:5px 8px 5px 14px;font-size:12px;font-weight:600;color:var(--ink-2);
+}
+.viewer-select select{
+  border:none;outline:none;background:var(--purple-soft);color:var(--purple-600);font-family:inherit;
+  font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:999px;cursor:pointer;max-width:220px;
+}
+.exec-hero-id{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap;}
+.exec-hero-id .avatar{background:rgba(255,255,255,0.16);color:#fff;}
+.exec-hero-id .ehi-meta{font-size:12.5px;opacity:0.9;}
+.compare-block{border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.compare-block + .compare-block{margin-top:12px;}
+.compare-legend{display:flex;align-items:center;gap:16px;font-size:11.5px;color:var(--ink-3);margin-top:10px;}
+.compare-legend span{display:inline-flex;align-items:center;gap:6px;}
+.compare-legend .dot-you{width:9px;height:9px;border-radius:3px;background:var(--purple);}
+.compare-legend .dot-team{width:9px;height:9px;border-radius:3px;background:#DADAE2;}
+.hbar-track.team .hbar{background:#B9B9C6;}
+.rank-note{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);margin-top:14px;padding-top:14px;border-top:1px solid #F0F0F3;}
+.rank-note i{color:var(--purple);font-size:15px;}
+.report-item.opp{border-left:3px solid var(--amber);}
+.report-item.practice{border-left:3px solid var(--green);}
+.report-item .ri-detalle{font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:10px;}
+.suggestion-box{
+  display:flex;gap:8px;align-items:flex-start;background:var(--purple-tint);border-radius:8px;
+  padding:10px 12px;font-size:12.5px;color:var(--ink);line-height:1.55;
+}
+.suggestion-box i{color:var(--purple);font-size:15px;flex-shrink:0;margin-top:1px;}
+.suggestion-box b{font-weight:600;}
+.practice-example{
+  display:flex;gap:8px;align-items:flex-start;background:var(--green-bg);border-radius:8px;
+  padding:10px 12px;font-size:12.5px;color:var(--ink);line-height:1.55;
+}
+.practice-example i{color:var(--green);font-size:15px;flex-shrink:0;margin-top:1px;}
+.anon-note{
+  display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);margin-bottom:12px;
+}
+.anon-note i{color:var(--ink-3);font-size:14px;}
+@media (max-width:760px){
+  .viewer-select select{max-width:150px;}
+}
+@media print{
+  .viewer-select,.back-link{display:none !important;}
+}
+
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js" crossorigin></script>
+
+<script type="text/babel" data-presets="react">
+/* ══════════════════════════════════════════════════════════════════════
+   MI REPORTE — variante de Speech Analytics Banca
+   Informe individual de coaching: solo datos del ejecutivo que lo mira
+   (oportunidades de mejora propias) + buenas prácticas del equipo
+   presentadas de forma agregada y anónima (sin nombres).
+   ══════════════════════════════════════════════════════════════════════ */
+const { useState, useMemo } = React;
+
+function Ph({ name, fill, style }) {
+  return <i className={(fill ? "ph-fill ph-" : "ph ph-") + name} style={style}></i>;
+}
+
+function BrandMark({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" role="img" aria-label="Speech Analytics">
+      <g fill="currentColor">
+        <rect x="4" y="13" width="4" height="6" rx="2"></rect>
+        <rect x="10.5" y="8" width="4" height="16" rx="2"></rect>
+        <rect x="17" y="4" width="4" height="24" rx="2"></rect>
+        <rect x="23.5" y="11" width="4" height="10" rx="2"></rect>
+      </g>
+    </svg>
+  );
+}
+
+function Sidebar() {
+  return (
+    <nav className="sidebar" aria-label="Navegación principal">
+      <div className="logo"><BrandMark /></div>
+      <button className="nav-item" title="Inicio" aria-label="Inicio"><Ph name="house" /></button>
+      <button className="nav-item" title="Monitoreo" aria-label="Monitoreo"><Ph name="monitor" /></button>
+      <button className="nav-item" title="Speech Analytics" aria-label="Speech Analytics"><Ph name="waveform" /></button>
+      <button className="nav-item" title="Conversaciones" aria-label="Conversaciones"><Ph name="chats-circle" /></button>
+      <button className="nav-item active" title="Reportes" aria-label="Reportes" aria-current="page"><Ph name="chart-bar" fill /></button>
+      <button className="nav-item" title="Alertas" aria-label="Alertas"><Ph name="bell" /></button>
+      <div className="spacer"></div>
+      <button className="nav-item" title="Configuración" aria-label="Configuración"><Ph name="gear" /></button>
+      <div className="avatar">MG</div>
+    </nav>
+  );
+}
+
+const PERIODO_INFORME = "últimos 30 días";
+const ROLES = { multi: "Multifuncional", serv: "Servicio al cliente", caja: "Cajero", ventas: "Ventas" };
+
+/* ── Prácticas reutilizadas: mismo objeto en varios ejecutivos para que
+     el conteo agregado y anónimo tenga sentido narrativo ── */
+const PRAC_ESCUCHA = { tema: "Escucha activa antes de ofrecer una solución",
+  detalle: "Deja que el cliente termine de explicar su situación y repite el motivo con sus palabras antes de proponer algo, en vez de interrumpir con la primera opción disponible." };
+const PRAC_CIERRE = { tema: "Cierre con confirmación explícita",
+  detalle: "Repite en voz alta el resultado de la operación (monto, producto o fecha) y espera la conformidad del cliente antes de despedirse." };
+const PRAC_ALTERNATIVA = { tema: "Ofrecer una alternativa según el perfil del cliente",
+  detalle: "En vez de ofrecer un único producto por defecto, menciona 2 opciones y explica en una frase por qué una podría convenirle más al cliente según lo que contó." };
+const PRAC_AGENDA = { tema: "Agendar el siguiente contacto antes de cerrar",
+  detalle: "Cuando una consulta queda pendiente de resolver, propone día y horario de seguimiento en la misma llamada en vez de dejarlo abierto." };
+const PRAC_TONO = { tema: "Tono cordial sostenido en operaciones repetitivas",
+  detalle: "Mantiene un tono cálido y paciente incluso en el décimo trámite similar del día, sin sonar mecánico." };
+const PRAC_RITMO = { tema: "Ritmo operativo sin apurar al cliente",
+  detalle: "Resuelve la operación con rapidez pero sin cortar las preguntas del cliente ni saltarse pasos de verificación." };
+
+/* ── Equipo de ejecutivos del período. `mejorar` son oportunidades propias
+     de cada uno; `fortalezas` son buenas prácticas detectadas, que se
+     agregan de forma anónima cuando pertenecen a "otros" ejecutivos ── */
+const EJECUTIVOS = [
+  { name: "María González", ini: "MG", rol: ROLES.caja, suc: "Agencia Centro",
+    atenciones: 210, conversion: 47.7, score: 6.4, resueltas: 96, noResueltas: 5, ventas: 28,
+    escuchaActiva: 58, interrupciones: 2, tiempoHabla: 52, sondeoProm: 1.1, csat: 4.0,
+    mejorar: [
+      { tema: "Confirmación explícita de la operación", impacto: "Alto",
+        detalle: "En parte de tus atenciones cerrás sin repetir en voz alta el monto o el resultado de la operación, y el cliente se retira sin la confirmación clara.",
+        accion: "Antes de despedirte, repetí el resultado de la operación (monto, producto o fecha) y esperá la conformidad verbal del cliente." },
+      { tema: "Presentación inicial", impacto: "Medio",
+        detalle: "El saludo de apertura no siempre incluye tu nombre, lo que resta cercanía en los primeros segundos de la atención.",
+        accion: "Sumá tu nombre y una pregunta que confirme el motivo de la visita en los primeros 10 segundos." },
+    ],
+    fortalezas: [
+      { tema: "Atención ágil y precisa", detalle: "Resuelve operaciones de caja en menos tiempo que el promedio de la agencia, sin perder exactitud en los montos." },
+      PRAC_TONO,
+    ] },
+  { name: "Carlos Fuentes", ini: "CF", rol: ROLES.multi, suc: "Agencia Centro",
+    atenciones: 592, conversion: 43.58, score: 5.1, resueltas: 90, noResueltas: 13, ventas: 31,
+    escuchaActiva: 41, interrupciones: 4, tiempoHabla: 61, sondeoProm: 0.8, csat: 3.6,
+    mejorar: [
+      { tema: "Sondeo de necesidades", impacto: "Alto", detalle: "Pasa rápido a resolver el trámite sin indagar si el cliente tiene otra necesidad relacionada.",
+        accion: "Antes de cerrar, hacé una pregunta abierta sobre qué más lo trajo a la agencia esta vez." },
+      { tema: "Ausencia de saludo inicial", impacto: "Medio", detalle: "En varias atenciones se omite el saludo y se entra directo al trámite.",
+        accion: "Empezá siempre con un saludo breve, aunque el cliente tenga apuro." },
+    ],
+    fortalezas: [
+      { tema: "Procesamiento ágil de la operación", detalle: "Resuelve trámites de caja y consulta con pocos pasos y sin reprocesos." },
+      { tema: "Manejo tranquilo de reclamos", detalle: "No se pone a la defensiva ante un reclamo: escucha, reconoce el problema y explica el siguiente paso." },
+    ] },
+  { name: "Ana Riquelme", ini: "AR", rol: ROLES.ventas, suc: "Agencia Sur",
+    atenciones: 210, conversion: 55.2, score: 7.8, resueltas: 94, noResueltas: 4, ventas: 58,
+    escuchaActiva: 71, interrupciones: 1, tiempoHabla: 47, sondeoProm: 2.1, csat: 4.5,
+    mejorar: [
+      { tema: "Registro del seguimiento prometido", impacto: "Medio", detalle: "En algunas atenciones promete un llamado de seguimiento pero no queda agendado en el sistema.",
+        accion: "Agendá el seguimiento en el mismo momento en que se lo prometés al cliente." },
+    ],
+    fortalezas: [ PRAC_CIERRE, { tema: "Manejo de objeciones con datos concretos", detalle: "Responde objeciones de tasa o costo con comparaciones concretas en vez de solo repetir el beneficio del producto." } ] },
+  { name: "Lucía Vergara", ini: "LV", rol: ROLES.caja, suc: "Agencia Norte",
+    atenciones: 276, conversion: 38.4, score: 4.6, resueltas: 84, noResueltas: 9, ventas: 18,
+    escuchaActiva: 39, interrupciones: 5, tiempoHabla: 63, sondeoProm: 0.7, csat: 3.4,
+    mejorar: [
+      { tema: "Confirmación de la operación", impacto: "Alto", detalle: "Similar al patrón más común del período: cierra sin confirmar en voz alta el resultado de la operación.",
+        accion: "Sumá una frase de cierre fija: “Entonces quedó [operación] por [monto], ¿todo correcto?”." },
+      { tema: "Comunicar tiempos de espera", impacto: "Medio", detalle: "Cuando hay demoras del sistema, no siempre avisa al cliente cuánto puede tardar.",
+        accion: "Si una operación demora, avisá un tiempo estimado en vez de dejar al cliente esperando sin información." },
+    ],
+    fortalezas: [ { tema: "Atención cordial", detalle: "Saluda y se despide con calidez incluso en operaciones simples." }, PRAC_RITMO ] },
+  { name: "Pedro Salas", ini: "PS", rol: ROLES.serv, suc: "Agencia Centro",
+    atenciones: 134, conversion: 12.69, score: 3.2, resueltas: 78, noResueltas: 0, ventas: 6,
+    escuchaActiva: 34, interrupciones: 3, tiempoHabla: 58, sondeoProm: 0.5, csat: 3.1,
+    mejorar: [
+      { tema: "Cierre poco enfático", impacto: "Alto", detalle: "Las atenciones terminan de forma abrupta, sin resumir lo conversado ni ofrecer un producto relacionado.",
+        accion: "Cerrá resumiendo en una frase lo que se resolvió y ofrecé, aunque sea una vez, un producto relacionado." },
+      { tema: "Personalización de la despedida", impacto: "Medio", detalle: "La despedida es genérica y no retoma el motivo puntual por el que vino el cliente.",
+        accion: "Mencioná el motivo puntual de la visita en la despedida, para que el cliente sienta que fue escuchado." },
+    ],
+    fortalezas: [ { tema: "Paciencia en educación financiera", detalle: "Explica términos y condiciones con calma a clientes que no están familiarizados con productos bancarios." }, { tema: "Información detallada de productos", detalle: "Da información completa y precisa cuando el cliente pregunta por características de un producto." } ] },
+  { name: "Rodrigo Cáceres", ini: "RC", rol: ROLES.multi, suc: "Agencia Poniente",
+    atenciones: 168, conversion: 29.8, score: 4.0, resueltas: 71, noResueltas: 7, ventas: 12,
+    escuchaActiva: 37, interrupciones: 6, tiempoHabla: 66, sondeoProm: 0.6, csat: 3.2,
+    mejorar: [
+      { tema: "Tiempos de atención elevados", impacto: "Alto", detalle: "Las atenciones se extienden más que el resto del equipo para trámites similares, generando fila de espera.",
+        accion: "Identificá los pasos que más se repiten en cada trámite y preparalos antes de que llegue el cliente." },
+      { tema: "Baja conversión en ofertas", impacto: "Alto", detalle: "Rara vez se ofrece un producto adicional durante la atención, aun cuando el perfil del cliente encaja.",
+        accion: "Elegí un producto para ofrecer por defecto en cada tipo de trámite y probá mencionarlo siempre, aunque el cliente diga que no." },
+    ],
+    fortalezas: [ { tema: "Trato amable", detalle: "Mantiene buen trato incluso con clientes impacientes por la demora." } ] },
+  { name: "Daniela Ponce", ini: "DP", rol: ROLES.ventas, suc: "Agencia Oriente",
+    atenciones: 245, conversion: 51.0, score: 6.9, resueltas: 93, noResueltas: 6, ventas: 44,
+    escuchaActiva: 66, interrupciones: 1, tiempoHabla: 49, sondeoProm: 1.8, csat: 4.3,
+    mejorar: [
+      { tema: "Registro de objeciones frecuentes", impacto: "Medio", detalle: "No siempre queda registrada la objeción del cliente cuando no se concreta una venta, lo que dificulta el seguimiento.",
+        accion: "Anotá en el sistema el motivo puntual por el que el cliente no aceptó la oferta." },
+    ],
+    fortalezas: [ PRAC_ESCUCHA, PRAC_ALTERNATIVA ] },
+  { name: "Jorge Salinas", ini: "JS", rol: ROLES.caja, suc: "Agencia Sur",
+    atenciones: 188, conversion: 40.1, score: 5.5, resueltas: 88, noResueltas: 6, ventas: 15,
+    escuchaActiva: 55, interrupciones: 2, tiempoHabla: 54, sondeoProm: 1.2, csat: 3.9,
+    mejorar: [
+      { tema: "Confirmación de identidad", impacto: "Alto", detalle: "En algunas operaciones sensibles no queda registrada la validación de identidad según el protocolo.",
+        accion: "Validá y dejá registrada la identidad del cliente antes de procesar cualquier operación sensible, sin excepción." },
+    ],
+    fortalezas: [ PRAC_ESCUCHA, PRAC_CIERRE ] },
+  { name: "Wendy Alvarado", ini: "WA", rol: ROLES.serv, suc: "Agencia Norte",
+    atenciones: 156, conversion: 34.5, score: 5.0, resueltas: 82, noResueltas: 8, ventas: 10,
+    escuchaActiva: 44, interrupciones: 3, tiempoHabla: 57, sondeoProm: 0.9, csat: 3.7,
+    mejorar: [
+      { tema: "Seguimiento de trámites derivados", impacto: "Medio", detalle: "Cuando deriva un trámite a otra área, no siempre le avisa al cliente cómo y cuándo va a tener novedades.",
+        accion: "Al derivar un trámite, decile al cliente el canal y el plazo estimado en que va a tener respuesta." },
+    ],
+    fortalezas: [ PRAC_AGENDA, PRAC_TONO ] },
+];
+
+/* ── Temas del período (compartidos por todo el equipo): se usan para
+     clasificar las conversaciones de cada ejecutivo y mostrar cuáles
+     tocó, con qué frecuencia y con qué tono ── */
+const TEMAS_PERIODO = [
+  { name: "Crédito hipotecario", sent: "mixta",
+    sintesis: "Los clientes preguntan por requisitos y plazos de aprobación; sin un checklist claro, muchas veces se necesita una segunda visita." },
+  { name: "Reclamo de cargos", sent: "negativa",
+    sintesis: "Es el motivo más sensible del período: varios clientes ya habían reclamado antes por el mismo cargo." },
+  { name: "App móvil", sent: "negativa",
+    sintesis: "Clientes que no pudieron resolver una operación en la app (clave, límites) terminan viniendo igual a la agencia." },
+  { name: "Apertura de cuenta", sent: "positiva",
+    sintesis: "Buen cierre en primera visita; es una buena instancia para ofrecer productos complementarios." },
+  { name: "Solicitud de tarjeta digital", sent: "mixta",
+    sintesis: "Alta demanda por la campaña vigente, pero la activación en dos pasos genera reconsultas." },
+  { name: "Consulta de inversión", sent: "positiva",
+    sintesis: "Interés sostenido y de calidad; conviene derivar con cita agendada para no perder la oportunidad." },
+];
+const SENT_LABEL = { pos: "Positivo", neu: "Neutro", neg: "Negativo" };
+
+/* ── Conversaciones de ejemplo por ejecutivo: se generan de forma
+     determinística a partir de sus propias oportunidades de mejora, para
+     que las "sugerencias por conversación" queden conectadas con el
+     resto del informe (no son datos reales, es contenido de demo) ── */
+function genConversaciones(exec, idx) {
+  const n = 8;
+  return Array.from({ length: n }, (_, i) => {
+    const tema = TEMAS_PERIODO[(idx * 3 + i * 5) % TEMAS_PERIODO.length];
+    const sentBase = tema.sent === "negativa" ? "neg" : tema.sent === "positiva" ? "pos" : "neu";
+    const flagged = i % 3 === 0;
+    const mejora = exec.mejorar[i % exec.mejorar.length];
+    const sent = flagged ? "neg" : sentBase;
+    const resultado = flagged && i % 2 === 0 ? "No resuelto" : "Resuelto";
+    const punt = flagged ? 3 + (i % 3) : 6 + (i % 4);
+    const day = 2 + ((idx * 3 + i * 5) % 27);
+    const hh = 8 + ((i * 2 + idx) % 10);
+    const mm = (i * 17 + idx * 7) % 60;
+    const durMin = 3 + ((idx * 7 + i * 5) % 9);
+    const durSeg = (idx * 13 + i * 11) % 60;
+    return {
+      id: "#" + (5200 - idx * 11 - i),
+      fecha: String(day).padStart(2, "0") + "/07, " + String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0"),
+      tema: tema.name, canal: i % 4 === 0 ? "Teléfono" : "CAJA",
+      dur: durMin + ":" + String(durSeg).padStart(2, "0"),
+      sent, resultado, punt,
+      sugerenciaTema: flagged ? mejora.tema : null,
+      sugerencia: flagged ? mejora.accion : null,
+    };
+  });
+}
+
+const fmtP = v => v.toFixed(1).replace(".", ",");
+const fmtNum = n => n.toLocaleString("es-CL");
+
+function avg(list, key) { return list.reduce((s, e) => s + e[key], 0) / list.length; }
+
+function Trend({ dir, tone, value }) {
+  const t = tone || dir;
+  const cls = t === "up" ? "up" : t === "down" ? "down" : "flat";
+  const icon = dir === "up" ? "arrow-up" : dir === "down" ? "arrow-down" : "minus";
+  return <span className={"trend " + cls}><i className={"ph-bold ph-" + icon}></i>{value}</span>;
+}
+
+/* compara el valor propio contra el promedio del equipo; `invert` para
+   métricas donde "menos" es mejor (ej. no resueltas, interrupciones).
+   El ícono sigue el signo real de la diferencia; el color (tone)
+   refleja si esa diferencia es buena o mala para esta métrica. */
+function CompareTrend({ value, teamAvg, unit, invert }) {
+  const diff = value - teamAvg;
+  const good = invert ? diff < 0 : diff > 0;
+  const flat = Math.abs(diff) < (invert ? 0.5 : 0.6);
+  const dir = flat ? "flat" : diff > 0 ? "up" : "down";
+  const tone = flat ? "flat" : good ? "up" : "down";
+  const label = flat ? "en línea con el equipo" : (diff > 0 ? "+" : "") + fmtP(diff) + (unit || "");
+  return <Trend dir={dir} tone={tone} value={label} />;
+}
+
+function KpiCard({ label, value, unit, sub, trend }) {
+  return (
+    <section className="card">
+      <div className="card-label">{label}</div>
+      <div className="metric-value-row">
+        <span className="metric-value" style={{ fontSize: 30 }}>{value}{unit ? <span className="metric-unit">{unit}</span> : null}</span>
+        {trend}
+      </div>
+      {sub ? <div className="card-sub">{sub}</div> : null}
+    </section>
+  );
+}
+
+function CompareBars({ label, you, teamAvg, unit, max }) {
+  const m = max || Math.max(you, teamAvg) * 1.15;
+  return (
+    <div className="compare-block">
+      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>{label}</div>
+      <div className="hbar-row" style={{ marginTop: 0 }}>
+        <span className="hbar-label" style={{ width: 130 }}>Vos</span>
+        <div className="hbar-track"><div className="hbar" style={{ width: (you / m) * 100 + "%" }}></div></div>
+        <span className="hbar-val" style={{ width: 46 }}>{fmtP(you)}{unit}</span>
+      </div>
+      <div className="hbar-row">
+        <span className="hbar-label" style={{ width: 130 }}>Promedio del equipo</span>
+        <div className="hbar-track team"><div className="hbar" style={{ width: (teamAvg / m) * 100 + "%" }}></div></div>
+        <span className="hbar-val" style={{ width: 46 }}>{fmtP(teamAvg)}{unit}</span>
+      </div>
+    </div>
+  );
+}
+
+function OpportunityItem({ o }) {
+  return (
+    <div className="report-item opp">
+      <div className="ri-top">
+        <span className="ri-name">{o.tema}</span>
+        <span className={"pill sm " + (o.impacto === "Alto" ? "crit" : "warn")}>impacto {o.impacto.toLowerCase()}</span>
+      </div>
+      <p className="ri-detalle">{o.detalle}</p>
+      <div className="suggestion-box"><Ph name="lightbulb" fill /><span><b>Sugerencia: </b>{o.accion}</span></div>
+    </div>
+  );
+}
+
+function PracticeItem({ p }) {
+  return (
+    <div className="report-item practice">
+      <div className="ri-top">
+        <span className="ri-name">{p.tema}</span>
+        <span className="pill sm purple"><Ph name="users-three" />{p.count} {p.count === 1 ? "ejecutivo" : "ejecutivos"} del equipo</span>
+      </div>
+      <div className="practice-example"><Ph name="check-circle" fill /><span>{p.detalle}</span></div>
+    </div>
+  );
+}
+
+function SentPill({ kind }) {
+  return <span className={"pill sm " + kind}><span className="dot"></span>{SENT_LABEL[kind]}</span>;
+}
+
+/* ── Barra de tiempo de habla ejecutivo / cliente ── */
+function TalkRatio({ pctEjecutivo, teamAvg }) {
+  const pctCliente = 100 - pctEjecutivo;
+  return (
+    <div>
+      <div className="ratio-bar">
+        <div className="ratio-seg exec" style={{ width: pctEjecutivo + "%" }}>{pctEjecutivo}% vos</div>
+        <div className="ratio-seg cli" style={{ width: pctCliente + "%" }}>{pctCliente}% cliente</div>
+        <div className="ratio-marker" style={{ left: "50%" }}></div>
+      </div>
+      <div className="ratio-marker-label">Línea punteada: referencia recomendada (~50% cada uno) · promedio del equipo: {fmtP(teamAvg)}% vos</div>
+    </div>
+  );
+}
+
+function ListenStat({ label, value, unit, teamAvg, invert }) {
+  return (
+    <div className="span-4">
+      <section className="card">
+        <div className="card-label">{label}</div>
+        <div className="metric-value-row">
+          <span className="metric-value" style={{ fontSize: 26 }}>{value}{unit ? <span className="metric-unit">{unit}</span> : null}</span>
+        </div>
+        <div className="card-sub"><CompareTrend value={value} teamAvg={teamAvg} unit={unit} invert={invert} /> vs. equipo</div>
+      </section>
+    </div>
+  );
+}
+
+function TopicItem({ t }) {
+  return (
+    <div className="report-item">
+      <div className="ri-top">
+        <span className="ri-name">{t.name}</span>
+        <span className="pill sm neu">{t.count} {t.count === 1 ? "conversación tuya" : "conversaciones tuyas"}</span>
+        <SentPill kind={t.dominant} />
+      </div>
+      <p className="ri-detalle" style={{ marginBottom: 0 }}>{t.sintesis}</p>
+    </div>
+  );
+}
+
+function ConversationRow({ c, isOpen, onToggle }) {
+  return (
+    <React.Fragment>
+      <tr onClick={onToggle} style={{ cursor: "pointer" }}>
+        <td style={{ color: "var(--ink-2)", whiteSpace: "nowrap" }}>{c.fecha}</td>
+        <td><span className="chip-gray">{c.tema}</span></td>
+        <td style={{ color: "var(--ink-2)" }}>{c.canal}</td>
+        <td style={{ fontVariantNumeric: "tabular-nums", color: "var(--ink-2)" }}>{c.dur}</td>
+        <td><SentPill kind={c.sent} /></td>
+        <td><span className={"pill sm " + (c.resultado === "Resuelto" ? "pos" : "neg")}><span className="dot"></span>{c.resultado}</span></td>
+        <td>
+          <span style={{ fontSize: 12, fontWeight: 600, color: c.punt >= 7 ? "var(--green)" : c.punt >= 5 ? "var(--amber)" : "var(--red)", background: c.punt >= 7 ? "var(--green-bg)" : c.punt >= 5 ? "var(--amber-bg)" : "var(--red-bg)", borderRadius: 6, padding: "3px 8px", fontVariantNumeric: "tabular-nums" }}>{c.punt}/10</span>
+        </td>
+        <td>{c.sugerencia ? <span className="pill sm warn"><Ph name="lightbulb" fill />sugerencia</span> : <span style={{ color: "var(--ink-3)", fontSize: 12 }}>—</span>}</td>
+        <td><i className={"ph ph-caret-" + (isOpen ? "up" : "down")} style={{ color: "var(--ink-3)" }}></i></td>
+      </tr>
+      {isOpen ? (
+        <tr>
+          <td colSpan={9} style={{ background: "var(--bg)" }}>
+            <div style={{ padding: "6px 4px 14px" }}>
+              {c.sugerencia ? (
+                <div className="suggestion-box"><Ph name="lightbulb" fill /><span><b>Sugerencia para esta conversación ({c.sugerenciaTema.toLowerCase()}): </b>{c.sugerencia}</span></div>
+              ) : (
+                <div className="practice-example"><Ph name="check-circle" fill /><span>Sin observaciones puntuales: esta atención no presentó alertas de coaching.</span></div>
+              )}
+            </div>
+          </td>
+        </tr>
+      ) : null}
+    </React.Fragment>
+  );
+}
+
+function MiReporte() {
+  const [selfIdx, setSelfIdx] = useState(0);
+  const self = EJECUTIVOS[selfIdx];
+  const others = useMemo(() => EJECUTIVOS.filter((_, i) => i !== selfIdx), [selfIdx]);
+  const [openConv, setOpenConv] = useState(null);
+
+  const teamAvgConv = useMemo(() => avg(EJECUTIVOS, "conversion"), []);
+  const teamAvgScore = useMemo(() => avg(EJECUTIVOS, "score"), []);
+  const teamAvgAtenciones = useMemo(() => avg(EJECUTIVOS, "atenciones"), []);
+  const teamAvgResPct = useMemo(() => avg(EJECUTIVOS.map(e => ({ v: e.resueltas })), "v"), []);
+  const teamAvgEscucha = useMemo(() => avg(EJECUTIVOS, "escuchaActiva"), []);
+  const teamAvgInterrupciones = useMemo(() => avg(EJECUTIVOS, "interrupciones"), []);
+  const teamAvgSondeo = useMemo(() => avg(EJECUTIVOS, "sondeoProm"), []);
+  const teamAvgTiempoHabla = useMemo(() => avg(EJECUTIVOS, "tiempoHabla"), []);
+  const teamAvgCsat = useMemo(() => avg(EJECUTIVOS, "csat"), []);
+
+  const rank = useMemo(() => {
+    const sorted = [...EJECUTIVOS].sort((a, b) => b.score - a.score);
+    return { pos: sorted.findIndex(e => e.name === self.name) + 1, total: sorted.length };
+  }, [self]);
+
+  const practices = useMemo(() => {
+    const map = new Map();
+    others.forEach(e => e.fortalezas.forEach(f => {
+      const cur = map.get(f.tema) || { tema: f.tema, detalle: f.detalle, count: 0 };
+      cur.count += 1;
+      map.set(f.tema, cur);
+    }));
+    return [...map.values()].sort((a, b) => b.count - a.count).slice(0, 4);
+  }, [others]);
+
+  const conversaciones = useMemo(() => genConversaciones(self, selfIdx), [self, selfIdx]);
+
+  const topicos = useMemo(() => {
+    return TEMAS_PERIODO.map(t => {
+      const propias = conversaciones.filter(c => c.tema === t.name);
+      const counts = { pos: 0, neu: 0, neg: 0 };
+      propias.forEach(c => counts[c.sent]++);
+      const dominant = propias.length
+        ? Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0]
+        : (t.sent === "negativa" ? "neg" : t.sent === "positiva" ? "pos" : "neu");
+      return { name: t.name, sintesis: t.sintesis, count: propias.length, dominant };
+    }).filter(t => t.count > 0);
+  }, [conversaciones]);
+
+  const topFortalezaPropia = self.fortalezas[0];
+  const topMejoraPropia = self.mejorar[0];
+
+  return (
+    <React.Fragment>
+      <Sidebar />
+      <main className="main" id="contenido">
+        <div className="topbar">
+          <div>
+            <h1 className="page-title">Mi reporte</h1>
+            <div className="page-sub">
+              <a className="back-link" href="indexbanca.html"><Ph name="arrow-left" /> Volver al tablero de Banca</a>
+              &nbsp;·&nbsp;Informe individual de coaching · {PERIODO_INFORME}
+            </div>
+          </div>
+          <span className="tenant-chip" style={{ marginLeft: 8 }}>
+            <span className="tc-dot"><BrandMark size={13} /></span>Banca
+          </span>
+          <div style={{ display: "flex", gap: 8, marginLeft: "auto", alignItems: "center", flexWrap: "wrap" }}>
+            <div className="viewer-select">
+              <span>Viendo como</span>
+              <select value={selfIdx} onChange={e => setSelfIdx(Number(e.target.value))} aria-label="Elegir ejecutivo (demo)">
+                {EJECUTIVOS.map((e, i) => <option key={e.name} value={i}>{e.name}</option>)}
+              </select>
+            </div>
+            <button className="btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }} onClick={() => window.print()}>
+              <i className="ph-fill ph-file-pdf" aria-hidden="true"></i>Descargar PDF
+            </button>
+          </div>
+        </div>
+
+        <div className="banner-info">
+          <Ph name="lock-simple" fill />
+          Este reporte es privado: solo vos ves el detalle de tus atenciones. Las buenas prácticas de otros ejecutivos se muestran agregadas, sin identificar a la persona.
+        </div>
+
+        <div className="report-sheet" style={{ border: "1px solid var(--border)", borderRadius: 12, overflow: "hidden" }}>
+          <div className="report-hero">
+            <div className="rh-kicker">Informe individual · confidencial</div>
+            <h2>{topFortalezaPropia ? "Tu fortaleza está en " + topFortalezaPropia.tema.toLowerCase() + "; la oportunidad más rápida es " + topMejoraPropia.tema.toLowerCase() : "Tu reporte del período"}</h2>
+            <p>
+              Se analizaron {fmtNum(self.atenciones)} atenciones tuyas de {self.suc} en los {PERIODO_INFORME}, incluyendo
+              indicadores de escucha, CSAT estimado, los temas que más aparecieron en tus conversaciones y una sugerencia
+              puntual por cada atención que lo requirió. Al final sumamos prácticas que le funcionan a otros ejecutivos
+              del equipo — sin decir quiénes son — para que puedas probarlas vos también.
+            </p>
+            <div className="exec-hero-id">
+              <span className="avatar lg">{self.ini}</span>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 15 }}>{self.name}</div>
+                <div className="ehi-meta">{self.rol} · {self.suc}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="report-body">
+            <div className="report-kpis">
+              <div className="report-kpi"><div className="rk-v">{fmtNum(self.atenciones)}</div><div className="rk-l">atenciones analizadas</div></div>
+              <div className="report-kpi"><div className="rk-v">{fmtP(self.conversion)}%</div><div className="rk-l">conversión</div></div>
+              <div className="report-kpi"><div className="rk-v">{fmtP(self.score)}/10</div><div className="rk-l">score de atención</div></div>
+              <div className="report-kpi"><div className="rk-v">{self.resueltas}%</div><div className="rk-l">atenciones resueltas</div></div>
+              <div className="report-kpi"><div className="rk-v">{self.noResueltas}</div><div className="rk-l">no resueltas</div></div>
+              <div className="report-kpi"><div className="rk-v">{fmtP(self.csat)}/5</div><div className="rk-l">CSAT estimado</div></div>
+            </div>
+
+            <div>
+              <div className="report-h3"><Ph name="ear" fill />Indicadores de escucha</div>
+              <div style={{ marginTop: 12 }}>
+                <TalkRatio pctEjecutivo={self.tiempoHabla} teamAvg={teamAvgTiempoHabla} />
+              </div>
+              <div className="grid" style={{ marginTop: 14 }}>
+                <ListenStat label="Escucha activa" value={self.escuchaActiva} unit="%" teamAvg={teamAvgEscucha} />
+                <ListenStat label="Interrupciones sin dejar terminar" value={self.interrupciones} teamAvg={teamAvgInterrupciones} invert />
+                <ListenStat label="Preguntas de sondeo (prom./atención)" value={self.sondeoProm} teamAvg={teamAvgSondeo} />
+              </div>
+              <div className="card-sub" style={{ marginTop: 12 }}>
+                Detectados automáticamente a partir del audio de tus atenciones interpretables del período. El CSAT es una estimación a partir del tono y el contenido de la conversación, no reemplaza la encuesta de servicio.
+              </div>
+            </div>
+
+            <div>
+              <div className="report-h3"><Ph name="chart-line-up" fill />Cómo te comparás con el equipo</div>
+              <div style={{ marginTop: 12 }}>
+                <CompareBars label="Conversión (%)" you={self.conversion} teamAvg={teamAvgConv} unit="%" />
+                <CompareBars label="Score de atención (/10)" you={self.score} teamAvg={teamAvgScore} unit="/10" max={10} />
+              </div>
+              <div className="compare-legend">
+                <span><span className="dot-you"></span>Vos</span>
+                <span><span className="dot-team"></span>Promedio del equipo ({EJECUTIVOS.length} ejecutivos)</span>
+              </div>
+              <div className="rank-note">
+                <Ph name="medal" fill />
+                Estás en el puesto {rank.pos} de {rank.total} por score de atención. Esta posición es solo para vos: no identifica a los demás ejecutivos del ranking.
+              </div>
+            </div>
+
+            <div>
+              <div className="report-h3"><Ph name="chats-circle" fill />Temas del período en tus conversaciones</div>
+              <div className="report-list" style={{ marginTop: 12 }}>
+                {topicos.map(t => <TopicItem t={t} key={t.name} />)}
+              </div>
+            </div>
+
+            <div>
+              <div className="report-h3"><Ph name="chat-circle-text" fill />Tus conversaciones</div>
+              <div className="anon-note" style={{ marginTop: 8 }}>
+                <Ph name="info" />
+                Muestra de {conversaciones.length} atenciones tuyas del período. Hacé clic en una fila para ver la sugerencia puntual de esa conversación.
+              </div>
+              <div style={{ overflowX: "auto" }}>
+                <table className="data">
+                  <thead>
+                    <tr>
+                      {["Fecha", "Tema", "Canal", "Duración", "Sentimiento", "Resultado", "Puntuación", "Coaching", ""].map(h => (
+                        <th key={h}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {conversaciones.map(c => (
+                      <ConversationRow c={c} key={c.id} isOpen={openConv === c.id}
+                        onToggle={() => setOpenConv(openConv === c.id ? null : c.id)} />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <div className="report-h3"><Ph name="target" fill />Tus oportunidades de mejora</div>
+              <div className="report-list" style={{ marginTop: 12 }}>
+                {self.mejorar.map(o => <OpportunityItem o={o} key={o.tema} />)}
+              </div>
+            </div>
+
+            <div>
+              <div className="report-h3"><Ph name="users-three" fill />Buenas prácticas del equipo que podés probar</div>
+              <div className="anon-note" style={{ marginTop: 8 }}>
+                <Ph name="info" />
+                Agrupadas entre {others.length} ejecutivos del resto del equipo, sin mostrar nombres ni agencia.
+              </div>
+              <div className="report-list">
+                {practices.map(p => <PracticeItem p={p} key={p.tema} />)}
+              </div>
+            </div>
+
+            <div>
+              <div className="report-h3"><Ph name="list-checks" fill />Tus próximos pasos</div>
+              <div className="report-list" style={{ marginTop: 12 }}>
+                {self.mejorar.map((o, i) => (
+                  <div className="report-action" key={o.tema}>
+                    <span className="ra-n">{i + 1}</span>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>{o.accion}</div>
+                      <p style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.6, marginTop: 4 }}>Relacionado con: {o.tema.toLowerCase()}.</p>
+                      <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                        <span className="pill sm neu"><Ph name="user" />Vos</span>
+                        <span className={"pill sm " + (o.impacto === "Alto" ? "crit" : "warn")}>impacto {o.impacto.toLowerCase()}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {practices[0] ? (
+                  <div className="report-action" key="practica">
+                    <span className="ra-n">{self.mejorar.length + 1}</span>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>Probar: {practices[0].tema.toLowerCase()}</div>
+                      <p style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.6, marginTop: 4 }}>{practices[0].detalle}</p>
+                      <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                        <span className="pill sm neu"><Ph name="user" />Vos</span>
+                        <span className="pill sm purple">práctica del equipo</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="card-sub" style={{ borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+              Nota metodológica: tus indicadores se calculan sobre tus atenciones con audio interpretable del período.
+              Las buenas prácticas de la sección "Buenas prácticas del equipo" se muestran agregadas y sin identificar a
+              ningún ejecutivo en particular. Este informe es una herramienta de coaching individual y confidencial;
+              no constituye evaluación formal de desempeño ni un ranking público.
+            </div>
+          </div>
+        </div>
+      </main>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<MiReporte />);
+</script>
