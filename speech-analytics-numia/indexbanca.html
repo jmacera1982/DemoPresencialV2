@@ -1193,7 +1193,7 @@ function Sidebar() {
 
 /* ── Tabs ── */
 function Tabs({ tab, onTab }) {
-  const tabs = ["Resumen", "Comercial", "Caja", "Interacciones", "Performance de usuarios", "Agencias"];
+  const tabs = ["Resumen", "Comercial", "Caja", "Interacciones", "Performance de usuarios", "Agencias", "Reportes"];
   return (
     <div className="tabs" role="tablist">
       {tabs.map(t => (
@@ -3173,6 +3173,864 @@ window.AGENCIAS_DATA = AGENCIAS_DATA;
 </script>
 
 <script type="text/babel" data-presets="react">
+// Screen 7 — Report Builder (tab Reportes)
+const { useState: useStateR, useMemo: useMemoR, useEffect: useEffectR, useRef: useRefR } = React;
+
+/* ══════════ Modelo de datos ══════════ */
+
+const RB_DIMS = [
+  { k: "suc", n: "Agencia", g: "Globales", vals: (typeof SUCURSALES !== "undefined" ? SUCURSALES.slice(0, 4) : ["Sucursal Centro", "Sucursal Norte", "Sucursal Providencia", "Sucursal Las Condes"]) },
+  { k: "agente", n: "Usuario", g: "Globales", vals: (typeof EJECUTIVOS !== "undefined" ? EJECUTIVOS : ["María González", "Carlos Fuentes", "Ana Riquelme", "Pedro Salas", "Lucía Vergara"]) },
+  { k: "canal", n: "Tipo de atención", g: "Globales", vals: ["Caja", "SAC"] },
+  { k: "periodo", n: "Fecha / período", g: "Globales", vals: ["Sem 40", "Sem 41", "Sem 42", "Sem 43", "Sem 44", "Sem 45"] },
+  { k: "resolucion", n: "Estado de resolución", g: "Del análisis", vals: ["Resuelta", "Parcial", "Derivada", "No resuelta"] },
+  { k: "resultado", n: "Resultado de la atención", g: "Del análisis", vals: ["Operación completada", "Consulta respondida", "Operación rechazada", "Cliente no se presentó"] },
+  { k: "motivo", n: "Motivo principal", g: "Del análisis", vals: ["Cuentas", "Tarjetas", "Operaciones de caja", "Pagos y transferencias", "Créditos y financiamiento", "Ahorro e inversiones", "Canales digitales", "Reclamos", "Otros motivos"] },
+  { k: "motivoNoRes", n: "Motivo de no-resolución", g: "Del análisis", vals: ["Información incompleta", "Derivado a otra agencia", "Operación no completada", "Derivado a otra área", "Rechazo del sistema"] },
+  { k: "tipoQueja", n: "Tipo de queja", g: "Del análisis", vals: ["Procesos", "Mal servicio", "Infraestructura", "Libro de quejas", "Conflictivo"] },
+  { k: "sentimiento", n: "Sentimiento del cliente", g: "Del análisis", vals: ["Positivo", "Neutro", "Negativo"] },
+  { k: "etapaDebil", n: "Etapa débil de venta", g: "Del análisis", vals: ["Cierre", "Apertura", "Sondeo", "Oferta"] },
+  { k: "producto", n: "Producto discutido", g: "Del análisis", vals: ["Tarjeta de crédito", "Tarjeta de débito", "Depósito a plazo", "Cheque", "Préstamo personal", "Seguro"] },
+  { k: "objecion", n: "Objeción del cliente", g: "Del análisis", vals: ["Precio / comisión", "Falta de notificación", "Confusión sobre cobro", "Ya tiene el producto", "No le interesa"] },
+  { k: "fortaleza", n: "Fortaleza / debilidad", g: "Del análisis", vals: ["Atención cordial", "Cierre efectivo", "Escucha activa", "Ritmo operativo", "Información clara"] },
+  { k: "scoreBucket", n: "Bucket de sellerScore", g: "Del análisis", vals: ["1–2", "3–4", "5–6", "7–8", "9–10"] },
+];
+const RB_DIM = {};
+RB_DIMS.forEach(d => { RB_DIM[d.k] = d; });
+
+const RB_FAMS = [
+  { k: "A", n: "Volumen y resolución" },
+  { k: "B", n: "Comercial" },
+  { k: "C", n: "Protocolo y servicio" },
+  { k: "D", n: "Fricciones operativas" },
+  { k: "E", n: "Quejas" },
+  { k: "F", n: "Experiencia del cliente" },
+  { k: "G", n: "Calidad del dato" },
+];
+
+const RB_MEAS = [
+  { k: "total", n: "Total de atenciones", f: "A", t: "conteo" },
+  { k: "pResueltas", n: "% Resueltas", f: "A", t: "tasa", p: 0.36 },
+  { k: "pFcr", n: "% Resueltas en primer contacto (FCR)", f: "A", t: "tasa", p: 0.31 },
+  { k: "pDerivadas", n: "% Derivadas", f: "A", t: "tasa", p: 0.12 },
+  { k: "pParciales", n: "% Parciales", f: "A", t: "tasa", p: 0.09 },
+  { k: "pNoResueltas", n: "% No resueltas", f: "A", t: "tasa", p: 0.64 },
+
+  { k: "pVenta", n: "% con venta cerrada", f: "B", t: "tasa", p: 0.06 },
+  { k: "pConv", n: "Conversión oferta → cierre", f: "B", t: "tasa", p: 0.28 },
+  { k: "pOferta", n: "Tasa de oferta (≥1 producto)", f: "B", t: "tasa", p: 0.21 },
+  { k: "avgProductos", n: "Promedio de productos ofrecidos", f: "B", t: "promedio", field: "productos", dec: 1 },
+  { k: "avgSeller", n: "sellerScore promedio", f: "B", t: "promedio", field: "sellerScore", dec: 1, unit: "/10" },
+
+  { k: "pBienvenida", n: "% Bienvenida", f: "C", t: "tasa", p: 0.58 },
+  { k: "pPresentacion", n: "% Presentación", f: "C", t: "tasa", p: 0.44 },
+  { k: "pPersonalizacion", n: "% Personalización", f: "C", t: "tasa", p: 0.37 },
+  { k: "pDespedida", n: "% Despedida con nombre", f: "C", t: "tasa", p: 0.29 },
+  { k: "pConsultaAdic", n: "% Consulta adicional", f: "C", t: "tasa", p: 0.33 },
+  { k: "pFraseCierre", n: "% Frase de cierre", f: "C", t: "tasa", p: 0.26 },
+  { k: "avgProtocolo", n: "Score de protocolo agregado", f: "C", t: "promedio", field: "protocolo", dec: 0, unit: "%" },
+  { k: "pCumpl6", n: "% Cumplimiento total 6/6", f: "C", t: "tasa", p: 0.08 },
+  { k: "pEscucha", n: "% con escucha activa", f: "C", t: "tasa", p: 0.13 },
+  { k: "pConfirmacion", n: "% con confirmación de operación", f: "C", t: "tasa", p: 0.09 },
+  { k: "pEncuesta", n: "% ofreció encuesta", f: "C", t: "tasa", p: 0.02 },
+  { k: "pInterrupcion", n: "% interrupción sin saludo", f: "C", t: "tasa", p: 0.07, neg: true },
+
+  { k: "pSistema", n: "% menciona sistema caído", f: "D", t: "tasa", p: 0.05, neg: true, soloCaja: true },
+  { k: "pSencillo", n: "% “no hay sencillo”", f: "D", t: "tasa", p: 0.03, neg: true, soloCaja: true },
+  { k: "pCambio", n: "% “no hay cambio”", f: "D", t: "tasa", p: 0.02, neg: true, soloCaja: true },
+  { k: "pTraslado", n: "% traslado a otra área", f: "D", t: "tasa", p: 0.08, neg: true },
+  { k: "pCentral", n: "% derivado a central", f: "D", t: "tasa", p: 0.02, neg: true },
+  { k: "pCobros", n: "% derivado a cobros", f: "D", t: "tasa", p: 0.02, neg: true },
+  { k: "pSupervisor", n: "% esperó supervisor", f: "D", t: "tasa", p: 0.05, neg: true },
+  { k: "pDigital", n: "% promovió canal digital", f: "D", t: "tasa", p: 0.033 },
+
+  { k: "pQueja", n: "% atenciones con queja", f: "E", t: "tasa", p: 0.05, neg: true },
+  { k: "pQuejaRes", n: "% quejas resueltas", f: "E", t: "tasa", p: 0.41 },
+
+  { k: "pPositivo", n: "% sentimiento positivo", f: "F", t: "tasa", p: 0.14 },
+  { k: "pNegativo", n: "% sentimiento negativo", f: "F", t: "tasa", p: 0.03, neg: true },
+  { k: "pFelicitaciones", n: "% felicitaciones explícitas", f: "F", t: "tasa", p: 0.05 },
+
+  { k: "avgConfidence", n: "analysisConfidence promedio", f: "G", t: "promedio", field: "confidence", dec: 2 },
+  { k: "pConfBajo", n: "% con confidence bajo", f: "G", t: "tasa", p: 0.07 },
+  { k: "pNoInterp", n: "% no interpretables", f: "G", t: "tasa", p: 0.11 },
+  { k: "pNoPresento", n: "% “no se presentó”", f: "G", t: "tasa", p: 0.04 },
+];
+const RB_M = {};
+RB_MEAS.forEach(m => { RB_M[m.k] = m; });
+
+/* Dataset sintético determinista */
+const RB_ROWS = (() => {
+  let s = 20260803;
+  const rnd = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+  const pick = a => a[Math.floor(rnd() * a.length)];
+  const out = [];
+  for (let i = 0; i < 2334; i++) {
+    const canal = rnd() < 0.76 ? "Caja" : "SAC";
+    const suc = pick(RB_DIM.suc.vals);
+    // la última agencia solo opera Caja en el período — genera combinaciones sin datos
+    if (suc === RB_DIM.suc.vals[3] && canal === "SAC") continue;
+    const skill = 0.7 + rnd() * 0.6;
+    const r = {
+      suc, canal, agente: pick(RB_DIM.agente.vals), periodo: pick(RB_DIM.periodo.vals),
+      resolucion: pick(RB_DIM.resolucion.vals), resultado: pick(RB_DIM.resultado.vals),
+      motivo: pick(RB_DIM.motivo.vals), motivoNoRes: pick(RB_DIM.motivoNoRes.vals),
+      tipoQueja: pick(RB_DIM.tipoQueja.vals), sentimiento: rnd() < 0.14 ? "Positivo" : rnd() < 0.9 ? "Neutro" : "Negativo",
+      etapaDebil: pick(RB_DIM.etapaDebil.vals), producto: pick(RB_DIM.producto.vals),
+      objecion: pick(RB_DIM.objecion.vals), fortaleza: pick(RB_DIM.fortaleza.vals),
+      productos: Math.round(rnd() * 2 * skill * 10) / 10,
+      sellerScore: Math.max(1, Math.min(10, Math.round(2 + rnd() * 5 * skill))),
+      protocolo: Math.round(20 + rnd() * 55 * skill),
+      confidence: Math.round((0.55 + rnd() * 0.44) * 100) / 100,
+      interpretable: rnd() > 0.11,
+      flags: {},
+    };
+    r.scoreBucket = r.sellerScore <= 2 ? "1–2" : r.sellerScore <= 4 ? "3–4" : r.sellerScore <= 6 ? "5–6" : r.sellerScore <= 8 ? "7–8" : "9–10";
+    RB_MEAS.forEach(m => { if (m.t === "tasa") r.flags[m.k] = rnd() < m.p * (m.neg ? 2 - skill : skill); });
+    r.flags.conflictivo = rnd() < 0.006;
+    out.push(r);
+  }
+  return out;
+})();
+
+/* ══════════ Cálculo ══════════ */
+const rbNum = (v, dec) => v.toLocaleString("es-AR", { minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 });
+
+function rbValue(m, rows, base) {
+  const den = base === "interpretables" ? rows.filter(r => r.interpretable) : rows;
+  if (!rows.length) return null;
+  if (m.t === "conteo") return m.flag ? rows.filter(r => r.flags[m.flag]).length : rows.length;
+  if (m.t === "tasa") return den.length ? (den.filter(r => r.flags[m.k]).length / den.length) * 100 : null;
+  if (m.t === "promedio") return den.length ? den.reduce((a, r) => a + r[m.field], 0) / den.length : null;
+  return den.length; // distribución / ranking se resuelven por dimensión
+}
+function rbFmt(m, v) {
+  if (v == null) return "—";
+  if (m.t === "conteo" || m.t === "distribucion" || m.t === "ranking") return rbNum(v, 0);
+  if (m.t === "tasa") return rbNum(v, 1) + "%";
+  return rbNum(v, m.dec) + (m.unit || "");
+}
+
+/* ══════════ Helpers de vista ══════════ */
+const RB_TYPE_ICON = { conteo: "hash", tasa: "percent", promedio: "chart-line-up", distribucion: "chart-donut", ranking: "list-numbers" };
+const RB_TYPE_LABEL = { conteo: "conteo", tasa: "tasa %", promedio: "promedio", distribucion: "distribución", ranking: "ranking" };
+const RB_VIZ = [
+  { k: "pivot", n: "Tabla", icon: "table", help: "Filas y columnas con los valores exactos." },
+  { k: "barra", n: "Barra", icon: "chart-bar-horizontal", help: "Compara magnitudes entre grupos." },
+  { k: "linea", n: "Línea", icon: "chart-line", help: "Evolución en el tiempo." },
+  { k: "kpi", n: "KPI", icon: "square", help: "Un solo número grande." },
+];
+const RB_PALETTE = ["var(--purple)", "#0072B2", "#56B4E9", "#E69F00", "#CC79A7"];
+
+const rbFilter = gf => RB_ROWS.filter(r =>
+  (!gf.sucs || !gf.sucs.length || gf.sucs.indexOf(r.suc) >= 0) &&
+  (!gf.agentes || !gf.agentes.length || gf.agentes.indexOf(r.agente) >= 0) &&
+  (gf.canal === "Todos" || r.canal === gf.canal));
+
+function rbValidViz(cfg) {
+  const v = ["pivot"];
+  if (cfg.rowDims.length === 1) v.push("barra");
+  if (cfg.rowDims.length === 1 && ["periodo", "mes"].indexOf(cfg.rowDims[0].k) >= 0 && cfg.meas.length === 1) v.push("linea");
+  if (!cfg.rowDims.length && cfg.meas.length === 1) v.push("kpi");
+  return v;
+}
+function rbRecommended(cfg) {
+  if (!cfg.rowDims.length && cfg.meas.length === 1) return "kpi";
+  if (cfg.rowDims.length === 1 && ["periodo", "mes"].indexOf(cfg.rowDims[0].k) >= 0 && cfg.meas.length === 1) return "linea";
+  if (cfg.rowDims.length === 1 && cfg.meas.length === 1) return "barra";
+  return "pivot";
+}
+const rbEffViz = cfg => {
+  const valid = rbValidViz(cfg);
+  return cfg.viz && valid.indexOf(cfg.viz) >= 0 ? cfg.viz : rbRecommended(cfg);
+};
+const rbInvalid = cfg => cfg.meas.length > 1 && cfg.colDims.length > 0;
+const rbNaMeas = (cfg, gf) => cfg.meas.filter(k => RB_M[k].soloCaja && gf.canal === "SAC").map(k => RB_M[k]);
+
+function rbPivot(rows, cfg, base) {
+  if (!rows.length || !cfg.meas.length) return null;
+  const rd = cfg.rowDims.map(d => d.k);
+  const limit = (vals, topN) => topN === "Todos" ? vals : vals.slice(0, parseInt(String(topN).replace("Top ", ""), 10));
+  const combos = [];
+  const walk = (i, acc) => {
+    if (i === rd.length) { combos.push(acc); return; }
+    const d = cfg.rowDims[i];
+    const counts = {}, score = {};
+    const M0 = RB_M[cfg.meas[0]];
+    RB_DIM[d.k].vals.forEach(v => {
+      const sub = rows.filter(r => r[d.k] === v && acc.every((a, j) => r[rd[j]] === a));
+      counts[v] = sub.length;
+      score[v] = sub.length ? (rbValue(M0, sub, base) || 0) : -Infinity;
+    });
+    limit(RB_DIM[d.k].vals.slice().filter(v => counts[v] > 0).sort((a, b) => score[b] - score[a]), d.topN).forEach(v => walk(i + 1, [...acc, v]));
+  };
+  if (rd.length) walk(0, []); else combos.push([]);
+  const cd = cfg.colDims[0];
+  const colVals = cd ? limit(RB_DIM[cd.k].vals.filter(v => rows.some(r => r[cd.k] === v)), cd.topN) : [null];
+  const body = combos.map(c => {
+    const subset = rows.filter(r => c.every((v, j) => r[rd[j]] === v));
+    return {
+      combo: c, subset,
+      cells: colVals.map(cv => cfg.meas.map(k => rbValue(RB_M[k], cv == null ? subset : subset.filter(r => r[cd.k] === cv), base))),
+    };
+  }).filter(b => b.subset.length > 0);
+  return { colVals, body, cd };
+}
+
+/* ══════════ Estados ══════════ */
+function RbSkeleton() {
+  return (
+    <div style={{ padding: 4 }}>
+      {[0, 1, 2, 3, 4, 5].map(i => (
+        <div key={i} style={{ height: 28, marginBottom: 8, borderRadius: 6, background: "linear-gradient(90deg,#F0F0F3 25%,#F7F7F9 50%,#F0F0F3 75%)", backgroundSize: "200% 100%", animation: "rb-shimmer 1.6s linear infinite", opacity: 1 - i * 0.11 }}></div>
+      ))}
+    </div>
+  );
+}
+function RbMsg({ icon, title, body, tone, action }) {
+  const c = tone === "warn" ? "var(--amber)" : tone === "error" ? "var(--red)" : "var(--purple)";
+  const bg = tone === "warn" ? "var(--amber-bg)" : tone === "error" ? "var(--red-bg)" : "var(--purple-soft)";
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 11, padding: "60px 32px", textAlign: "center" }}>
+      <span style={{ width: 44, height: 44, borderRadius: 12, background: bg, color: c, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 21 }}>
+        <i className={"ph ph-" + icon}></i>
+      </span>
+      <div style={{ fontSize: 15, fontWeight: 600 }}>{title}</div>
+      <div style={{ fontSize: 13, color: "var(--ink-3)", maxWidth: 400, lineHeight: 1.55 }}>{body}</div>
+      {action || null}
+    </div>
+  );
+}
+
+/* ══════════ Render de una visualización ══════════ */
+function RbView({ cfg, gf: gfIn, base, height }) {
+  const gf = useMemoR(() => (cfg.canal ? { ...gfIn, canal: cfg.canal } : gfIn), [gfIn, cfg.canal]);
+  const rows = useMemoR(() => rbFilter(gf), [gf]);
+  useEffectR(() => { window.__rbOpenGallery = () => setGallery(true); return () => { delete window.__rbOpenGallery; }; }, []);
+  const pivot = useMemoR(() => rbPivot(rows, cfg, base), [rows, cfg, base]);
+  const na = rbNaMeas(cfg, gf);
+  const naAll = na.length === cfg.meas.length && cfg.meas.length > 0;
+  if (!cfg.meas.length) return <RbMsg icon="ruler" title="Seleccione una métrica" body="Indique qué desea medir —por ejemplo, el porcentaje de atenciones resueltas— y el gráfico se calcula solo." />;
+  if (rbInvalid(cfg)) return <RbMsg tone="error" icon="warning-circle" title="Esta combinación no se puede mostrar" body="No se pueden ver varias métricas y un segundo corte al mismo tiempo: la tabla quedaría con dos ejes de números. Deje una sola métrica o quite el cruce." />;
+  if (!rows.length) return <RbMsg tone="warn" icon="database" title="No hay atenciones con estos filtros" body="La combinación de agencia, usuario y tipo de atención no registró atenciones en el período. Amplíe el rango de fechas o quite un filtro." />;
+  if (naAll) return <RbMsg tone="warn" icon="info" title="Las métricas elegidas no aplican a SAC" body="Las fricciones de caja (sistema caído, falta de sencillo o de cambio) solo se detectan en atenciones de ventanilla. Modifique el filtro de canal o seleccione otra métrica." />;
+  const viz = rbEffViz(cfg);
+  const M0 = RB_M[cfg.meas[0]];
+
+  if (viz === "kpi") {
+    return (
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", padding: "26px 4px" }}>
+        {cfg.meas.map(k => {
+          const M = RB_M[k], no = M.soloCaja && gf.canal === "SAC";
+          return (
+            <div key={k} style={{ flex: "1 1 200px" }}>
+              <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginBottom: 8 }}>{M.n}</div>
+              <div style={{ fontSize: 40, fontWeight: 600, letterSpacing: "-0.02em", color: no ? "var(--ink-3)" : M.alerta ? "var(--red)" : "var(--ink)", fontVariantNumeric: "tabular-nums" }}>
+                {no ? "N/A" : rbFmt(M, rbValue(M, rows, base))}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 6 }}>{rbNum(rows.length, 0)} atenciones</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+  if (viz === "linea") {
+    const pts = pivot.body.map(b => ({ x: b.combo.join(" "), v: b.cells[0][0] || 0 }));
+    const mx = Math.max.apply(null, pts.map(p => p.v)) * 1.15 || 1;
+    const W = 760, H = height || 250, x0 = 46, x1 = 744, y0 = H - 40, yT = 14;
+    const X = i => x0 + (i * (x1 - x0)) / Math.max(1, pts.length - 1);
+    const Y = v => y0 - (v / mx) * (y0 - yT);
+    return (
+      <svg viewBox={"0 0 " + W + " " + H} style={{ width: "100%", height: "auto", display: "block" }}>
+        {[0, 0.25, 0.5, 0.75, 1].map(f => (
+          <g key={f}>
+            <line x1={x0} y1={Y(mx * f)} x2={x1} y2={Y(mx * f)} stroke="rgba(26,26,46,0.07)"></line>
+            <text x={x0 - 10} y={Y(mx * f) + 4} textAnchor="end" style={{ fontSize: 11, fill: "var(--ink-3)" }}>{rbNum(mx * f, 0)}</text>
+          </g>
+        ))}
+        <path d={pts.map((p, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(p.v).toFixed(1)).join(" ")} fill="none" stroke="var(--purple)" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"></path>
+        {pts.map((p, i) => <circle key={p.x} cx={X(i)} cy={Y(p.v)} r="3.5" fill="var(--purple)" stroke="#fff" strokeWidth="1.5"><title>{p.x}: {rbFmt(M0, p.v)}</title></circle>)}
+        {pts.map((p, i) => <text key={"l" + p.x} x={X(i)} y={y0 + 22} textAnchor="middle" style={{ fontSize: 11, fill: "var(--ink-3)" }}>{p.x}</text>)}
+      </svg>
+    );
+  }
+  if (viz === "barra") {
+    const stacked = cfg.colDims.length && cfg.apilar;
+    const maxV = Math.max.apply(null, pivot.body.map(b => stacked ? b.cells.reduce((a, c) => a + (c[0] || 0), 0) : (b.cells[0][0] || 0))) || 1;
+    return (
+      <div>
+        {pivot.body.map(b => {
+          const tot = b.cells.reduce((a, c) => a + (c[0] || 0), 0);
+          return (
+            <div key={b.combo.join("|")} style={{ display: "grid", gridTemplateColumns: "minmax(110px,200px) 1fr 76px", alignItems: "center", gap: 12, padding: "5px 0" }}>
+              <span style={{ fontSize: 12.5, color: "var(--ink-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.combo.join(" · ") || "Total"}</span>
+              <div style={{ display: "flex", height: 18, borderRadius: 4, overflow: "hidden", background: "var(--bg)" }}>
+                {stacked ? b.cells.map((c, i) => (
+                  <div key={i} title={pivot.colVals[i] + ": " + rbFmt(M0, c[0])} style={{ width: ((c[0] || 0) / maxV * 100) + "%", background: RB_PALETTE[i % RB_PALETTE.length] }}></div>
+                )) : (
+                  <div style={{ width: Math.max(1, (b.cells[0][0] || 0) / maxV * 100) + "%", background: "var(--purple)", borderRadius: 4, transition: "width .28s cubic-bezier(0.4,0,0.2,1)" }}></div>
+                )}
+              </div>
+              <span style={{ fontSize: 12.5, fontWeight: 600, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{rbFmt(M0, stacked ? tot : b.cells[0][0])}</span>
+            </div>
+          );
+        })}
+        {stacked ? (
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border)" }}>
+            {pivot.colVals.map((v, i) => (
+              <span key={v} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "var(--ink-2)" }}>
+                <span style={{ width: 9, height: 9, borderRadius: 2, background: RB_PALETTE[i % RB_PALETTE.length] }}></span>{v}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table className="data" style={{ width: "100%", fontSize: 12.5, borderCollapse: "collapse" }}>
+        <thead>
+          {pivot.cd ? (
+            <tr>
+              {cfg.rowDims.map(d => <th key={d.k} rowSpan="2" style={{ whiteSpace: "nowrap", verticalAlign: "bottom" }}>{RB_DIM[d.k].n}</th>)}
+              {pivot.colVals.map(cv => <th key={cv} colSpan={cfg.meas.length} style={{ textAlign: "center", whiteSpace: "nowrap", borderLeft: "1px solid var(--border)" }}>{cv}</th>)}
+            </tr>
+          ) : null}
+          <tr>
+            {!pivot.cd ? cfg.rowDims.map(d => <th key={d.k} style={{ whiteSpace: "nowrap" }}>{RB_DIM[d.k].n}</th>) : null}
+            {pivot.colVals.map(cv => cfg.meas.map(k => (
+              <th key={String(cv) + k} style={{ textAlign: "right", whiteSpace: "nowrap" }}>{RB_M[k].n}</th>
+            )))}
+          </tr>
+        </thead>
+        <tbody>
+          {pivot.body.map(b => (
+            <tr key={b.combo.join("|")}>
+              {b.combo.map((v, i) => <td key={i} style={{ fontWeight: i === 0 ? 500 : 400, whiteSpace: "nowrap" }}>{v}</td>)}
+              {b.cells.map((cell, ci) => cell.map((v, mi) => {
+                const M = RB_M[cfg.meas[mi]], no = M.soloCaja && gf.canal === "SAC";
+                return <td key={ci + "-" + mi} style={{ textAlign: "right", fontVariantNumeric: "tabular-nums", color: no ? "var(--ink-3)" : M.alerta && v > 0 ? "var(--red)" : "var(--ink-2)", borderLeft: ci > 0 && mi === 0 ? "1px solid var(--border)" : "none" }}>{no ? "N/A" : rbFmt(M, v)}</td>;
+              }))}
+            </tr>
+          ))}
+          <tr style={{ borderTop: "2px solid var(--border)", fontWeight: 600 }}>
+            {cfg.rowDims.map((d, i) => <td key={d.k}>{i === 0 ? "Total" : ""}</td>)}
+            {pivot.colVals.map((cv, ci) => cfg.meas.map((k, mi) => {
+              const M = RB_M[k], no = M.soloCaja && gf.canal === "SAC";
+              const sub = cv == null ? rows : rows.filter(r => r[pivot.cd.k] === cv);
+              return <td key={ci + "-" + mi} style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{no ? "N/A" : rbFmt(M, rbValue(M, sub, base))}</td>;
+            }))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/* ══════════ Dimensión temporal derivada ══════════ */
+RB_ROWS.forEach(r => { r.mes = ["Sem 40", "Sem 41", "Sem 42"].indexOf(r.periodo) >= 0 ? "Octubre" : "Noviembre"; });
+RB_DIMS.push({ k: "mes", n: "Mes", g: "Globales", vals: ["Octubre", "Noviembre"], hidden: true });
+RB_DIM.mes = RB_DIMS[RB_DIMS.length - 1];
+const RB_TEMPORAL = ["periodo", "mes"];
+const RB_TOP_OPTS = ["Todos", "Top 5", "Top 10", "Top 20"];
+
+/* ══════════ Controles ══════════ */
+const rbSelStyle = { width: "100%", height: 36, padding: "0 10px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg)", fontFamily: "inherit", fontSize: 13, color: "var(--ink)", cursor: "pointer" };
+
+function RbDimSelect({ value, onChange, placeholder, disabled, exclude }) {
+  return (
+    <select value={value || ""} disabled={disabled} onChange={e => onChange(e.target.value || null)} style={{ ...rbSelStyle, opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "pointer" }}>
+      <option value="">{placeholder}</option>
+      {["Globales", "Del análisis"].map(g => (
+        <optgroup key={g} label={g}>
+          {RB_DIMS.filter(d => d.g === g && !d.hidden && (exclude || []).indexOf(d.k) < 0).map(d => <option key={d.k} value={d.k}>{d.n}</option>)}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
+function RbMeasSelect({ value, onChange, exclude }) {
+  return (
+    <select value={value} onChange={e => onChange(e.target.value)} style={rbSelStyle}>
+      {RB_FAMS.map(f => (
+        <optgroup key={f.k} label={f.n + (f.k === "G" ? " (diagnóstico)" : "")}>
+          {RB_MEAS.filter(m => m.f === f.k && (m.k === value || (exclude || []).indexOf(m.k) < 0)).map(m => <option key={m.k} value={m.k}>{m.n}</option>)}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
+function RbSection({ title, count, help, children, right }) {
+  return (
+    <div style={{ borderTop: "1px solid var(--border)", padding: "16px 0" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: help ? 4 : 10 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 600 }}>{title}</span>
+        {count != null ? <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-2)", background: "var(--bg)", borderRadius: 5, padding: "1px 7px" }}>{count}</span> : null}
+        {right ? <div style={{ marginLeft: "auto" }}>{right}</div> : null}
+      </div>
+      {help ? <div style={{ fontSize: 12, color: "var(--ink-3)", lineHeight: 1.5, marginBottom: 10 }}>{help}</div> : null}
+      {children}
+    </div>
+  );
+}
+function RbSegmented({ value, options, onChange }) {
+  return (
+    <div style={{ display: "inline-flex", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, padding: 2 }}>
+      {options.map(o => (
+        <button key={o.k} onClick={() => onChange(o.k)}
+          style={{ border: "none", borderRadius: 6, padding: "5px 12px", fontFamily: "inherit", fontSize: 12, fontWeight: value === o.k ? 600 : 400, cursor: "pointer", background: value === o.k ? "var(--card)" : "transparent", color: value === o.k ? "var(--ink)" : "var(--ink-3)", boxShadow: value === o.k ? "0 1px 2px rgba(18,18,23,0.06)" : "none" }}>{o.n}</button>
+      ))}
+    </div>
+  );
+}
+
+/* ══════════ Chart builder (patrón Intercom) ══════════ */
+function RbChartBuilder({ initial, gf, base, onBase, onCancel, onSave }) {
+  const [cfg, setCfg] = useStateR(initial);
+  const [loading, setLoading] = useStateR(false);
+  const key = JSON.stringify([cfg.meas, cfg.rowDims, cfg.colDims, cfg.apilar, base]);
+  useEffectR(() => { setLoading(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, [key]);
+  useEffectR(() => {
+    const onKey = e => { if (e.key === "Escape") onCancel(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, []);
+  const set = p => setCfg(c => ({ ...c, ...p }));
+  const valid = rbValidViz(cfg), rec = rbRecommended(cfg), eff = rbEffViz(cfg);
+  const rowDim = cfg.rowDims[0] ? cfg.rowDims[0].k : null;
+  const colDim = cfg.colDims[0] ? cfg.colDims[0].k : null;
+  const colBlocked = cfg.meas.length > 1;
+  const invalid = rbInvalid(cfg);
+  const autoName = cfg.meas.length ? RB_M[cfg.meas[0]].n + (rowDim ? " por " + RB_DIM[rowDim].n.toLowerCase() : "") : "";
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 220, background: "rgba(10,12,17,0.5)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }} onClick={onCancel}>
+      <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Constructor de gráfico"
+        style={{ width: "100%", height: "100%", maxWidth: 1340, background: "#fff", borderRadius: 14, boxShadow: "0 28px 70px rgba(10,12,17,0.32)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        {/* header */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 22px 14px" }}>
+          <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 8 }}>
+            <input value={cfg.name} onChange={e => set({ name: e.target.value })} placeholder="Escriba un nombre para este gráfico"
+              style={{ width: 340, maxWidth: "100%", border: "none", borderBottom: "1px dashed transparent", padding: "2px 0", fontFamily: "inherit", fontSize: 19, fontWeight: 600, color: "var(--ink)", background: "transparent" }}
+              onFocus={e => { e.target.style.borderBottomColor = "var(--border)"; }} onBlur={e => { e.target.style.borderBottomColor = "transparent"; }} />
+            <i className="ph ph-pencil-simple" aria-hidden="true" style={{ fontSize: 15, color: "var(--ink-3)", flexShrink: 0 }}></i>
+          </div>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            <button className="btn-secondary" onClick={onCancel}>Cancelar</button>
+            <button className="btn-primary" disabled={!cfg.meas.length || invalid}
+              style={{ opacity: (!cfg.meas.length || invalid) ? 0.5 : 1, cursor: (!cfg.meas.length || invalid) ? "not-allowed" : "pointer" }}
+              onClick={() => onSave({ ...cfg, name: cfg.name || autoName, viz: eff })}>
+              {initial.saved ? "Guardar cambios" : "Agregar gráfico"}
+            </button>
+          </div>
+        </div>
+
+        <div style={{ flex: 1, minHeight: 0, display: "grid", gridTemplateColumns: "minmax(0,1fr) 380px", borderTop: "1px solid var(--border)" }}>
+          {/* izquierda: tipos + preview */}
+          <div style={{ overflowY: "auto", padding: "16px 22px 26px" }}>
+            <section className="card" style={{ minHeight: 330 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                <span style={{ fontSize: 14.5, fontWeight: 600 }}>{cfg.name || autoName || "Gráfico sin título"}</span>
+              </div>
+              {loading ? <RbSkeleton /> : <RbView cfg={cfg} gf={gf} base={base} />}
+            </section>
+          </div>
+
+          {/* derecha: configuración */}
+          <div style={{ borderLeft: "1px solid var(--border)", overflowY: "auto", padding: "14px 20px 30px" }}>
+            <React.Fragment>
+                <RbSection title={<React.Fragment>Tipo de visualización <InfoDot text="Cómo se dibuja el resultado. Tabla para leer los valores exactos, barra para comparar agencias o usuarios, línea para ver la evolución en el tiempo y KPI para un único número. Solo se habilitan las opciones que sirven para lo que eligió; el punto marca la sugerida." /></React.Fragment>}>
+                  <div style={{ display: "inline-flex", gap: 2, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 10, padding: 3 }}>
+                    {RB_VIZ.map(v => {
+                      const ok = valid.indexOf(v.k) >= 0, on = eff === v.k;
+                      return (
+                        <button key={v.k} disabled={!ok} onClick={() => set({ viz: v.k })}
+                          title={ok ? v.n + (v.k === rec ? " · recomendada" : "") : v.n + " — no aplica a los campos elegidos"}
+                          style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 32, padding: "0 11px", border: "none", borderRadius: 7, fontFamily: "inherit", fontSize: 12, fontWeight: on ? 600 : 400, cursor: ok ? "pointer" : "not-allowed", background: on ? "var(--card)" : "transparent", boxShadow: on ? "0 1px 2px rgba(18,18,23,0.08)" : "none", color: on ? "var(--purple)" : "var(--ink-3)", opacity: ok ? 1 : 0.4, position: "relative" }}>
+                          <i className={"ph ph-" + v.icon} style={{ fontSize: 15 }}></i>{v.n}
+                          {ok && v.k === rec ? <span style={{ position: "absolute", top: 4, right: 4, width: 4, height: 4, borderRadius: "50%", background: "var(--purple)" }}></span> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </RbSection>
+
+                <RbSection title={<React.Fragment>Métricas <InfoDot text="Qué se quiere medir: por ejemplo, cuántas atenciones hubo, qué porcentaje se resolvió o el promedio de cumplimiento de protocolo. Puede sumar hasta 3 métricas para verlas juntas." /></React.Fragment>} count={cfg.meas.length}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {cfg.meas.map((k, i) => (
+                      <div key={i} style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 12 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                          <i className={"ph ph-" + RB_TYPE_ICON[RB_M[k].t]} style={{ fontSize: 14, color: "var(--purple)" }}></i>
+                          <span style={{ fontSize: 12.5, fontWeight: 600 }}>{RB_TYPE_LABEL[RB_M[k].t]}</span>
+                          {cfg.meas.length > 1 ? (
+                            <button onClick={() => set({ meas: cfg.meas.filter((_, j) => j !== i) })} aria-label="Quitar métrica"
+                              style={{ marginLeft: "auto", border: "none", background: "none", cursor: "pointer", color: "var(--ink-3)", padding: 0 }}>
+                              <i className="ph ph-x" style={{ fontSize: 13 }}></i>
+                            </button>
+                          ) : null}
+                        </div>
+                        <RbMeasSelect value={k} exclude={cfg.meas} onChange={v => set({ meas: cfg.meas.map((x, j) => j === i ? v : x) })} />
+                        {RB_M[k].soloCaja ? <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 7 }}>Solo se detecta en atenciones de Caja.</div> : null}
+                      </div>
+                    ))}
+                  </div>
+                  {cfg.meas.length < 3 ? (
+                    <button onClick={() => set({ meas: cfg.meas.concat(RB_MEAS.filter(m => cfg.meas.indexOf(m.k) < 0)[0].k), colDims: [] })}
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, border: "none", background: "none", fontFamily: "inherit", fontSize: 12.5, fontWeight: 500, color: "var(--purple)", cursor: "pointer", padding: "10px 0 0" }}>
+                      <i className="ph ph-plus" style={{ fontSize: 13 }}></i>Agregar métrica
+                    </button>
+                  ) : null}
+                </RbSection>
+
+                <RbSection title={<React.Fragment>Ver por <InfoDot text="Cómo se divide el resultado. Si elige Agencia, obtiene una línea por agencia; si elige Usuario, una por cada ejecutivo. Si no elige nada, ve el total de toda la operación." /></React.Fragment>}>
+                  <RbDimSelect value={rowDim} exclude={colDim ? [colDim] : []} placeholder="Sin agrupación (total general)"
+                    onChange={v => set({ rowDims: v ? [{ k: v, topN: cfg.rowDims[0] ? cfg.rowDims[0].topN : "Todos" }] : [] })} />
+                  {rowDim && RB_TEMPORAL.indexOf(rowDim) >= 0 ? (
+                    <div style={{ marginTop: 10 }}>
+                      <RbSegmented value={rowDim} options={[{ k: "periodo", n: "Semana" }, { k: "mes", n: "Mes" }]}
+                        onChange={v => set({ rowDims: [{ k: v, topN: "Todos" }] })} />
+                    </div>
+                  ) : null}
+                  {rowDim ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
+                      <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Mostrar</span>
+                      <select value={cfg.rowDims[0].topN} onChange={e => set({ rowDims: [{ ...cfg.rowDims[0], topN: e.target.value }] })}
+                        style={{ ...rbSelStyle, width: "auto", height: 30, fontSize: 12 }}>
+                        {RB_TOP_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                  ) : null}
+                </RbSection>
+
+                <RbSection title={<React.Fragment>Cruzar por <InfoDot text="Un segundo corte, para comparar en paralelo: por ejemplo, ver cada agencia separada en Caja y SAC, o por sentimiento del cliente. Es opcional." /></React.Fragment>}>
+                  <RbDimSelect value={colDim} disabled={colBlocked} exclude={rowDim ? [rowDim] : []} placeholder="Sin cruce"
+                    onChange={v => set({ colDims: v ? [{ k: v, topN: "Top 5" }] : [] })} />
+                  {colBlocked ? (
+                    <div style={{ display: "flex", gap: 7, background: "var(--amber-bg)", color: "var(--amber)", borderRadius: 8, padding: "9px 11px", fontSize: 11.5, lineHeight: 1.45, marginTop: 9 }}>
+                      <i className="ph ph-info" style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}></i>
+                      <span>Deje una sola métrica para habilitar el cruce por columnas.</span>
+                    </div>
+                  ) : null}
+                  {colDim && eff === "barra" ? (
+                    <label style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: "var(--ink-2)", cursor: "pointer", marginTop: 10 }}>
+                      <input type="checkbox" checked={!!cfg.apilar} onChange={e => set({ apilar: e.target.checked })} />
+                      Apilar las barras
+                    </label>
+                  ) : null}
+                </RbSection>
+              <RbSection title={<React.Fragment>Canal de atención <InfoDot text="Por defecto el gráfico usa el canal elegido en los filtros del reporte. Puede fijarlo a Caja o SAC si este gráfico en particular solo aplica a uno de los dos." /></React.Fragment>}>
+                <RbSegmented value={cfg.canal || "reporte"} onChange={v => set({ canal: v === "reporte" ? null : v })}
+                  options={[{ k: "reporte", n: "Según el reporte" }, { k: "Todos", n: "Caja y SAC" }, { k: "Caja", n: "Caja" }, { k: "SAC", n: "SAC" }]} />
+              </RbSection>
+
+              <RbSection title={<React.Fragment>Base de cálculo <InfoDot text="Sobre qué universo se calculan los porcentajes. Algunas atenciones no se pueden analizar porque el audio quedó inaudible o demasiado corto. “Todas” las cuenta e incluirlas baja los porcentajes; “Solo interpretables” mide únicamente las conversaciones que el análisis sí pudo escuchar. Se aplica a todo el reporte." /></React.Fragment>}>
+                <RbSegmented value={base} onChange={onBase} options={[{ k: "todas", n: "Todas" }, { k: "interpretables", n: "Solo interpretables" }]} />
+              </RbSection>
+            </React.Fragment>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════ Galería “Agregar un gráfico” ══════════ */
+const RB_PRESETS = [
+  { fam: "Volumen y resolución", name: "Total de atenciones", meas: ["total"], row: null, viz: "kpi", width: "half" },
+  { fam: "Volumen y resolución", name: "Atenciones por semana", meas: ["total"], row: "periodo", viz: "linea", width: "half" },
+  { fam: "Volumen y resolución", name: "% Resueltas por sucursal", meas: ["pResueltas"], row: "suc", viz: "barra", width: "half" },
+  { fam: "Volumen y resolución", name: "Mix de demanda por motivo", meas: ["total"], row: "motivo", viz: "barra", width: "half" },
+  { fam: "Volumen y resolución", name: "Causas de no-resolución", meas: ["total"], row: "motivoNoRes", viz: "barra", width: "half" },
+  { fam: "Comercial", name: "Conversión por agente", meas: ["pConv"], row: "agente", viz: "barra", width: "half" },
+  { fam: "Comercial", name: "sellerScore promedio por sucursal", meas: ["avgSeller"], row: "suc", viz: "barra", width: "half" },
+  { fam: "Comercial", name: "Top productos discutidos", meas: ["total"], row: "producto", topN: "Top 5", viz: "barra", width: "half" },
+  { fam: "Comercial", name: "Top objeciones del cliente", meas: ["total"], row: "objecion", topN: "Top 5", viz: "barra", width: "half" },
+  { fam: "Comercial", name: "Top fortalezas / debilidades", meas: ["total"], row: "fortaleza", topN: "Top 5", viz: "barra", width: "half" },
+  { fam: "Comercial", name: "Distribución de sellerScore", meas: ["total"], row: "scoreBucket", viz: "barra", width: "half" },
+  { fam: "Comercial", name: "Etapa débil más frecuente", meas: ["total"], row: "etapaDebil", viz: "barra", width: "half" },
+  { fam: "Protocolo y servicio", name: "Protocolo por sucursal", meas: ["avgProtocolo", "pCumpl6"], row: "suc", viz: "pivot", width: "full" },
+  { fam: "Protocolo y servicio", name: "% Bienvenida por agente", meas: ["pBienvenida"], row: "agente", viz: "barra", width: "half" },
+  { fam: "Fricciones operativas", name: "Sistema caído por sucursal", meas: ["pSistema"], row: "suc", viz: "barra", width: "half" },
+  { fam: "Quejas", name: "Distribución por tipo de queja", meas: ["total"], row: "tipoQueja", viz: "barra", width: "half" },
+  { fam: "Quejas", name: "% con queja por sucursal", meas: ["pQueja"], row: "suc", viz: "barra", width: "half" },
+  { fam: "Experiencia del cliente", name: "Distribución de sentimiento", meas: ["total"], row: "sentimiento", viz: "barra", width: "half" },
+  { fam: "Experiencia del cliente", name: "Sentimiento por semana", meas: ["pPositivo"], row: "periodo", viz: "linea", width: "half" },
+  { fam: "Experiencia del cliente", name: "Sentimiento por sucursal", meas: ["total"], row: "suc", col: "sentimiento", viz: "barra", width: "full" },
+  { fam: "Calidad del dato", name: "% no interpretables por sucursal", meas: ["pNoInterp"], row: "suc", viz: "barra", width: "half" },
+];
+let RB_SEQ = 1;
+const rbCfgFromPreset = p => ({
+  id: "w" + (RB_SEQ++), name: p ? p.name : "", desc: "",
+  meas: p ? p.meas.slice() : ["total"],
+  rowDims: p && p.row ? [{ k: p.row, topN: p.topN || "Todos" }] : [],
+  colDims: p && p.col ? [{ k: p.col, topN: "Top 5" }] : [],
+  viz: p ? p.viz : null, apilar: true, width: p ? p.width : "half",
+});
+
+function RbThumb({ viz }) {
+  const box = { width: 96, height: 62, borderRadius: 9, background: "var(--purple-tint)", border: "1px solid var(--purple-soft)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
+  const P = "var(--purple)", T = "#D5BBFF", L = "#EFE4FE";
+  if (viz === "kpi") return (
+    <div style={box}>
+      <svg width="72" height="40" viewBox="0 0 72 40">
+        <text x="6" y="24" style={{ fontSize: 18, fontWeight: 600, fill: P, fontFamily: "inherit" }}>48</text>
+        <text x="31" y="24" style={{ fontSize: 11, fontWeight: 500, fill: T, fontFamily: "inherit" }}>%</text>
+        <rect x="6" y="30" width="30" height="4" rx="2" fill={T}></rect>
+        <rect x="40" y="30" width="16" height="4" rx="2" fill={L}></rect>
+      </svg>
+    </div>
+  );
+  if (viz === "linea") return (
+    <div style={box}>
+      <svg width="70" height="38" viewBox="0 0 70 38">
+        <path d="M3,30 L16,20 L29,24 L42,11 L55,15 L67,6 L67,34 L3,34 Z" fill={L}></path>
+        <path d="M3,30 L16,20 L29,24 L42,11 L55,15 L67,6" fill="none" stroke={P} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+        <circle cx="67" cy="6" r="2.6" fill={P}></circle>
+      </svg>
+    </div>
+  );
+  if (viz === "pivot") return (
+    <div style={box}>
+      <svg width="72" height="40" viewBox="0 0 72 40">
+        <rect x="2" y="2" width="68" height="7" rx="2" fill={T}></rect>
+        {[0, 1, 2].map(i => (
+          <g key={i}>
+            <rect x="2" y={12 + i * 9} width="30" height="6" rx="2" fill={L}></rect>
+            <rect x={36 + (i % 2) * 6} y={12 + i * 9} width={i === 1 ? 20 : 28} height="6" rx="2" fill={i === 0 ? P : T} opacity={i === 0 ? 0.85 : 1}></rect>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+  return (
+    <div style={box}>
+      <svg width="72" height="40" viewBox="0 0 72 40">
+        {[[0, 58, P], [1, 40, T], [2, 48, T], [3, 26, L]].map(([i, w, c]) => (
+          <rect key={i} x="4" y={4 + i * 9} width={w} height="6" rx="3" fill={c}></rect>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function RbGallery({ onClose, onCustom, onPreset }) {
+  const [q, setQ] = useStateR("");
+  const [type, setType] = useStateR("Todos");
+  useEffectR(() => {
+    const onKey = e => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+  const typeOf = p => p.viz === "kpi" ? "KPI" : p.viz === "linea" ? "Línea" : p.viz === "pivot" ? "Tabla" : "Barra";
+  // cualquier métrica se puede ver como tabla: al filtrar por “Tabla” se ofrecen todas en esa vista
+  const source = type === "Tabla" ? RB_PRESETS.map(p => ({ ...p, viz: "pivot", width: p.col ? "full" : p.width })) : RB_PRESETS;
+  const list = source.filter(p => (type === "Todos" || type === "Tabla" || typeOf(p) === type) && (!q || p.name.toLowerCase().indexOf(q.toLowerCase()) >= 0 || p.fam.toLowerCase().indexOf(q.toLowerCase()) >= 0));
+  const fams = RB_FAMS.map(f => f.n).filter(n => list.some(p => p.fam === n));
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 215, display: "flex", justifyContent: "flex-end" }}>
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(10,12,17,0.4)" }}></div>
+      <div style={{ position: "relative", width: 460, maxWidth: "94vw", background: "#fff", height: "100%", boxShadow: "-12px 0 40px rgba(10,12,17,0.18)", display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "18px 22px 14px" }}>
+          <span style={{ fontSize: 18, fontWeight: 600 }}>Agregar un gráfico</span>
+          <button onClick={onClose} aria-label="Cerrar" style={{ marginLeft: "auto", border: "none", background: "none", cursor: "pointer", color: "var(--ink-3)", padding: 4 }}>
+            <i className="ph ph-x" style={{ fontSize: 17 }}></i>
+          </button>
+        </div>
+        <div style={{ padding: "0 22px 14px", borderBottom: "1px solid var(--border)" }}>
+          <button onClick={onCustom}
+            style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, border: "1px solid var(--border)", borderRadius: 10, background: "var(--card)", padding: "14px 16px", fontFamily: "inherit", cursor: "pointer", textAlign: "left", marginBottom: 14 }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--purple)"; e.currentTarget.style.background = "var(--purple-tint)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "var(--card)"; }}>
+            <span style={{ width: 40, height: 40, borderRadius: 9, background: "var(--purple-soft)", color: "var(--purple)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19, flexShrink: 0 }}>
+              <i className="ph ph-plus"></i>
+            </span>
+            <span>
+              <span style={{ display: "block", fontSize: 14, fontWeight: 600 }}>Crear un gráfico nuevo</span>
+              <span style={{ display: "block", fontSize: 12.5, color: "var(--ink-3)", marginTop: 2 }}>Defina la métrica, la dimensión y la visualización.</span>
+            </span>
+          </button>
+          <div style={{ position: "relative", marginBottom: 10 }}>
+            <i className="ph ph-magnifying-glass" style={{ position: "absolute", left: 11, top: 10, fontSize: 14, color: "var(--ink-3)" }}></i>
+            <input value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar un gráfico o una métrica"
+              style={{ width: "100%", height: 36, padding: "0 10px 0 33px", borderRadius: 8, border: "1px solid var(--border)", fontFamily: "inherit", fontSize: 13, background: "var(--bg)", color: "var(--ink)" }} />
+          </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {["Todos", "KPI", "Barra", "Línea", "Tabla"].map(t => (
+              <button key={t} onClick={() => setType(t)}
+                style={{ display: "inline-flex", alignItems: "center", gap: 5, border: "1px solid " + (type === t ? "var(--purple)" : "var(--border)"), background: type === t ? "var(--purple-tint)" : "var(--bg)", color: type === t ? "var(--purple)" : "var(--ink-2)", borderRadius: 7, padding: "5px 10px", fontFamily: "inherit", fontSize: 12, fontWeight: type === t ? 600 : 400, cursor: "pointer" }}>
+                {t === "Todos" ? "Todos los tipos" : t}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", padding: "6px 22px 26px" }}>
+          {list.length === 0 ? (
+            <div style={{ fontSize: 13, color: "var(--ink-3)", padding: "28px 0", textAlign: "center", lineHeight: 1.6 }}>
+              No se encontraron gráficos con ese nombre.<br />Pruebe con otra métrica o cree un gráfico nuevo.
+            </div>
+          ) : fams.map(f => (
+            <div key={f}>
+              <div style={{ fontSize: 13, fontWeight: 600, padding: "18px 0 8px" }}>{f}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {list.filter(p => p.fam === f).map(p => (
+                  <button key={p.name} onClick={() => onPreset(p)}
+                    style={{ display: "flex", alignItems: "center", gap: 14, border: "1px solid var(--border)", borderRadius: 10, background: "var(--card)", padding: 12, fontFamily: "inherit", cursor: "pointer", textAlign: "left" }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--purple)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; }}>
+                    <RbThumb viz={p.viz} />
+                    <span style={{ minWidth: 0 }}>
+                      <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)" }}>{p.fam}</span>
+                      <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, marginTop: 2 }}>{p.name}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════ Widget en el canvas ══════════ */
+function RbWidget({ cfg, gf, base, onEdit, onDup, onDelete, onWidth }) {
+  const [menu, setMenu] = useStateR(false);
+  const eff = rbEffViz(cfg);
+  const desc = cfg.desc || [
+    cfg.meas.map(k => RB_M[k].n).join(" · "),
+    cfg.rowDims.length ? "por " + RB_DIM[cfg.rowDims[0].k].n.toLowerCase() : null,
+    cfg.colDims.length ? "cruzado con " + RB_DIM[cfg.colDims[0].k].n.toLowerCase() : null,
+  ].filter(Boolean).join(" · ");
+  return (
+    <section className="card" style={{ gridColumn: cfg.width === "full" ? "span 2" : "span 1", display: "flex", flexDirection: "column", minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cfg.name}</div>
+          <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{desc}</div>
+        </div>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, flexShrink: 0, position: "relative" }}>
+          <button onClick={() => onWidth(cfg.width === "full" ? "half" : "full")} title={cfg.width === "full" ? "Media pantalla" : "Ancho completo"}
+            style={{ border: "none", background: "none", cursor: "pointer", color: "var(--ink-3)", padding: 4 }}>
+            <i className={"ph ph-" + (cfg.width === "full" ? "arrows-in-simple" : "arrows-out-simple")} style={{ fontSize: 15 }}></i>
+          </button>
+          <button onClick={() => setMenu(!menu)} aria-label="Acciones del gráfico" title="Acciones"
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, border: "none", background: "none", borderRadius: 6, color: "var(--ink-3)", cursor: "pointer" }}>
+            <i className="ph ph-dots-three-vertical" style={{ fontSize: 16 }}></i>
+          </button>
+          {menu ? (
+            <React.Fragment>
+              <div onClick={() => setMenu(false)} style={{ position: "fixed", inset: 0, zIndex: 5 }}></div>
+              <div className="dropdown" style={{ width: 170, right: 0, left: "auto", top: 30, zIndex: 6 }}>
+                {[["Editar", "pencil-simple", () => { setMenu(false); onEdit(); }],
+                  ["Duplicar", "copy", () => { setMenu(false); onDup(); }],
+                  ["Exportar a Excel", "file-xls", () => setMenu(false)],
+                  ["Eliminar", "trash", () => { setMenu(false); onDelete(); }]].map(([l, ic, fn]) => (
+                    <button key={l} className="dd-opt" onClick={fn}
+                      style={{ width: "100%", border: "none", background: "none", fontFamily: "inherit", color: l === "Eliminar" ? "var(--red)" : "var(--ink)" }}>
+                      <i className={"ph ph-" + ic} style={{ fontSize: 15 }} />{l}
+                    </button>
+                  ))}
+              </div>
+            </React.Fragment>
+          ) : null}
+        </div>
+      </div>
+      <RbView cfg={cfg} gf={gf} base={base} height={220} />
+    </section>
+  );
+}
+
+/* ══════════ Reporte (canvas) ══════════ */
+function Reportes({ filters }) {
+  const [title, setTitle] = useStateR("Operación y demanda");
+  const [desc, setDesc] = useStateR("");
+  const [widgets, setWidgets] = useStateR([]);
+  const [snapshot, setSnapshot] = useStateR([]);
+  const [gallery, setGallery] = useStateR(false);
+  const [builder, setBuilder] = useStateR(null);
+  const [base, setBase] = useStateR("todas");
+  const canal = (filters && filters.canal) || "Todos";
+  const gf = useMemoR(() => ({
+    sucs: (filters && filters.sucursales) || [], agentes: (filters && filters.ejecutivos) || [],
+    canal, fecha: (filters && filters.periodo) || "Últimos 30 días",
+  }), [filters, canal]);
+  const [toast, setToast] = useStateR(null);
+  useEffectR(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 3200); return () => clearTimeout(t); }, [toast]);
+
+  const rows = useMemoR(() => rbFilter(gf), [gf]);
+  useEffectR(() => { window.__rbOpenGallery = () => setGallery(true); return () => { delete window.__rbOpenGallery; }; }, []);
+  const activeFilters = [
+    gf.suc !== "Todas las sucursales" ? { k: "suc", l: gf.suc, reset: { suc: "Todas las sucursales" } } : null,
+    gf.agente !== "Todos los agentes" ? { k: "agente", l: gf.agente, reset: { agente: "Todos los agentes" } } : null,
+    gf.canal !== "Todos" ? { k: "canal", l: "Canal: " + gf.canal, reset: { canal: "Todos" } } : null,
+  ].filter(Boolean);
+
+  const save = cfg => {
+    setWidgets(w => w.some(x => x.id === cfg.id) ? w.map(x => x.id === cfg.id ? { ...cfg, saved: true } : x) : w.concat({ ...cfg, saved: true }));
+    setBuilder(null);
+  };
+  const sel = { border: "1px solid var(--border)", borderRadius: 8, height: 34, padding: "0 10px", fontFamily: "inherit", fontSize: 12.5, color: "var(--ink)", background: "var(--card)", cursor: "pointer" };
+
+  return (
+    <React.Fragment>
+      <section className="card" style={{ padding: 0, overflow: "hidden" }} data-screen-label="Reporte custom">
+        {/* alcance del reporte: canal + base de cálculo (el resto viene de los filtros del tablero) */}
+        <div className="chips-sm" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{gf.fecha} · {rbNum(rows.length, 0)} atenciones</span>
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+            <button className="btn-secondary" style={{ display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0 }} onClick={() => setGallery(true)}>
+              <i className="ph ph-plus"></i>Agregar gráfico
+            </button>
+          </div>
+        </div>
+
+        {/* canvas */}
+        <div style={{ padding: 22, minHeight: 460, background: "#FAFAF9", backgroundImage: "radial-gradient(rgba(26,26,46,0.13) 1px, transparent 1px)", backgroundSize: "16px 16px" }}>
+          {!widgets.length ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: "70px 24px", textAlign: "center" }}>
+              <div style={{ fontSize: 16, fontWeight: 600 }}>Este reporte todavía no tiene gráficos</div>
+              <div style={{ fontSize: 13, color: "var(--ink-3)", maxWidth: 430, lineHeight: 1.6 }}>
+                Seleccione un gráfico de la galería —vienen preconfigurados por métrica— o cree uno nuevo definiendo qué medir y por qué dimensión analizarlo.
+              </div>
+              <button className="btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 4 }} onClick={() => setGallery(true)}>
+                <i className="ph ph-plus"></i>Agregar gráfico
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 18, alignItems: "start" }}>
+              {widgets.map(w => (
+                <RbWidget key={w.id} cfg={w} gf={gf} base={base}
+                  onEdit={() => setBuilder(w)}
+                  onDup={() => setWidgets(list => list.concat({ ...w, id: "w" + (RB_SEQ++), name: w.name + " (copia)" }))}
+                  onDelete={() => setWidgets(list => list.filter(x => x.id !== w.id))}
+                  onWidth={width => setWidgets(list => list.map(x => x.id === w.id ? { ...x, width } : x))} />
+              ))}
+              <button onClick={() => setGallery(true)}
+                style={{ gridColumn: "span 1", minHeight: 150, border: "1.5px dashed var(--border)", borderRadius: 10, background: "rgba(255,255,255,0.6)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "inherit", fontSize: 13, color: "var(--purple)", fontWeight: 500, cursor: "pointer" }}>
+                <i className="ph ph-plus-circle" style={{ fontSize: 22 }}></i>Agregar gráfico
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {gallery ? (
+        <RbGallery onClose={() => setGallery(false)}
+          onCustom={() => { setGallery(false); setBuilder(rbCfgFromPreset(null)); }}
+          onPreset={p => { setGallery(false); setBuilder(rbCfgFromPreset(p)); }} />
+      ) : null}
+      {builder ? <RbChartBuilder initial={builder} gf={gf} base={base} onBase={setBase} onCancel={() => setBuilder(null)} onSave={save} /> : null}
+    </React.Fragment>
+  );
+}
+
+window.Reportes = Reportes;
+</script>
+<script type="text/babel" data-presets="react">
 /* ── Tabs Comercial y Caja + aplicación principal ── */
 
 const OKABE = ["var(--purple)", "#0072B2", "#56B4E9", "#E69F00", "#CC79A7", "#1A7F5A", "#9CA3AF", "#991B1B"];
@@ -3770,6 +4628,7 @@ function App() {
             onGoInteractions={() => setTab("Interacciones")} />
         ) : null}
         {tab === "Agencias" ? <Agencias /> : null}
+        {tab === "Reportes" ? <Reportes filters={filters} /> : null}
       </main>
 
 
