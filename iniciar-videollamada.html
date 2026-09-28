@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: blob: https:; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https: wss:; frame-src 'self' https:; worker-src 'self' blob:; media-src 'self' data: blob: https:; form-action 'self' https:;">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Iniciar videollamada - La Araucana</title>
+  <link rel="icon" type="image/png" href="images/img-isotipo-imagen.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="assets/css/pages/iniciar-videollamada.css">
+</head>
+<body>
+  <div class="form-container">
+    <div class="form-header">
+      <h1><i class="bi bi-camera-video me-2"></i>Iniciar videollamada</h1>
+      <p>Completa tus datos para continuar</p>
+    </div>
+
+    <div id="formAlert" class="alert d-none"></div>
+
+    <form id="guardiaForm" class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Nombre</label>
+        <input type="text" class="form-control" name="firstName" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Apellido</label>
+        <input type="text" class="form-control" name="lastName" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">DNI</label>
+        <input type="text" class="form-control" name="rut" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Teléfono</label>
+        <input type="tel" class="form-control" name="phone" required>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" name="email" required>
+      </div>
+    </form>
+
+    <div class="info-text">
+      <i class="bi bi-info-circle"></i> Al continuar, te asignaremos una atención y verás una sala de espera. Cuando el agente esté listo, podrás iniciar una videollamada.
+    </div>
+
+    <div class="mt-4">
+      <button id="btnEnviarTurno" class="btn btn-primary">
+        <i class="bi bi-check2-circle me-2"></i>Generar atención
+      </button>
+    </div>
+
+    <!-- Sección de información de la atención -->
+    <div id="turnInfoSection" class="turn-info-section">
+      <div class="text-center mb-3">
+        <div class="success-badge">
+          <i class="bi bi-check2-circle me-1"></i>Atención Reservada Exitosamente
+        </div>
+        <div class="text-success fw-semibold">¡Tu atención ha sido generada en el sistema!</div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="info-item">
+            <div class="info-label">Código de la Atención:</div>
+            <div class="info-value" id="turnCodeDisplay">—</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="info-item">
+            <div class="info-label">Número de Atención:</div>
+            <div class="info-value" id="turnNumber">—</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="info-item">
+            <div class="info-label">Estado de la Atención:</div>
+            <div class="info-value status-warn" id="turnStatus">Consultando...</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="info-item">
+            <div class="info-label">Tiempo de Espera Actual:</div>
+            <div class="info-value" id="currentWaitingTime">N/A</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="info-item">
+            <div class="info-label">Tiempo Promedio de Espera:</div>
+            <div class="info-value" id="avgWaitingTime">N/A</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="info-item">
+            <div class="info-label">Cola/Servicio:</div>
+            <div class="info-value" id="queueName">—</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="info-item">
+            <div class="info-label">Sala de Espera:</div>
+            <div class="info-value" id="waitingRoomName">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <button id="btnAbrirVideo" class="btn btn-primary" disabled>
+          <i class="bi bi-camera-video me-2"></i>Conectarme a videollamada
+        </button>
+        <div class="form-text mt-2">El botón se habilitará cuando el agente te llame.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Video -->
+  <div class="video-modal" id="videoModal">
+    <div class="video-container">
+      <div class="video-header">
+        <h6><i class="bi bi-camera-video me-2"></i>Videollamada</h6>
+        <button class="btn-close-video" id="btnCloseVideo">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <iframe id="videoFrame" class="video-iframe" src="about:blank"
+        allow="camera; microphone; autoplay; fullscreen; clipboard-write; display-capture"
+        referrerpolicy="no-referrer" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/api-client.js" integrity="sha384-b/p40FT/5XXkNy7YC6XbaXRp1igzcpWmGB1YAGJzJJBvqKuwOpLgWb6MhHHM06wI" crossorigin="anonymous"></script>
+  <script src="assets/js/shared/fila-virtual-api.js" integrity="sha384-W2FVZuoQ/r9cqrSpNbk0wehzKOCRZCRnNfimodwlQaOJldMVGjdfZJjBqhzJxZuF" crossorigin="anonymous"></script>
+  <script src="assets/js/pages/iniciar-videollamada.js" integrity="sha384-PjrsWSifUNC9Plxj/Kj0e8cINCy92q7i+tp0Po6E7k75xxxf0LPuDzHEFApxkF3k" crossorigin="anonymous"></script>
+</body>
+</html>
