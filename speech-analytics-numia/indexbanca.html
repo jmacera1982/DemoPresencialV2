@@ -512,6 +512,36 @@ table.data tbody tr:hover{background:var(--purple-tint);}
 .det-chip.purple{background:var(--purple-soft);color:var(--purple);}
 .det-chip.selected{border-color:currentColor;}
 
+/* ── Score breakdown: 3 tarjetas (Confianza del análisis / Score de la
+   atención / Cumplimiento del protocolo) — mismo componente para el
+   detalle de una interacción y para el reporte agregado de agencias ── */
+.score-cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;align-items:start;}
+.score-card{padding:20px 22px;}
+.score-card-title{font-size:14px;font-weight:600;color:var(--ink);}
+.score-card-value-row{display:flex;align-items:baseline;gap:10px;margin-top:10px;flex-wrap:wrap;}
+.score-card-pct{font-size:32px;font-weight:700;letter-spacing:-0.6px;line-height:1;font-variant-numeric:tabular-nums;}
+.score-card-tag{font-size:13px;font-weight:600;}
+.score-card-bar-track{height:6px;border-radius:3px;background:#F0F0F3;margin-top:12px;}
+.score-card-bar{height:6px;border-radius:3px;transition:width .25s ease;}
+.score-card-desc{font-size:12.5px;color:var(--ink-3);line-height:1.55;margin-top:12px;}
+.score-item-boxes{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+.score-item-box{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:#FCFCFD;}
+.score-item-box-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.score-item-box-label{font-size:12.5px;font-weight:600;color:var(--ink);}
+.score-item-box-formula{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.score-item-box-desc{font-size:11.5px;color:var(--ink-3);line-height:1.5;margin-top:4px;}
+.score-item-rows{display:flex;flex-direction:column;margin-top:12px;}
+.score-item-row{display:flex;align-items:center;gap:9px;padding:8px 0;}
+.score-item-row + .score-item-row{border-top:1px solid #F0F0F3;}
+.score-item-ic{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.score-item-ic.ok{background:var(--green-bg);color:var(--green);}
+.score-item-ic.mid{background:var(--amber-bg);color:var(--amber);}
+.score-item-ic.no{background:#F0F0F3;color:var(--ink-3);}
+.score-item-label{font-size:13px;color:var(--ink-2);flex:1;min-width:0;}
+.score-item-val{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums;margin-left:auto;}
+.score-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);border-radius:8px;padding:10px 12px;margin-top:14px;font-size:12.5px;font-weight:600;color:var(--ink-2);}
+.score-card-footer span:last-child{color:var(--ink);font-variant-numeric:tabular-nums;}
+
 /* sticky footer */
 .panel-footer{
   position:sticky;bottom:0;background:#fff;border:1px solid var(--border);border-radius:12px;
@@ -2503,6 +2533,152 @@ window.GRABACION_ACEPTADA_TOTAL = GRABACION_ACEPTADA_TOTAL;
 </script>
 
 <script type="text/babel" data-presets="react">
+/* ══════════════════════════════════════════════════════════════════════
+   Score breakdown — 3 tarjetas reutilizables:
+     · Confianza del análisis   → qué tanto puede confiar el usuario en la
+       lectura del modelo (métricas ponderadas, se configuran por prompt).
+     · Score de la atención     → cada aspecto suma hasta un máximo fijo.
+     · Cumplimiento del protocolo → puntaje por item de protocolo cumplido.
+   Se usan tanto en el detalle de una interacción (dentro de la
+   conversación) como en el reporte agregado de agencias/sucursales.
+   ══════════════════════════════════════════════════════════════════════ */
+function scoreTier(pct, tiers) {
+  for (let i = 0; i < tiers.length; i++) { if (pct >= tiers[i].min) return tiers[i]; }
+  return tiers[tiers.length - 1];
+}
+
+const CONFIDENCE_TIERS = [
+  { min: 85, label: "Excelente", color: "var(--green)" },
+  { min: 65, label: "Muy bueno", color: "var(--green)" },
+  { min: 45, label: "Bueno", color: "var(--amber)" },
+  { min: 25, label: "Regular", color: "var(--amber)" },
+  { min: 0, label: "Bajo", color: "var(--red)" },
+];
+const ATTENTION_TIERS = [
+  { min: 85, label: "Excelente", color: "var(--green)" },
+  { min: 70, label: "Muy bueno", color: "var(--green)" },
+  { min: 55, label: "Bueno", color: "var(--green)" },
+  { min: 35, label: "Regular", color: "var(--amber)" },
+  { min: 0, label: "Bajo", color: "var(--red)" },
+];
+const PROTOCOL_TIERS = [
+  { min: 70, label: "Bueno", color: "var(--purple)" },
+  { min: 40, label: "Neutro", color: "var(--purple)" },
+  { min: 20, label: "Bajo", color: "var(--ink-3)" },
+  { min: 0, label: "Crítico", color: "var(--red)" },
+];
+
+const fmt1 = n => n.toFixed(1).replace(".", ",");
+
+function ScoreCardHead({ title, pct, tier, info }) {
+  return (
+    <React.Fragment>
+      <div className="card-head" style={{ marginBottom: 0 }}>
+        <span className="score-card-title">{title}</span>
+        {info ? <InfoTip text={info} /> : null}
+      </div>
+      <div className="score-card-value-row">
+        <span className="score-card-pct" style={{ color: tier.color }}>{pct}%</span>
+        <span className="score-card-tag" style={{ color: tier.color }}>{tier.label}</span>
+      </div>
+      <div className="score-card-bar-track">
+        <div className="score-card-bar" style={{ width: Math.max(0, Math.min(100, pct)) + "%", background: tier.color }}></div>
+      </div>
+    </React.Fragment>
+  );
+}
+
+function ScoreItemRow({ icon, tone, label, valueText }) {
+  return (
+    <div className="score-item-row">
+      <span className={"score-item-ic " + tone}><Ph name={icon} /></span>
+      <span className="score-item-label">{label}</span>
+      <span className="score-item-val">{valueText}</span>
+    </div>
+  );
+}
+
+/* Confianza del análisis: métricas ponderadas (peso × valor = puntos). */
+function ConfidenceCard({ metrics }) {
+  const weighted = metrics.map(m => Object.assign({}, m, { points: m.value * m.weight }));
+  const sum = weighted.reduce((s, m) => s + m.points, 0);
+  const pct = Math.round(sum);
+  const tier = scoreTier(pct, CONFIDENCE_TIERS);
+  return (
+    <section className="card score-card" id="card-confianza-analisis">
+      <ScoreCardHead title="Confianza del análisis" pct={pct} tier={tier} />
+      <p className="score-card-desc">Tres métricas ponderadas. Mide la lectura del modelo, no la atención. Los pesos se configuran por prompt.</p>
+      <div className="score-item-boxes">
+        {weighted.map(m => (
+          <div className="score-item-box" key={m.key}>
+            <div className="score-item-box-top">
+              <span className="score-item-box-label">{m.label}</span>
+              <span className="score-item-box-formula">{fmt1(m.value)} × {fmt1(m.weight)} = {fmt1(m.points)}</span>
+            </div>
+            <p className="score-item-box-desc">{m.desc}</p>
+          </div>
+        ))}
+      </div>
+      <div className="score-card-footer"><span>Suma ponderada</span><span>{fmt1(sum)}</span></div>
+    </section>
+  );
+}
+
+/* Score de la atención: cada aspecto suma hasta un máximo fijo (total 100). */
+function AttentionScoreCard({ aspects, desc }) {
+  const sum = aspects.reduce((s, a) => s + a.value, 0);
+  const tier = scoreTier(sum, ATTENTION_TIERS);
+  return (
+    <section className="card score-card" id="card-score-atencion">
+      <ScoreCardHead title="Score de la atención" pct={sum} tier={tier} />
+      <p className="score-card-desc">{desc || "Cada aspecto aporta un máximo fijo. Se suman 10 puntos por felicitación del cliente."}</p>
+      <div className="score-item-rows">
+        {aspects.map(a => {
+          const ratio = a.max ? a.value / a.max : 0;
+          const tone = ratio <= 0 ? "no" : ratio >= 1 ? "ok" : "mid";
+          const icon = ratio <= 0 ? "x" : ratio >= 1 ? "check" : "minus";
+          return <ScoreItemRow key={a.key} icon={icon} tone={tone} label={a.label} valueText={fmt1(a.value).replace(",0", "") + "/" + a.max} />;
+        })}
+      </div>
+      <div className="score-card-footer"><span>Suma de puntos</span><span>{Math.round(sum)}/100</span></div>
+    </section>
+  );
+}
+
+/* Cumplimiento del protocolo: puntaje por item cumplido (total 100). */
+function ProtocolScoreCard({ items, desc }) {
+  const sum = items.reduce((s, i) => s + i.points, 0);
+  const cumplidos = items.filter(i => i.points > 0).length;
+  const tier = scoreTier(Math.round(sum), PROTOCOL_TIERS);
+  return (
+    <section className="card score-card" id="card-cumplimiento-protocolo">
+      <ScoreCardHead title="Cumplimiento del protocolo" pct={Math.round(sum)} tier={tier} />
+      <p className="score-card-desc">{desc || (cumplidos + " de " + items.length + " items cumplidos · cada item aporta su puntaje al total")}</p>
+      <div className="score-item-rows">
+        {items.map(i => {
+          const ratio = i.max ? i.points / i.max : (i.points > 0 ? 1 : 0);
+          const tone = ratio <= 0 ? "no" : ratio >= 1 ? "ok" : "mid";
+          const icon = ratio <= 0 ? "x" : ratio >= 1 ? "check" : "minus";
+          return <ScoreItemRow key={i.key} icon={icon} tone={tone} label={i.label} valueText={fmt1(i.points).replace(",0", "")} />;
+        })}
+      </div>
+      <div className="score-card-footer"><span>Suma de puntos</span><span>{Math.round(sum)}/100</span></div>
+    </section>
+  );
+}
+
+function ScoreBreakdown({ confidence, attention, attentionDesc, protocol, protocolDesc }) {
+  return (
+    <div className="score-cards-grid">
+      <ConfidenceCard metrics={confidence} />
+      <AttentionScoreCard aspects={attention} desc={attentionDesc} />
+      <ProtocolScoreCard items={protocol} desc={protocolDesc} />
+    </div>
+  );
+}
+</script>
+
+<script type="text/babel" data-presets="react">
 /* ── Pantalla 3 — Detalle de la interacción ── */
 const { useState: useStateT, useRef: useRefT, useEffect: useEffectT } = React;
 
@@ -2524,14 +2700,32 @@ const TRANSCRIPT = [
 ];
 
 const PROTOCOL = [
-  { ok: true, label: "Saludo", ts: "0:05" },
-  { ok: true, label: "Validación de identidad", ts: "0:48" },
-  { ok: true, label: "Escucha del motivo", ts: null },
-  { ok: true, label: "Confirmación del motivo", ts: "2:10" },
-  { ok: false, label: "Ofrecimiento de producto", ts: null },
-  { ok: true, label: "Manejo de objeciones", ts: "5:22" },
-  { ok: true, label: "Cierre con próximos pasos", ts: "7:30" },
-  { ok: false, label: "Despedida", ts: null },
+  { ok: true, label: "Saludo", ts: "0:05", peso: 10 },
+  { ok: true, label: "Validación de identidad", ts: "0:48", peso: 15 },
+  { ok: true, label: "Escucha del motivo", ts: null, peso: 10 },
+  { ok: true, label: "Confirmación del motivo", ts: "2:10", peso: 15 },
+  { ok: false, label: "Ofrecimiento de producto", ts: null, peso: 15 },
+  { ok: true, label: "Manejo de objeciones", ts: "5:22", peso: 15 },
+  { ok: true, label: "Cierre con próximos pasos", ts: "7:30", peso: 15 },
+  { ok: false, label: "Despedida", ts: null, peso: 5 },
+];
+
+/* Confianza del análisis — qué tanto puede confiar el usuario en la
+   lectura del modelo para esta interacción puntual. */
+const DETAIL_CONFIDENCE = [
+  { key: "claridad", label: "Claridad del material", value: 78, weight: 0.5, desc: "Qué tan entendible es la atención. Es la métrica de mayor peso." },
+  { key: "respaldo", label: "Respaldo en evidencia", value: 82, weight: 0.3, desc: "Cuánto se sostiene en frases textuales y no en inferencia." },
+  { key: "coherencia", label: "Coherencia de la conversación", value: 85, weight: 0.2, desc: "Si el diálogo se sostiene con turnos ordenados y sin saltos." },
+];
+
+/* Score de la atención — cada aspecto suma hasta un máximo fijo (100 en total). */
+const DETAIL_ATTENTION = [
+  { key: "protocolo", label: "Uso de protocolo", value: 15, max: 20 },
+  { key: "ofrecimiento", label: "Ofrecimiento de producto", value: 0, max: 15 },
+  { key: "cierre", label: "Cierre de venta", value: 0, max: 10 },
+  { key: "satisfaccion", label: "Satisfacción del cliente", value: 14, max: 20 },
+  { key: "amabilidad", label: "Amabilidad del ejecutivo", value: 11, max: 15 },
+  { key: "resolucion", label: "Resolución de la gestión", value: 20, max: 20 },
 ];
 
 /* tipos de detección: color + ícono + subrayado propio (accesible) */
@@ -2772,30 +2966,16 @@ function Detail({ onBack, locked, drawer }) {
               </ul>
             </section>
 
-            <section className="card" id="card-metricas">
-              <div className="card-label">Métricas de la interacción</div>
-              <div style={{ marginTop: 8 }}>
-                <div className="metric-row">
-                  <span className="mr-label">Satisfacción estimada <span className="tag-estimado">estimado</span></span>
-                  <div className="mr-bar-track"><div className="mr-bar" style={{ width: "70%", background: "var(--amber)" }}></div></div>
-                  <span className="mr-val">3.5/5</span>
-                </div>
-                <div className="metric-row">
-                  <span className="mr-label">Cumplimiento de protocolo</span>
-                  <div className="mr-bar-track"><div className="mr-bar" style={{ width: "75%", background: "var(--purple)" }}></div></div>
-                  <span className="mr-val">6 de 8</span>
-                </div>
-                <div className="metric-row">
-                  <span className="mr-label">Empatía <InfoTip text="Frases de validación emocional detectadas según el protocolo cargado" /></span>
-                  <div className="mr-bar-track"><div className="mr-bar" style={{ width: "50%", background: "var(--amber)" }}></div></div>
-                  <span className="mr-val">2 de 4</span>
-                </div>
-              </div>
-            </section>
+            <div id="card-metricas" style={{ display: "contents" }}>
+              <ScoreBreakdown
+                confidence={DETAIL_CONFIDENCE}
+                attention={DETAIL_ATTENTION}
+                protocol={PROTOCOL.map(p => ({ key: p.label, label: p.label, points: p.ok ? p.peso : 0, max: p.peso }))} />
+            </div>
 
             <section className="card" id="card-protocolo">
               <div className="card-head" style={{ marginBottom: 4 }}>
-                <span className="card-label">Cumplimiento de protocolo</span>
+                <span className="card-label">Detalle del protocolo <InfoTip text="Cada item del protocolo, con el momento exacto donde se detectó (o no) en la conversación." /></span>
                 <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{PROTOCOL.filter(p => p.ok).length} de {PROTOCOL.length}</span>
               </div>
               <div style={{ margin: "6px -8px 0" }}>
@@ -3277,6 +3457,31 @@ const AGENCIAS_DATA = [
   });
 })();
 
+/* Score agregado del período (todas las agencias): mismas 3 tarjetas que
+   se muestran en el detalle de una interacción, pero calculadas sobre el
+   promedio del conjunto filtrado en lugar de una sola conversación. */
+const AGENCIAS_CONFIDENCE = [
+  { key: "claridad", label: "Claridad del material", value: 82, weight: 0.5, desc: "Qué tan entendible es la atención, en promedio, para el modelo. Es la métrica de mayor peso." },
+  { key: "respaldo", label: "Respaldo en evidencia", value: 74, weight: 0.3, desc: "Cuánto se sostiene el análisis en frases textuales y no en inferencia." },
+  { key: "coherencia", label: "Coherencia de la conversación", value: 88, weight: 0.2, desc: "Si el diálogo se sostiene con turnos ordenados y sin saltos en la mayoría de las atenciones." },
+];
+const AGENCIAS_ATTENTION = [
+  { key: "protocolo", label: "Uso de protocolo", value: 6, max: 20 },
+  { key: "ofrecimiento", label: "Ofrecimiento de producto", value: 2, max: 15 },
+  { key: "cierre", label: "Cierre de venta", value: 1, max: 10 },
+  { key: "satisfaccion", label: "Satisfacción del cliente", value: 15, max: 20 },
+  { key: "amabilidad", label: "Amabilidad del ejecutivo", value: 12, max: 15 },
+  { key: "resolucion", label: "Resolución de la gestión", value: 8, max: 20 },
+];
+const AGENCIAS_PROTOCOLO = [
+  { key: "saludo", label: "Saludo de bienvenida", points: 14.5, max: 25 },
+  { key: "presentacion", label: "Presentación del ejecutivo", points: 8.8, max: 20 },
+  { key: "nombre", label: "Uso del nombre del cliente", points: 5.55, max: 15 },
+  { key: "consulta", label: "Consulta por algo adicional", points: 4.95, max: 15 },
+  { key: "cierre", label: "Frase de cierre", points: 3.9, max: 15 },
+  { key: "despedida", label: "Despedida", points: 2.9, max: 10 },
+];
+
 function Agencias() {
   const [orden, setOrden] = useStateP("Conversión");
   const [sortKey, setSortKey] = useStateP("conversion");
@@ -3305,6 +3510,16 @@ function Agencias() {
           <TeamKpi label="Ventas totales" value="243" icon="handshake" tint="var(--red-bg)" iconColor="var(--red)" />
           <TeamKpi label="Score promedio" value="4,0" icon="medal" tint="var(--amber-bg)" iconColor="var(--amber)" />
         </KpiRow>
+
+        <div className="span-12" data-screen-label="Score agregado de agencias">
+          <div className="card-label" style={{ marginBottom: 10 }}>Score agregado del período <InfoTip text="Promedio calculado sobre todas las agencias activas en el rango de fechas seleccionado." /></div>
+          <ScoreBreakdown
+            confidence={AGENCIAS_CONFIDENCE}
+            attention={AGENCIAS_ATTENTION}
+            attentionDesc="Cada aspecto aporta un máximo fijo, promediado entre todas las agencias del período."
+            protocol={AGENCIAS_PROTOCOLO}
+            protocolDesc="Aporte de cada item al puntaje agregado, según el % de atenciones que lo cumplieron." />
+        </div>
 
         <section className="card span-12">
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, alignItems: "end" }}>
