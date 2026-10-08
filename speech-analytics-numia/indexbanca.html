@@ -1193,7 +1193,7 @@ function Sidebar() {
 
 /* ── Tabs ── */
 function Tabs({ tab, onTab }) {
-  const tabs = ["Resumen", "Comercial", "Caja", "Interacciones", "Performance de usuarios", "Agencias", "Reportes"];
+  const tabs = ["Resumen", "Comercial", "Caja", "Interacciones", "Consentimiento", "Performance de usuarios", "Agencias", "Reportes"];
   return (
     <div className="tabs" role="tablist">
       {tabs.map(t => (
@@ -1697,7 +1697,7 @@ function SentimentChart() {
   );
 }
 
-function Dashboard({ variant, rankingPublico, nubePalabras, onDrillToInteractions, onOpenProfile, onGoTemas, onDrillTopic, activeKeyword, onFilterKeyword, onOpenNoGrabacion }) {
+function Dashboard({ variant, rankingPublico, nubePalabras, onDrillToInteractions, onOpenProfile, onGoTemas, onDrillTopic, activeKeyword, onFilterKeyword, onOpenConsentimiento }) {
   const locked = variant === "locked" || variant === "setup";
   const day1 = variant === "day1";
   const setup = variant === "setup";
@@ -1767,7 +1767,7 @@ function Dashboard({ variant, rankingPublico, nubePalabras, onDrillToInteraction
             info="Atenciones en las que el cliente no dio su consentimiento para grabar la conversación. Al no existir audio, no se generan transcripción ni métricas de calidad para estos casos; solo se registran los datos del turno."
             value={NO_GRABACION_TOTAL}
             sub={(NO_GRABACION_TOTAL / NO_GRABACION_BASE * 100).toFixed(1).replace(".", ",") + "% de " + NO_GRABACION_BASE.toLocaleString("es-CL") + " atenciones del período"}
-            onDetail={onOpenNoGrabacion} />
+            onDetail={() => onOpenConsentimiento("Rechazada")} />
         </div>
 
         {/* Row 3 — Heatmap + Ratio */}
@@ -2102,9 +2102,10 @@ const SUCURSALES_T = SUCURSALES;
 const MOTIVOS_T = ["Otras operaciones", "Operaciones de caja", "Consulta de crédito", "Apertura de cuenta", "Consulta de inversión", "Bloqueo de tarjeta", "Reclamo de cargos"];
 const CANALES_T = ["CAJA", "Teléfono", "Video llamada"];
 
-/* ── Atenciones sin grabación aceptada (cliente no dio consentimiento) ── */
+/* ── Consentimiento de grabación (atenciones en las que el cliente aceptó o rechazó ser grabado) ── */
 const NO_GRABACION_TOTAL = 132;
 const NO_GRABACION_BASE = 2742; // atenciones del período, incluyendo las sin grabación aceptada
+const GRABACION_ACEPTADA_TOTAL = NO_GRABACION_BASE - NO_GRABACION_TOTAL;
 const NO_GRABACION = [
   { turno: "CJ52", tramite: "Retiro de efectivo", fecha: "15/07/2026", hora: "11:38", suc: "Agencia Centro" },
   { turno: "PL28", tramite: "Solicitud de crédito", fecha: "15/07/2026", hora: "10:52", suc: "Agencia Centro" },
@@ -2120,6 +2121,30 @@ const NO_GRABACION = [
   { turno: "AT79", tramite: "Reclamo de cargos", fecha: "13/07/2026", hora: "09:18", suc: "Agencia Norte" },
   { turno: "CJ15", tramite: "Depósito", fecha: "12/07/2026", hora: "17:05", suc: "Agencia Oriente" },
   { turno: "PL07", tramite: "Consulta de inversión", fecha: "12/07/2026", hora: "16:30", suc: "Agencia Centro" },
+];
+
+/* Muestra representativa de atenciones donde el cliente sí aceptó ser grabado */
+const GRABACION_ACEPTADA = [
+  { turno: "CJ51", tramite: "Consulta de saldo", fecha: "15/07/2026", hora: "11:30", suc: "Agencia Centro" },
+  { turno: "PL27", tramite: "Apertura de cuenta", fecha: "15/07/2026", hora: "10:44", suc: "Agencia Sur" },
+  { turno: "CJ46", tramite: "Retiro de efectivo", fecha: "15/07/2026", hora: "10:06", suc: "Agencia Norte" },
+  { turno: "AT90", tramite: "Bloqueo de tarjeta", fecha: "15/07/2026", hora: "09:40", suc: "Agencia Poniente" },
+  { turno: "CJ40", tramite: "Depósito", fecha: "14/07/2026", hora: "17:15", suc: "Agencia Centro" },
+  { turno: "PL19", tramite: "Consulta de crédito", fecha: "14/07/2026", hora: "16:51", suc: "Agencia Oriente" },
+  { turno: "CJ35", tramite: "Pago de servicios", fecha: "14/07/2026", hora: "16:02", suc: "Agencia Norte" },
+  { turno: "AT84", tramite: "Reclamo de cargos", fecha: "14/07/2026", hora: "15:21", suc: "Agencia Sur" },
+  { turno: "CJ29", tramite: "Cambio de clave", fecha: "14/07/2026", hora: "11:55", suc: "Agencia Centro" },
+  { turno: "PL13", tramite: "Consulta de inversión", fecha: "13/07/2026", hora: "11:33", suc: "Agencia Poniente" },
+  { turno: "CJ21", tramite: "Actualización de datos", fecha: "13/07/2026", hora: "10:19", suc: "Agencia Centro" },
+  { turno: "AT78", tramite: "Retiro de efectivo", fecha: "13/07/2026", hora: "09:05", suc: "Agencia Norte" },
+  { turno: "CJ14", tramite: "Apertura de cuenta", fecha: "12/07/2026", hora: "16:58", suc: "Agencia Oriente" },
+  { turno: "PL06", tramite: "Solicitud de crédito", fecha: "12/07/2026", hora: "16:21", suc: "Agencia Centro" },
+];
+
+const CONSENTIMIENTO_ESTADOS = ["Todas", "Aceptada", "Rechazada"];
+const CONSENTIMIENTO = [
+  ...NO_GRABACION.map(r => ({ ...r, estado: "rechazada" })),
+  ...GRABACION_ACEPTADA.map(r => ({ ...r, estado: "aceptada" })),
 ];
 
 function selStyle() {
@@ -2334,63 +2359,133 @@ function Interactions({ onOpenDetail, forceEmpty, initialQuery }) {
   );
 }
 
-/* ── Drill-down: atenciones sin grabación aceptada ── */
-function NoGrabacionDrilldown({ onClose }) {
+const CONSENTIMIENTO_FILTER_DEFAULTS = {
+  estado: "Todas", sucursal: "Todas las agencias", desde: "", hasta: "",
+};
+
+/* ── Tab: Consentimiento de grabación (visualizar y filtrar atenciones aceptadas/rechazadas) ── */
+function Consentimiento({ initialEstado }) {
   const [q, setQ] = useStateI("");
-  const rows = NO_GRABACION.filter(r =>
-    !q || (r.turno + " " + r.tramite).toLowerCase().includes(q.toLowerCase())
-  );
+  const [ff, setFf] = useStateI(CONSENTIMIENTO_FILTER_DEFAULTS);
+  const setField = (k, v) => setFf(s => ({ ...s, [k]: v }));
+
+  React.useEffect(() => {
+    if (initialEstado) setFf(s => ({ ...s, estado: initialEstado }));
+  }, [initialEstado]);
+
+  const clearAll = () => { setFf(CONSENTIMIENTO_FILTER_DEFAULTS); setQ(""); };
+
+  const rows = CONSENTIMIENTO.filter(r => {
+    if (ff.estado !== "Todas" && r.estado !== ff.estado.toLowerCase()) return false;
+    if (ff.sucursal !== "Todas las agencias" && r.suc !== ff.sucursal) return false;
+    if (ff.desde && r.fecha.split("/").reverse().join("-") < ff.desde) return false;
+    if (ff.hasta && r.fecha.split("/").reverse().join("-") > ff.hasta) return false;
+    if (q && !(r.turno + " " + r.tramite).toLowerCase().includes(q.toLowerCase())) return false;
+    return true;
+  });
+
+  const aceptadaPct = (GRABACION_ACEPTADA_TOTAL / NO_GRABACION_BASE * 100).toFixed(1).replace(".", ",");
+  const rechazadaPct = (NO_GRABACION_TOTAL / NO_GRABACION_BASE * 100).toFixed(1).replace(".", ",");
+
   return (
     <React.Fragment>
-      <div className="drawer-head" data-screen-label="Atenciones sin grabación aceptada">
-        <span style={{ fontSize: 13, color: "var(--ink-3)" }}>Consentimiento de grabación · Detalle</span>
-        <button className="drawer-close" onClick={onClose} aria-label="Cerrar"><Ph name="x" /></button>
-      </div>
-      <div className="detail-header">
-        <h1>Atenciones que no aceptaron la grabación</h1>
-        <span className="meta-chip">{NO_GRABACION_TOTAL} atenciones</span>
-      </div>
-      <p style={{ color: "var(--ink-2)", fontSize: 13.5, marginBottom: 16 }}>
-        El cliente no dio su consentimiento para grabar la conversación, por lo que no se generó audio ni transcripción.
-        Solo se cuenta con los datos del turno registrados por el sistema de atención.
-      </p>
-
-      <section className="card" style={{ padding: "8px 16px 16px" }} data-screen-label="Tabla de atenciones sin grabación">
-        <div className="filter-row" style={{ paddingTop: 8, paddingBottom: 8 }}>
-          <div className="search-bar">
-            <Ph name="magnifying-glass" />
-            <input placeholder="Buscar por turno o trámite…" value={q} onChange={e => setQ(e.target.value)} />
+      <div className="grid" data-screen-label="Consentimiento de grabación">
+        <SecHead icon="microphone-slash" title="Consentimiento de grabación"
+          sub="Visualizá y filtrá las atenciones según si el cliente aceptó o rechazó que la conversación fuera grabada" />
+        <div className="span-12" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+          <div style={{ display: "flex" }}>
+            <MetricCard label="Atenciones con grabación aceptada"
+              info="Atenciones en las que el cliente dio su consentimiento para grabar la conversación."
+              value={GRABACION_ACEPTADA_TOTAL.toLocaleString("es-CL")}
+              sub={aceptadaPct + "% de " + NO_GRABACION_BASE.toLocaleString("es-CL") + " atenciones del período"} />
+          </div>
+          <div style={{ display: "flex" }}>
+            <MetricCard className="alert-card" label="Atenciones sin grabación aceptada" alertIcon
+              info="Atenciones en las que el cliente no dio su consentimiento para grabar la conversación. Al no existir audio, no se generan transcripción ni métricas de calidad para estos casos; solo se registran los datos del turno."
+              value={NO_GRABACION_TOTAL}
+              sub={rechazadaPct + "% de " + NO_GRABACION_BASE.toLocaleString("es-CL") + " atenciones del período"} />
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", padding: "8px 4px 4px" }}>
-          <span style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>{NO_GRABACION_TOTAL} atenciones sin grabación en el período</span>
-          <ExportMenu compact />
+      </div>
+
+      <section className="card" style={{ marginTop: 20, marginBottom: 20 }} data-screen-label="Filtros de consentimiento">
+        <div className="card-head" style={{ marginBottom: 14, alignItems: "flex-start" }}>
+          <div style={{ display: "flex", gap: 12 }}>
+            <span style={{ width: 36, height: 36, borderRadius: 9, background: "var(--red-bg)", color: "var(--red)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <i className="ph-fill ph-funnel" style={{ fontSize: 18 }}></i>
+            </span>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 600 }}>Filtros</div>
+              <div style={{ fontSize: 12.5, color: "var(--ink-3)" }}>Refiná la búsqueda de atenciones</div>
+            </div>
+          </div>
+          <button className="link-btn" style={{ display: "inline-flex", alignItems: "center", gap: 5 }} onClick={clearAll}>
+            <i className="ph ph-x"></i>Limpiar filtros
+          </button>
         </div>
-        <div style={{ overflowX: "auto" }}>
-          <table className="data">
-            <thead>
-              <tr>
-                <th>Identificador de turno</th>
-                <th>Trámite</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(r => (
-                <tr key={r.turno}>
-                  <td style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{r.turno}</td>
-                  <td><span className="chip-gray">{r.tramite}</span></td>
-                  <td style={{ color: "var(--ink-2)", whiteSpace: "nowrap" }}>{r.fecha}</td>
-                  <td style={{ color: "var(--ink-2)", fontVariantNumeric: "tabular-nums" }}>{r.hora}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 14 }}>
+          <FilterField label="Consentimiento" value={ff.estado} onChange={v => setField("estado", v)} options={CONSENTIMIENTO_ESTADOS} />
+          <FilterField label="Agencia" value={ff.sucursal} onChange={v => setField("sucursal", v)} options={["Todas las agencias", ...SUCURSALES_T]} />
+          <FilterField label="Desde" value={ff.desde} onChange={v => setField("desde", v)} type="date" />
+          <FilterField label="Hasta" value={ff.hasta} onChange={v => setField("hasta", v)} type="date" />
         </div>
-        <div className="pagination">
-          <span>Mostrando {rows.length} de {NO_GRABACION_TOTAL} atenciones</span>
+
+        <div className="search-bar" style={{ marginTop: 14 }}>
+          <Ph name="magnifying-glass" />
+          <input placeholder="Buscar por turno o trámite…" value={q} onChange={e => setQ(e.target.value)} />
         </div>
+      </section>
+
+      <section className="card" style={{ padding: "8px 16px 16px" }} data-screen-label="Tabla de atenciones por consentimiento">
+        {!rows.length ? (
+          <div className="empty-state">
+            <div className="es-circle"><Ph name="magnifying-glass" /></div>
+            <p>No hay atenciones con estos filtros</p>
+            <span style={{ fontSize: 13, color: "var(--ink-3)" }}>Pruebe con otro rango de fechas, agencia o estado de consentimiento.</span>
+            <button className="btn-secondary" onClick={clearAll}>Limpiar filtros</button>
+          </div>
+        ) : (
+          <React.Fragment>
+            <div style={{ display: "flex", alignItems: "center", padding: "8px 4px 4px" }}>
+              <span style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 600 }}>{rows.length} de {CONSENTIMIENTO.length} atenciones del período</span>
+              <ExportMenu compact />
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table className="data">
+                <thead>
+                  <tr>
+                    <th>Identificador de turno</th>
+                    <th>Trámite</th>
+                    <th>Agencia</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Consentimiento</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map(r => (
+                    <tr key={r.turno}>
+                      <td style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{r.turno}</td>
+                      <td><span className="chip-gray">{r.tramite}</span></td>
+                      <td style={{ color: "var(--ink-2)" }}>{r.suc}</td>
+                      <td style={{ color: "var(--ink-2)", whiteSpace: "nowrap" }}>{r.fecha}</td>
+                      <td style={{ color: "var(--ink-2)", fontVariantNumeric: "tabular-nums" }}>{r.hora}</td>
+                      <td>
+                        <span className={"pill sm " + (r.estado === "aceptada" ? "pos" : "neg")}>
+                          <span className="dot"></span>{r.estado === "aceptada" ? "Aceptada" : "Rechazada"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="pagination">
+              <span>Mostrando {rows.length} de {CONSENTIMIENTO.length} atenciones</span>
+            </div>
+          </React.Fragment>
+        )}
       </section>
     </React.Fragment>
   );
@@ -2398,10 +2493,13 @@ function NoGrabacionDrilldown({ onClose }) {
 
 window.Interactions = Interactions;
 window.INTERACTIONS = INTERACTIONS;
-window.NoGrabacionDrilldown = NoGrabacionDrilldown;
+window.Consentimiento = Consentimiento;
+window.CONSENTIMIENTO = CONSENTIMIENTO;
 window.NO_GRABACION = NO_GRABACION;
 window.NO_GRABACION_TOTAL = NO_GRABACION_TOTAL;
 window.NO_GRABACION_BASE = NO_GRABACION_BASE;
+window.GRABACION_ACEPTADA = GRABACION_ACEPTADA;
+window.GRABACION_ACEPTADA_TOTAL = GRABACION_ACEPTADA_TOTAL;
 </script>
 
 <script type="text/babel" data-presets="react">
@@ -4659,18 +4757,19 @@ function App() {
   const [drillQuery, setDrillQuery] = React.useState("");
   const drill = q => { setDrillQuery(q || ""); setTab("Interacciones"); };
   const [filters, setFilters] = React.useState({ periodo: null, sucursales: [], ejecutivos: [], interpretable: null, keyword: null });
-  const [noGrabacionOpen, setNoGrabacionOpen] = React.useState(false);
+  const [consentFilter, setConsentFilter] = React.useState(null);
+  const openConsentimiento = estado => { setConsentFilter(estado || "Todas"); setTab("Consentimiento"); };
 
   const openDetail = () => setDrawer(true);
   const closeDrawer = () => setDrawer(false);
 
   React.useEffect(() => {
-    if (!drawer && !topic && !noGrabacionOpen) return;
-    const onKey = e => { if (e.key === "Escape") { setDrawer(false); setTopic(null); setNoGrabacionOpen(false); } };
+    if (!drawer && !topic) return;
+    const onKey = e => { if (e.key === "Escape") { setDrawer(false); setTopic(null); } };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
-  }, [drawer, topic, noGrabacionOpen]);
+  }, [drawer, topic]);
 
   const variant = t.estado === "bloqueado" ? "locked"
     : t.estado === "día 1" ? "day1"
@@ -4704,7 +4803,7 @@ function App() {
         </div>
         <Tabs tab={tab} onTab={setTab} />
         {/* Filtros globales: debajo de las tabs, visibles en cada tab */}
-        <FilterRow filters={filters} onChange={setFilters} hideEjecutivos={tab === "Agencias"} />
+        <FilterRow filters={filters} onChange={setFilters} hideEjecutivos={tab === "Agencias" || tab === "Consentimiento"} />
         <ActiveFiltersBar filters={filters} onChange={setFilters} />
         {tab === "Resumen" ? (
           <Dashboard variant={variant}
@@ -4716,12 +4815,15 @@ function App() {
             onDrillToInteractions={() => setTab("Interacciones")}
             activeKeyword={filters.keyword}
             onFilterKeyword={kw => setFilters(f => ({ ...f, keyword: f.keyword === kw ? null : kw }))}
-            onOpenNoGrabacion={() => setNoGrabacionOpen(true)} />
+            onOpenConsentimiento={openConsentimiento} />
         ) : null}
         {tab === "Comercial" ? <Comercial onDrill={drill} /> : null}
         {tab === "Caja" ? <Caja onDrill={drill} /> : null}
         {tab === "Interacciones" ? (
           <Interactions onOpenDetail={openDetail} forceEmpty={t.listaVacia} initialQuery={drillQuery} />
+        ) : null}
+        {tab === "Consentimiento" ? (
+          <Consentimiento initialEstado={consentFilter} />
         ) : null}
         {tab === "Performance de usuarios" ? (
           <Profile onOpenDetail={openDetail} datosInsuficientes={t.datosInsuficientes}
@@ -4745,14 +4847,6 @@ function App() {
         <div className="drawer-backdrop" onClick={e => { if (e.target === e.currentTarget) closeDrawer(); }}>
           <aside className="drawer" role="dialog" aria-label="Detalle de interacción">
             <Detail onBack={closeDrawer} locked={variant === "locked" || variant === "setup"} drawer />
-          </aside>
-        </div>
-      ) : null}
-
-      {noGrabacionOpen ? (
-        <div className="drawer-backdrop" onClick={e => { if (e.target === e.currentTarget) setNoGrabacionOpen(false); }}>
-          <aside className="drawer" role="dialog" aria-label="Atenciones sin grabación aceptada">
-            <NoGrabacionDrilldown onClose={() => setNoGrabacionOpen(false)} />
           </aside>
         </div>
       ) : null}
