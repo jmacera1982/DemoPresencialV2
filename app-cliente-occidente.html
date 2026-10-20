@@ -10,7 +10,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Banco de Occidente (Demo · Numia Bank) - Mi Banca</title>
-  <link rel="icon" type="image/svg+xml" href="images/favicon-occidente.svg" />
+  <link rel="icon" type="image/png" href="images/favicon-occidente.png" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/ integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -53,8 +53,9 @@
     <div class="mobile-app-header">
       <button type="button" id="btnHeaderBack" aria-label="Volver" class="ac-visibility-hidden"><i class="bi bi-arrow-left"></i></button>
       <div id="numiaHeaderBrand">
-        <i class="bi bi-diamond-fill ac-icon-lg"></i>
-        <span id="numiaHeaderTitle" class="ac-header-title">Banco de Occidente</span>
+        <img src="images/logo-banco-occidente.png" alt="Banco de Occidente" class="numia-header-logo" data-app-cliente-fallback="#numiaHeaderBrandFallback" />
+        <span id="numiaHeaderBrandFallback" class="ac-fallback-brand ac-hidden"><i class="bi bi-diamond-fill ac-fallback-brand-icon"></i>Banco de Occidente</span>
+        <span id="numiaHeaderTitle" class="ac-header-title ac-hidden">Banco de Occidente</span>
       </div>
       <div class="mobile-app-header-actions">
         <span class="numia-demo-chip" aria-hidden="true">DEMO</span>
@@ -379,7 +380,8 @@
         <button type="button" class="san-promo-popup-close" id="btnPromoPopupClose" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
         <span class="numia-demo-chip numia-demo-chip--modal" aria-hidden="true">DEMO</span>
         <div class="san-promo-popup-logo">
-          <img src="images/favicon-occidente.svg" alt="Banco de Occidente" />
+          <img src="images/logo-banco-occidente.png" alt="Banco de Occidente" data-app-cliente-fallback="#sanPromoPopupBrandFallback" />
+          <span id="sanPromoPopupBrandFallback" class="ac-fallback-brand ac-hidden"><i class="bi bi-diamond-fill ac-fallback-brand-icon"></i> Banco de Occidente</span>
         </div>
         <h3 id="sanPromoPopupTitle">¡Tenés un préstamo preaprobado!</h3>
         <p>Un asesor de Banco de Occidente te explica las mejores opciones de financiamiento.</p>
