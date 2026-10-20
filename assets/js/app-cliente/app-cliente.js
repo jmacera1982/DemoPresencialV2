@@ -963,9 +963,13 @@
       var headerTitle = document.getElementById('numiaHeaderTitle');
       var headerBack = document.getElementById('btnHeaderBack');
       var headerBrand = document.getElementById('numiaHeaderBrand');
+      // Se toma el texto inicial del header como nombre "home", para que esta
+      // misma lógica funcione en cualquier variante de banco (Numia Bank,
+      // Banco de Occidente, etc.) sin depender de un literal fijo.
+      var homeHeaderTitle = headerTitle ? headerTitle.textContent.trim() : 'Numia Bank';
 
       function setHeader(title, showBack) {
-        var isHome = title === 'Numia Bank';
+        var isHome = title === homeHeaderTitle;
         if (headerTitle) headerTitle.textContent = title;
         if (headerBrand) headerBrand.style.display = isHome ? 'flex' : 'none';
         if (headerBack) headerBack.style.visibility = showBack ? 'visible' : 'hidden';
@@ -978,7 +982,7 @@
         ocultarChatCita();
         if (screenHome) screenHome.classList.add('active');
         if (screenCita) screenCita.classList.remove('active');
-        setHeader('Numia Bank', false);
+        setHeader(homeHeaderTitle, false);
       }
 
       function showCita() {

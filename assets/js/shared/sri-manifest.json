@@ -2,7 +2,7 @@
   "algorithm": "sha384",
   "generatedBy": "scripts/apply-sri.py",
   "files": {
-    "assets/js/app-cliente/app-cliente.js": "sha384-PaATVkW8qrLNpfVO4V+vYJ8xJNSF0LtnEpFy/OFMmzVeHpRzuKigfYu+MZCGXhnP",
+    "assets/js/app-cliente/app-cliente.js": "sha384-TSbc0H89dfpUKTLcEUCeityKPTJrH15d07ysTVuxb3EqVgF+x0tpmdMQBYXYE2Qz",
     "assets/js/app-cliente/appcliente-en.js": "sha384-gKxFezVp+CM0qYYe5qkcE9mHYxCwYwUhe5aGRm1WYjDG5rorYhJETCyfuKODOLlb",
     "assets/js/app-cliente/base.js": "sha384-0fvP9Z9+AROVUjq27jkZPbZuzsNXXgssCe3NdBj+ojMlXgo4QNw6DkNnmlNb9gdr",
     "assets/js/app-mobile-salud/app-mobileSalud.js": "sha384-Eaj2uSaa4J76P/1+9ysRgoGZ4eXXM62nPeV9KBa/9ax54f9d9BZ3nAPZs0UI8usj",
