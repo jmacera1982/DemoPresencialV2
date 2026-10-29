@@ -748,15 +748,4 @@ const FV_QUEUES = [16222, 16221]; // Alternar entre estos dos queueId
           placement: 'top'
         });
       }
-      // Inicializar popover Avatar Salud
-      const linkAvatarSalud = document.getElementById('linkAvatarSalud');
-      if (linkAvatarSalud) {
-        const contentEl = document.getElementById('popoverAvatarSaludContent');
-        new bootstrap.Popover(linkAvatarSalud, {
-          content: contentEl ? contentEl.innerHTML : '',
-          html: true,
-          trigger: 'hover',
-          placement: 'top'
-        });
-      }
     });
