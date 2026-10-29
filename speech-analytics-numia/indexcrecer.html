@@ -410,6 +410,55 @@ table.data tbody tr:hover{background:var(--purple-tint);}
 }
 .detail-layout{display:grid;grid-template-columns:3fr 2fr;gap:16px;align-items:start;}
 
+/* ── Clasificación y desglose de scoring de la atención ── */
+.aten-row-2{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;margin-bottom:20px;align-items:stretch;}
+.clas-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;}
+.clas-grid .pill{align-self:flex-start;}
+.clas-grid > div{display:flex;flex-direction:column;align-items:flex-start;}
+
+.sh-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-3);}
+.sh-value{display:flex;align-items:baseline;gap:9px;margin-top:8px;font-size:34px;font-weight:600;letter-spacing:-0.025em;}
+.sh-band{font-size:14px;font-weight:500;letter-spacing:0;}
+.sh-track{height:7px;border-radius:4px;background:#E8E8EE;margin-top:14px;overflow:hidden;}
+.sh-bar{height:100%;border-radius:4px;}
+.sh-note{font-size:11.5px;color:var(--ink-3);line-height:1.5;margin-top:12px;}
+
+.metric-box{border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin-top:12px;}
+.mb-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
+.mb-name{font-size:12.5px;font-weight:500;color:var(--purple);}
+.mb-calc{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.mb-desc{font-size:11.5px;color:var(--ink-3);line-height:1.45;margin-top:5px;}
+
+.aspect-list{list-style:none;margin-top:14px;}
+.aspect-list li{display:flex;align-items:flex-start;gap:9px;padding:9px 10px;border-radius:7px;font-size:12.5px;color:var(--ink);line-height:1.45;}
+.aspect-list li:nth-child(even){background:#FAFAFC;}
+.aspect-list li i{font-size:15px;color:var(--ink-3);flex-shrink:0;}
+.aspect-list li.ok i{color:var(--green);}
+.aspect-list li.no i{color:var(--ink-3);}
+.aspect-list li.no .al-name{color:var(--ink-2);}
+.al-name{flex:1;min-width:0;}
+.al-pts{font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink-2);white-space:nowrap;}
+
+.aten-total{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding:12px 14px;border-radius:9px;background:var(--purple-tint);font-size:12.5px;color:var(--ink-2);}
+.aten-total strong{font-size:14px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
+
+.eval-stack{display:flex;flex-direction:column;gap:20px;margin-bottom:24px;}
+.eval-card{display:grid;grid-template-columns:minmax(220px,264px) minmax(0,1fr);gap:28px;align-items:start;}
+.eval-rail{display:flex;flex-direction:column;gap:0;min-width:0;}
+.eval-rail .card-title{margin-bottom:10px;}
+.eval-rail .sh-note{margin-top:10px;}
+.eval-rail .aten-total{margin-top:16px;}
+.eval-body{min-width:0;display:grid;align-content:start;}
+.eval-grid-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;}
+.eval-grid-3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;}
+.eval-card .aspect-list{margin-top:0;list-style:none;}
+.eval-card .aspect-list li{background:#FAFAFC;border:1px solid var(--border);}
+.eval-card .metric-box{margin-bottom:0;}
+@media (max-width:900px){
+  .aten-row-2{grid-template-columns:1fr;}
+  .eval-card{grid-template-columns:1fr;gap:18px;}
+}
+
 /* transcript */
 .transcript-card{padding:0;overflow:hidden;}
 .player{padding:16px 20px;border-bottom:1px solid var(--border);}
@@ -3246,6 +3295,20 @@ const CASO_VENTA = {
     { ok: false, label: "Invitación a la encuesta de satisfacción", ts: null },
   ],
   protocolLabel: "Protocolo de asesoría comercial",
+  motivo: "Cotización de póliza de auto",
+  confianza: [
+    { n: "Claridad del material", v: 86, w: 0.5, d: "Qué tan entendible es la atención. Es la métrica de mayor peso." },
+    { n: "Respaldo en evidencia", v: 82, w: 0.3, d: "Cuánto se sostiene en frases textuales y no en inferencia." },
+    { n: "Coherencia de la conversación", v: 84, w: 0.2, d: "Si el diálogo se sostiene con turnos ordenados y sin saltos." },
+  ],
+  aspectos: [
+    { n: "Sondeo del vehículo y del perfil antes de recomendar.", p: 20, max: 20 },
+    { n: "Explicación de coberturas con ejemplos concretos.", p: 18, max: 20 },
+    { n: "Manejo de la comparación con la competencia sin bajar la prima.", p: 15, max: 15 },
+    { n: "Explicación del deducible antes del monto de la prima.", p: 4, max: 15 },
+    { n: "Oferta de venta cruzada (hogar, vida).", p: 0, max: 15 },
+    { n: "Cierre con fecha de seguimiento concreta.", p: 15, max: 15 },
+  ],
   feedback: "Buena asesoría de fondo: la asesora indagó el vehículo y quién lo conduce antes de recomendar, explicó las coberturas con ejemplos concretos, sostuvo la comparación con la competencia con argumentos de servicio y no de prima, y cerró con una fecha de seguimiento.",
   oportunidades: [
     "El deducible aparece en 4:05, después del monto de la prima, y ahí nace la única objeción de la conversación: es el patrón que se repite en 148 cotizaciones del período.",
@@ -3315,6 +3378,20 @@ const CASO_RECLAMO = {
     { ok: false, label: "Cierre con próximos pasos y responsable", ts: null },
   ],
   protocolLabel: "Protocolo de reclamaciones",
+  motivo: "Apertura de reclamación por siniestro",
+  confianza: [
+    { n: "Claridad del material", v: 81, w: 0.5, d: "Qué tan entendible es la atención. Es la métrica de mayor peso." },
+    { n: "Respaldo en evidencia", v: 78, w: 0.3, d: "Cuánto se sostiene en frases textuales y no en inferencia." },
+    { n: "Coherencia de la conversación", v: 76, w: 0.2, d: "Si el diálogo se sostiene con turnos ordenados y sin saltos." },
+  ],
+  aspectos: [
+    { n: "Verificación de lesionados y terceros al abrir el expediente.", p: 15, max: 15 },
+    { n: "Lista completa de documentos solicitada sin fricción.", p: 15, max: 15 },
+    { n: "Deducible y exclusiones explicados antes del ajuste.", p: 0, max: 20 },
+    { n: "Tiempo de llegada de la pieza informado con plazo.", p: 0, max: 15 },
+    { n: "Oferta proactiva del Rent-a-Car incluido en la cobertura.", p: 0, max: 15 },
+    { n: "Cierre con próximos pasos y responsable definido.", p: 5, max: 20 },
+  ],
   feedback: "El manejo técnico del expediente fue correcto —documentos completos y monto del ajuste explicado—, pero la conversación se pierde por información, no por dinero: el deducible se explicó después del ajuste y la pieza quedó sin fecha. El cliente trabaja con el vehículo y termina resolviendo por fuera de la red.",
   oportunidades: [
     "En 1:15 el cliente pregunta explícitamente si tiene que pagar algo y la respuesta se aplaza al ajustador: ahí nace la molestia de toda la conversación.",
@@ -3379,6 +3456,20 @@ const CASO_SEGUIMIENTO = {
     { ok: true, label: "Cierre con próximos pasos claros", ts: "4:20" },
   ],
   protocolLabel: "Protocolo de seguimiento de expediente",
+  motivo: "Seguimiento de reclamación en trámite",
+  confianza: [
+    { n: "Claridad del material", v: 85, w: 0.5, d: "Qué tan entendible es la atención. Es la métrica de mayor peso." },
+    { n: "Respaldo en evidencia", v: 83, w: 0.3, d: "Cuánto se sostiene en frases textuales y no en inferencia." },
+    { n: "Coherencia de la conversación", v: 82, w: 0.2, d: "Si el diálogo se sostiene con turnos ordenados y sin saltos." },
+  ],
+  aspectos: [
+    { n: "Verificación en sistema antes de responder.", p: 15, max: 15 },
+    { n: "Reconocimiento explícito de la molestia del cliente.", p: 15, max: 15 },
+    { n: "Alternativa concreta ofrecida (escalamiento con fecha).", p: 15, max: 15 },
+    { n: "Fecha de pago confirmada con el ajustador.", p: 0, max: 20 },
+    { n: "Argumento de retención frente a la competencia.", p: 0, max: 15 },
+    { n: "Cierre con próximos pasos claros.", p: 18, max: 20 },
+  ],
   feedback: "La ejecutiva hace bien lo que está a su alcance: verifica en sistema antes de responder, reconoce la molestia, aclara que el Rent-a-Car no tiene costo para el cliente y escala con responsable. El problema es anterior a este contacto: la fecha de diez días se prometió al reportar sin confirmarla con el ajustador, y este es el tercer contacto sin respuesta.",
   oportunidades: [
     "El caso nace de una fecha de pago prometida sin confirmar (una de las 41 del período): la causa raíz está en la apertura del expediente, no en el seguimiento.",
@@ -3436,6 +3527,108 @@ function InfoTip({ text }) {
       <Ph name="info" />
       {show ? <span className="tooltip-box">{text}</span> : null}
     </span>
+  );
+}
+
+const dec1 = n => n.toFixed(1).replace(".", ",");
+
+function ScoreHeadline({ value, note }) {
+  const b = scoreBand(value);
+  return (
+    <React.Fragment>
+      <div className="sh-value">
+        <span style={{ color: b.ink }}>{value}%</span>
+        <span className="sh-band" style={{ color: b.ink }}>{b.name}</span>
+      </div>
+      <div className="sh-track"><div className="sh-bar" style={{ width: value + "%", background: b.base }}></div></div>
+      {note ? <div className="sh-note">{note}</div> : null}
+    </React.Fragment>
+  );
+}
+
+function AtencionResumen({ caso, r }) {
+  const sumaPond = caso.confianza.reduce((a, m) => a + m.v * m.w, 0);
+  const sumaAsp = caso.aspectos.reduce((a, x) => a + x.p, 0);
+  const maxAsp = caso.aspectos.reduce((a, x) => a + x.max, 0);
+  const cumplidos = caso.protocol.filter(x => x.ok).length;
+  return (
+    <React.Fragment>
+      <div className="aten-row-2">
+        <section className="card">
+          <div className="card-title" style={{ marginBottom: 16 }}>Clasificación de la atención</div>
+          <div className="clas-grid">
+            <div>
+              <div className="sh-label">Motivo</div>
+              <span className="pill brand" style={{ marginTop: 8 }}>{caso.motivo}</span>
+            </div>
+            <div>
+              <div className="sh-label">Sentimiento</div>
+              <span style={{ marginTop: 8 }}><SentPill kind={r.sent} /></span>
+            </div>
+            <div>
+              <div className="sh-label">Estado</div>
+              <span className={"pill " + (r.resultado === "Resuelto" ? "pos" : "neg")} style={{ marginTop: 8 }}>
+                <span className="dot"></span>{r.resultado}
+              </span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div className="eval-stack">
+        <section className="card eval-card" data-screen-label="Confianza del análisis">
+          <div className="eval-rail">
+            <div className="card-title">Confianza del análisis</div>
+            <ScoreHeadline value={Math.round(sumaPond)} note="Tres métricas ponderadas. Mide la lectura del modelo, no la atención." />
+            <div className="aten-total"><span>Suma ponderada</span><strong>{dec1(sumaPond)}</strong></div>
+          </div>
+          <div className="eval-body eval-grid-3">
+            {caso.confianza.map(m => (
+              <div className="metric-box" key={m.n}>
+                <div className="mb-top">
+                  <span className="mb-name">{m.n}</span>
+                  <span className="mb-calc">{m.v} × {dec1(m.w)} = {dec1(m.v * m.w)}</span>
+                </div>
+                <div className="mb-desc">{m.d}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="card eval-card" data-screen-label="Score de la atención">
+          <div className="eval-rail">
+            <div className="card-title">Score de la atención</div>
+            <ScoreHeadline value={Math.round(sumaAsp / maxAsp * 100)} note="Cada aspecto aporta un máximo fijo." />
+            <div className="aten-total"><span>Suma de puntos</span><strong>{sumaAsp}/{maxAsp}</strong></div>
+          </div>
+          <ul className="aspect-list eval-body eval-grid-2">
+            {caso.aspectos.map(a => (
+              <li key={a.n}>
+                <Ph name="minus-circle" />
+                <span className="al-name">{a.n}</span>
+                <span className="al-pts">{a.p}/{a.max}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="card eval-card" data-screen-label="Cumplimiento del protocolo">
+          <div className="eval-rail">
+            <div className="card-title">Cumplimiento del protocolo</div>
+            <ScoreHeadline value={Math.round(cumplidos / caso.protocol.length * 100)} note="Cada paso cuenta como cumplido o no cumplido." />
+            <div className="aten-total"><span>Pasos cumplidos</span><strong>{cumplidos}/{caso.protocol.length}</strong></div>
+          </div>
+          <ul className="aspect-list eval-body eval-grid-2">
+            {caso.protocol.map(p => (
+              <li key={p.label} className={p.ok ? "ok" : "no"}>
+                <Ph name={p.ok ? "check-circle" : "x-circle"} fill />
+                <span className="al-name">{p.label}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </React.Fragment>
   );
 }
 
@@ -3562,8 +3755,9 @@ function Detail({ onBack, row, drawer, onGoProfile }) {
         <span className="meta-chip"><Ph name="shield-check" />{r.producto}</span>
         <span className="meta-chip"><Ph name="chats-circle" />{r.motivo}</span>
         <span className="meta-chip"><span className="avatar sm">{r.ini}</span>{r.exec}</span>
-        <SentPill kind={r.sent} />
       </div>
+
+      <AtencionResumen caso={caso} r={r} />
 
       <div className={"detail-layout" + (drawer ? " in-drawer" : "")}>
         <section className="card transcript-card">
@@ -3619,41 +3813,6 @@ function Detail({ onBack, row, drawer, onGoProfile }) {
               <ul>
                 {caso.oportunidades.map(o => <li key={o}>{o}</li>)}
               </ul>
-            </section>
-
-            <section className="card" id="card-metricas">
-              <div className="card-label">Métricas de la interacción</div>
-              <div style={{ marginTop: 8 }}>
-                <div className="metric-row">
-                  <span className="mr-label">{caso.protocolLabel}</span>
-                  <div className="mr-bar-track"><div className="mr-bar" style={{ width: (cumplidos / caso.protocol.length) * 100 + "%", background: "var(--purple)" }}></div></div>
-                  <span className="mr-val">{cumplidos} de {caso.protocol.length}</span>
-                </div>
-                {caso.metricas.map(m => (
-                  <div className="metric-row" key={m.label}>
-                    <span className="mr-label">
-                      {m.label}
-                      {m.tag ? <span className="tag-estimado">estimado</span> : null}
-                      {m.info ? <InfoTip text={m.info} /> : null}
-                    </span>
-                    <div className="mr-bar-track"><div className="mr-bar" style={{ width: m.pct + "%", background: m.color }}></div></div>
-                    <span className="mr-val">{m.val}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="card" id="card-protocolo">
-              <div className="card-label">Momentos del protocolo</div>
-              <div style={{ margin: "8px -8px 0" }}>
-                {caso.protocol.map(p => (
-                  <button className={"check-row" + (p.ok ? "" : " fail")} key={p.label} onClick={() => seekTo(p.ts)}>
-                    <span className={"check-ic " + (p.ok ? "ok" : "no")}><Ph name={p.ok ? "check" : "x"} bold /></span>
-                    <span className="check-label">{p.label}</span>
-                    <span className="check-ts">{p.ts || "no detectado"}</span>
-                  </button>
-                ))}
-              </div>
             </section>
 
             <section className="card" id="card-detecciones">
