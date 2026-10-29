@@ -850,6 +850,37 @@ table.data tbody tr:hover{background:var(--purple-tint);}
 /* alerta de KPI: borde + ícono, no solo color */
 .card.alert-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;}
 
+/* ── Puntuación 0–100: 5 bandas (alineado al pitch/protocolo re-layout V2) ── */
+.score-badge{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;
+  border-radius:6px;padding:3px 8px;font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.score-badge .sb-mark{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.score-badge.none{background:#F0F0F3;color:var(--ink-3);font-weight:500;}
+.score-legend{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:11px;color:var(--ink-3);}
+.score-legend .sl-item{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.score-legend .sl-mark{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
+
+/* ── Embudo de cobertura (Resumen) ── */
+.funnel-card{display:block;}
+.fc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.fc-meta{font-size:11.5px;color:var(--purple);font-weight:500;text-align:right;white-space:nowrap;}
+.fc-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fc-stat{border:1px solid var(--border);border-radius:9px;padding:12px 14px;min-width:0;}
+.fc-label{
+  font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--ink-3);display:flex;align-items:center;gap:4px;
+}
+.fc-value{display:flex;align-items:baseline;gap:7px;margin-top:6px;font-size:28px;font-weight:600;letter-spacing:-0.02em;}
+.fc-band{font-size:12.5px;font-weight:500;letter-spacing:0;}
+.fc-sub{font-size:11.5px;color:var(--ink-3);margin-top:6px;}
+.fc-track{height:7px;border-radius:4px;background:#E8E8EE;margin-top:16px;overflow:hidden;}
+.fc-bar{height:100%;border-radius:4px;}
+.fc-foot{font-size:11.5px;color:var(--ink-3);margin-top:8px;}
+@media (max-width:1150px){
+  .fc-stats{grid-template-columns:1fr;}
+}
+
 @media (prefers-reduced-motion: reduce){
   *{transition-duration:0.01ms !important;animation-duration:0.01ms !important;}
 }
@@ -1356,6 +1387,71 @@ function MetricCard({ label, tag, alertIcon, value, unit, trend, sub, spark, spa
     </section>
   );
 }
+
+/* ── Bandas de puntuación (0–100): escala única de la app (re-layout V2) ── */
+const SCORE_BANDS = [
+  { name: "Bajo",      lo: 0,  hi: 10,  base: "#D97B3F", ink: "#A0521E", bg: "#FBEFE6" },
+  { name: "Neutro",    lo: 10, hi: 30,  base: "#6E7391", ink: "#565B78", bg: "#F0F1F6" },
+  { name: "Medio",     lo: 30, hi: 50,  base: "#B8B54A", ink: "#67651F", bg: "#F7F6E3" },
+  { name: "Bueno",     lo: 50, hi: 70,  base: "#7FA33F", ink: "#556F22", bg: "#EFF4E5" },
+  { name: "Muy bueno", lo: 70, hi: 100, base: "#0F7A3D", ink: "#0F7A3D", bg: "#E6F2EA" },
+];
+const scoreBand = n => SCORE_BANDS.find(b => n < b.hi) || SCORE_BANDS[SCORE_BANDS.length - 1];
+
+function ScoreBadge({ value, out, decimals }) {
+  if (value == null) return <span className="score-badge none" title="Sin puntuación">—</span>;
+  const max = out || 100;
+  const b = scoreBand(value * (100 / max));
+  const txt = (decimals ? value.toFixed(decimals).replace(".", ",") : value) + "/" + max;
+  return (
+    <span className="score-badge" style={{ background: b.bg, color: b.ink }} title={b.name + " (" + b.lo + "–" + b.hi + ")"}>
+      <span className="sb-mark" style={{ background: b.base }}></span>{txt}
+    </span>
+  );
+}
+
+function ScoreLegend() {
+  return (
+    <div className="score-legend" aria-label="Escala de puntuación">
+      {SCORE_BANDS.map(b => (
+        <span className="sl-item" key={b.name}>
+          <span className="sl-mark" style={{ background: b.base }}></span>
+          <span>{b.name + " (" + b.lo + "–" + b.hi + ")"}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/* ── Tarjeta de embudo de cobertura: transcripción → análisis → resultado ── */
+function FunnelCard({ title, info, meta, primary, secondary, foot, className }) {
+  const b = scoreBand(primary.pct);
+  return (
+    <section className={"card funnel-card" + (className ? " " + className : "")}>
+      <div className="fc-head">
+        <span className="card-title">{title} <InfoDot text={info} /></span>
+        <span className="fc-meta">{meta}</span>
+      </div>
+      <div className="fc-stats">
+        {[primary, secondary].map((s, i) => (
+          <div className="fc-stat" key={s.label}>
+            <div className="fc-label">{s.label}{s.info ? <InfoDot text={s.info} /> : null}</div>
+            <div className="fc-value">
+              <span style={{ color: i === 0 ? b.ink : "var(--ink)" }}>{s.pct}%</span>
+              {i === 0 ? <span className="fc-band" style={{ color: b.ink }}>{b.name}</span> : null}
+            </div>
+            <div className="fc-sub">{s.sub}</div>
+          </div>
+        ))}
+      </div>
+      <div className="fc-track" role="img" aria-label={primary.label + ": " + primary.pct + "%"}>
+        <div className="fc-bar" style={{ width: primary.pct + "%", background: b.base }}></div>
+      </div>
+      {foot ? <div className="fc-foot">{foot}</div> : null}
+    </section>
+  );
+}
+
 
 function FilterChip({ icon, label, options, active, single, selected, onApply }) {
   const [open, setOpen] = useState(false);
@@ -2233,6 +2329,121 @@ function CompetenciaCard({ onDrill, span }) {
   );
 }
 
+/* ── Cumplimiento por paso del protocolo (asesoría de pólizas) ── */
+const PROTO_STEPS = [
+  { n: 1, name: "Saludo e identificación del cliente", sev: "baja",
+    desc: "Verifica si el asesor saluda, se identifica y confirma los datos del asegurado o la póliza.",
+    v: [85, 89, 92, 98] },
+  { n: 2, name: "Validación de la póliza o número de siniestro", sev: "alta",
+    desc: "Verifica si valida la póliza vigente o el número de siniestro antes de gestionar el caso.",
+    v: [81, 85, 88, 94] },
+  { n: 3, name: "Escucha activa del motivo de la gestión", sev: "baja",
+    desc: "Verifica si deja que el cliente explique el motivo sin interrumpir y resume lo entendido.",
+    v: [83, 87, 90, 96] },
+  { n: 4, name: "Sondeo del perfil y necesidades de cobertura", sev: "media",
+    desc: "Verifica si indaga el perfil de riesgo del cliente antes de recomendar un producto.",
+    v: [67, 71, 74, 80] },
+  { n: 5, name: "Explicación de coberturas y exclusiones", sev: "alta",
+    desc: "Punto crítico regulatorio. Verifica si detalla qué cubre y qué excluye la póliza antes del cierre.",
+    v: [49, 53, 56, 62] },
+  { n: 6, name: "Explicación del deducible y costos", sev: "alta",
+    desc: "Verifica si informa el monto del deducible y los costos asociados al reclamo o a la prima.",
+    v: [54, 58, 61, 67] },
+  { n: 7, name: "Ofrecimiento de producto complementario", sev: "media",
+    desc: "Verifica si ofrece activamente un segundo ramo acorde al perfil detectado (vida, flotilla, Plan Futuro).",
+    v: [50, 54, 57, 63] },
+  { n: 8, name: "Manejo de objeciones de prima o competencia", sev: "media",
+    desc: "Verifica si responde con argumento de valor ante objeciones de prima, plazo o competencia.",
+    v: [56, 60, 63, 69] },
+  { n: 9, name: "Validación de comprensión y resolución de dudas", sev: "media",
+    desc: "Verifica si pregunta explícitamente si quedó alguna duda y la resuelve antes de avanzar.",
+    v: [58, 62, 65, 71] },
+  { n: 10, name: "Mención de canales digitales (app o web)", sev: "media",
+    desc: "Verifica si invita a dar seguimiento al siniestro o pagar la prima desde la app sin volver a la sucursal.",
+    v: [26, 30, 33, 39] },
+  { n: 11, name: "Confirmación de próximos pasos y plazos", sev: "media",
+    desc: "Verifica si establece con fecha concreta cuándo y cómo continúa el trámite o el ajuste.",
+    v: [63, 67, 70, 76] },
+  { n: 12, name: "Entrega de comprobante o número de caso", sev: "baja",
+    desc: "Verifica si entrega comprobante, póliza o número de caso de respaldo de la gestión.",
+    v: [78, 82, 85, 91] },
+  { n: 13, name: "Verificación de satisfacción", sev: "baja",
+    desc: "Verifica si pregunta explícitamente si la atención resolvió lo que el cliente buscaba.",
+    v: [52, 56, 59, 65] },
+  { n: 14, name: "Despedida institucional", sev: "baja",
+    desc: "Verifica si se despide con amabilidad y mensaje institucional de cierre.",
+    v: [74, 78, 81, 87] },
+];
+const protoAvg = s => Math.round(s.v.reduce((a, b) => a + b, 0) / s.v.length);
+const PROTO_ESCALA = [
+  { max: 10, label: "Bajo", color: "#D97B3F" },
+  { max: 30, label: "Neutro", color: "#6E7391" },
+  { max: 50, label: "Medio", color: "#B8B54A" },
+  { max: 70, label: "Bueno", color: "#7FA33F" },
+  { max: 100, label: "Muy bueno", color: "#0F7A3D" },
+];
+const protoBand = v => PROTO_ESCALA.find(b => v <= b.max) || PROTO_ESCALA[4];
+const PROTO_REVIEWS = [
+  { id: "#C-7418", reason: "Explicación de deducible ausente", sev: "crit", exec: "Juan Carlos Encarnación", fecha: "11/08/2026, 11:05" },
+  { id: "#C-7415", reason: "Escalación a defensoría del asegurado", sev: "crit", exec: "Juan Carlos Encarnación", fecha: "11/08/2026, 10:48" },
+  { id: "#C-7408", reason: "Satisfacción estimada baja", sev: "warn", exec: "Wendy Marisol Féliz", fecha: "11/08/2026, 09:58" },
+];
+
+function ProtocoloHeatmap() {
+  return (
+    <section className="card span-12" data-screen-label="Cumplimiento por paso del protocolo">
+      <div className="card-head">
+        <span className="card-title">Cumplimiento por paso del protocolo <InfoDot text="Porcentaje de interacciones del período en que se detectó cada paso, según la escala de color." /></span>
+        <span className="card-sub">14 pasos · 2.606 interacciones</span>
+      </div>
+      <div role="list" aria-label="Cumplimiento por paso del protocolo" style={{ display: "flex", flexDirection: "column" }}>
+        {PROTO_STEPS.map((s, i) => {
+          const band = protoBand(protoAvg(s));
+          return (
+            <div key={s.n} role="listitem" title={s.desc}
+              style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, background: i % 2 ? "transparent" : "#FAFAFC" }}>
+              <span style={{ fontSize: 11, color: "var(--ink-3)", fontVariantNumeric: "tabular-nums", width: 16, textAlign: "right", flexShrink: 0 }}>{s.n}</span>
+              <span style={{ fontSize: 13, flex: 1, minWidth: 0, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+              <span title={band.label} style={{ fontSize: 12.5, fontWeight: 600, fontVariantNumeric: "tabular-nums", width: 44, textAlign: "right", color: band.color }}>{protoAvg(s)}%</span>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 12, fontSize: 11.5, color: "var(--ink-3)", flexWrap: "wrap" }}>
+        {PROTO_ESCALA.map((b, i) => (
+          <span key={b.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 3, background: b.color, flexShrink: 0 }}></span>
+            {b.label} ({i === 0 ? 0 : PROTO_ESCALA[i - 1].max}–{b.max})
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RequierenRevision() {
+  return (
+    <section className="card span-12" data-screen-label="Requieren revisión">
+      <div className="review-strip" style={{ marginBottom: 0 }}>
+        <div className="strip-title"><i className="ph-fill ph-flag" aria-hidden="true" style={{ color: "var(--red)", marginRight: 6 }}></i>Requieren revisión</div>
+        <div className="review-cards">
+          {PROTO_REVIEWS.map(r => (
+            <div className={"review-card " + r.sev} key={r.id}>
+              <div className="rc-top">
+                <span className="rc-reason">{r.reason}</span>
+                <span className={"pill sm " + (r.sev === "crit" ? "crit" : "warn")}>{r.sev === "crit" ? "Crítica" : "Media"}</span>
+              </div>
+              <div className="rc-meta">
+                <span>{r.id}</span>·<span>{r.exec}</span>·<span>{r.fecha}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ══════════════════════ DASHBOARD RESUMEN ══════════════════════ */
 function Dashboard({ variant, rankingPublico, nubePalabras, onOpenProfile, onGoTemas, onDrillTopic, onOpenModel, onDrill }) {
   const locked = variant === "locked" || variant === "setup";
@@ -2252,6 +2463,30 @@ function Dashboard({ variant, rankingPublico, nubePalabras, onOpenProfile, onGoT
       ) : null}
       <div className="grid">
 
+        {/* Row 0 — Embudo de cobertura: qué se transcribe, qué se analiza, qué se resuelve */}
+        <div className="span-12" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))", gap: 16 }}>
+          <FunnelCard
+            title="Transcripción"
+            info="De todas las atenciones del período, cuántas produjeron audio interpretable para transcribir."
+            meta={TOTAL_CRUDAS.toLocaleString("en-US") + " atenciones · 100% del total"}
+            primary={{ label: "Interpretables", pct: 90, sub: "2.864 atenciones", info: "Audio con calidad suficiente para transcribir y evaluar." }}
+            secondary={{ label: "No interpretables", pct: 10, sub: "316 atenciones", info: "Audio inaudible, incompleto o sin grabación." }} />
+          <FunnelCard
+            title="Alcance del análisis"
+            info="Del subgrupo interpretable, cuántas atenciones pudo evaluar el modelo de extremo a extremo."
+            meta="2.864 interpretables · 100% del subgrupo"
+            primary={{ label: "Analizables", pct: 91, sub: "2.606 atenciones", info: "Conversaciones evaluadas contra el protocolo activo." }}
+            secondary={{ label: "Excluidas", pct: 9, sub: "258 atenciones", info: "Excluidas por duración mínima o motivo no clasificable." }}
+            foot="De las 258 excluidas: 162 no se presentó (63%) · 96 otros motivos" />
+          <FunnelCard
+            title="Resultado de la gestión"
+            info="Del subgrupo analizable, cuántas atenciones se cerraron sin necesidad de volver."
+            meta="2.606 analizables · 100% del subgrupo"
+            primary={{ label: "Resueltas", pct: 95, sub: "2.476 atenciones", info: "Cerradas en el primer contacto." }}
+            secondary={{ label: "No resueltas", pct: 5, sub: "130 atenciones", info: "Requieren seguimiento o una nueva gestión." }}
+            foot="258 excluidas del cálculo" />
+        </div>
+
         {/* KPIs principales */}
         <div className="span-12" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
           <div style={{ display: "flex" }}>
@@ -2261,14 +2496,14 @@ function Dashboard({ variant, rankingPublico, nubePalabras, onOpenProfile, onGoT
               spark={day1 ? null : sparkUp} locked={locked} lockedText="Active esta métrica cargando el protocolo de asesoría" />
           </div>
           <div style={{ display: "flex" }}>
-            <MetricCard label="Interacciones analizadas"
-              info="Conversaciones con audio interpretable sobre el total capturado en sucursales, centro de contacto, WhatsApp e intermediarios."
-              value="2,864" sub={"de " + TOTAL_CRUDAS.toLocaleString("en-US") + " capturadas · 90% interpretable"} spark={sparkFlat} />
-          </div>
-          <div style={{ display: "flex" }}>
             <MetricCard label="CSAT estimado" tag="estimado"
               info="Satisfacción estimada a partir del tono y el contenido de la conversación. No reemplaza la encuesta de servicio."
               value={day1 ? "3.9" : "4.2"} unit="/5" trend={<Trend dir="up" value="0.2" />} spark={sparkSat} />
+          </div>
+          <div style={{ display: "flex" }}>
+            <MetricCard label="Mención app o web"
+              info="Paso del protocolo que invita a seguir el estado del siniestro o pagar la prima desde la app, sin tener que volver a la sucursal."
+              value="29" unit="%" spark={[0.2, 0.26, 0.24, 0.3, 0.28, 0.33, 0.31, 0.36, 0.35]} />
           </div>
           <div style={{ display: "flex" }}>
             <MetricCard label="Índice de asesoría"
@@ -2301,6 +2536,9 @@ function Dashboard({ variant, rankingPublico, nubePalabras, onOpenProfile, onGoT
 
         <HeatmapAtenciones />
         <RatioEscucha />
+
+        <ProtocoloHeatmap />
+        <RequierenRevision />
 
         <SentimentChart />
         <TopAsesores rankingPublico={rankingPublico} onOpenProfile={onOpenProfile} />
