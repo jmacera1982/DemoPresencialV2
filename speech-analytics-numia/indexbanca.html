@@ -850,6 +850,37 @@ table.data tbody tr:hover{background:var(--purple-tint);}
 /* alerta de KPI: borde + ícono, no solo color */
 .card.alert-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;}
 
+/* ── Puntuación 0–100: 5 bandas (alineado al pitch/protocolo re-layout V2) ── */
+.score-badge{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;
+  border-radius:6px;padding:3px 8px;font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.score-badge .sb-mark{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.score-badge.none{background:#F0F0F3;color:var(--ink-3);font-weight:500;}
+.score-legend{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:11px;color:var(--ink-3);}
+.score-legend .sl-item{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.score-legend .sl-mark{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
+
+/* ── Embudo de cobertura (Resumen) ── */
+.funnel-card{display:block;}
+.fc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.fc-meta{font-size:11.5px;color:var(--purple);font-weight:500;text-align:right;white-space:nowrap;}
+.fc-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fc-stat{border:1px solid var(--border);border-radius:9px;padding:12px 14px;min-width:0;}
+.fc-label{
+  font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--ink-3);display:flex;align-items:center;gap:4px;
+}
+.fc-value{display:flex;align-items:baseline;gap:7px;margin-top:6px;font-size:28px;font-weight:600;letter-spacing:-0.02em;}
+.fc-band{font-size:12.5px;font-weight:500;letter-spacing:0;}
+.fc-sub{font-size:11.5px;color:var(--ink-3);margin-top:6px;}
+.fc-track{height:7px;border-radius:4px;background:#E8E8EE;margin-top:16px;overflow:hidden;}
+.fc-bar{height:100%;border-radius:4px;}
+.fc-foot{font-size:11.5px;color:var(--ink-3);margin-top:8px;}
+@media (max-width:1150px){
+  .fc-stats{grid-template-columns:1fr;}
+}
+
 @media (prefers-reduced-motion: reduce){
   *{transition-duration:0.01ms !important;animation-duration:0.01ms !important;}
 }
@@ -1057,6 +1088,71 @@ function MetricCard({ label, tag, alertIcon, value, unit, trend, sub, spark, spa
     </section>
   );
 }
+
+/* ── Bandas de puntuación (0–100): escala única de la app (re-layout V2) ── */
+const SCORE_BANDS = [
+  { name: "Bajo",      lo: 0,  hi: 10,  base: "#D97B3F", ink: "#A0521E", bg: "#FBEFE6" },
+  { name: "Neutro",    lo: 10, hi: 30,  base: "#6E7391", ink: "#565B78", bg: "#F0F1F6" },
+  { name: "Medio",     lo: 30, hi: 50,  base: "#B8B54A", ink: "#67651F", bg: "#F7F6E3" },
+  { name: "Bueno",     lo: 50, hi: 70,  base: "#7FA33F", ink: "#556F22", bg: "#EFF4E5" },
+  { name: "Muy bueno", lo: 70, hi: 100, base: "#0F7A3D", ink: "#0F7A3D", bg: "#E6F2EA" },
+];
+const scoreBand = n => SCORE_BANDS.find(b => n < b.hi) || SCORE_BANDS[SCORE_BANDS.length - 1];
+
+function ScoreBadge({ value, out, decimals }) {
+  if (value == null) return <span className="score-badge none" title="Sin puntuación">—</span>;
+  const max = out || 100;
+  const b = scoreBand(value * (100 / max));
+  const txt = (decimals ? value.toFixed(decimals).replace(".", ",") : value) + "/" + max;
+  return (
+    <span className="score-badge" style={{ background: b.bg, color: b.ink }} title={b.name + " (" + b.lo + "–" + b.hi + ")"}>
+      <span className="sb-mark" style={{ background: b.base }}></span>{txt}
+    </span>
+  );
+}
+
+function ScoreLegend() {
+  return (
+    <div className="score-legend" aria-label="Escala de puntuación">
+      {SCORE_BANDS.map(b => (
+        <span className="sl-item" key={b.name}>
+          <span className="sl-mark" style={{ background: b.base }}></span>
+          <span>{b.name + " (" + b.lo + "–" + b.hi + ")"}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/* ── Tarjeta de embudo de cobertura: transcripción → análisis → resultado ── */
+function FunnelCard({ title, info, meta, primary, secondary, foot, className }) {
+  const b = scoreBand(primary.pct);
+  return (
+    <section className={"card funnel-card" + (className ? " " + className : "")}>
+      <div className="fc-head">
+        <span className="card-title">{title} <InfoDot text={info} /></span>
+        <span className="fc-meta">{meta}</span>
+      </div>
+      <div className="fc-stats">
+        {[primary, secondary].map((s, i) => (
+          <div className="fc-stat" key={s.label}>
+            <div className="fc-label">{s.label}{s.info ? <InfoDot text={s.info} /> : null}</div>
+            <div className="fc-value">
+              <span style={{ color: i === 0 ? b.ink : "var(--ink)" }}>{s.pct}%</span>
+              {i === 0 ? <span className="fc-band" style={{ color: b.ink }}>{b.name}</span> : null}
+            </div>
+            <div className="fc-sub">{s.sub}</div>
+          </div>
+        ))}
+      </div>
+      <div className="fc-track" role="img" aria-label={primary.label + ": " + primary.pct + "%"}>
+        <div className="fc-bar" style={{ width: primary.pct + "%", background: b.base }}></div>
+      </div>
+      {foot ? <div className="fc-foot">{foot}</div> : null}
+    </section>
+  );
+}
+
 
 /* ── Filter chip with dropdown (controlled) ── */
 function FilterChip({ icon, label, options, active, single, selected, onApply }) {
@@ -1697,6 +1793,121 @@ function SentimentChart() {
   );
 }
 
+/* ── Cumplimiento por paso del protocolo (pitch comercial de agencia) ── */
+const PROTO_STEPS = [
+  { n: 1, name: "Saludo institucional e identificación", sev: "baja",
+    desc: "Verifica si el ejecutivo saluda, da la bienvenida a la agencia y se identifica por su nombre.",
+    v: [86, 90, 93, 99] },
+  { n: 2, name: "Validación de identidad del cliente", sev: "alta",
+    desc: "Verifica si solicita y valida el documento de identidad antes de operar sobre la cuenta.",
+    v: [82, 86, 89, 95] },
+  { n: 3, name: "Escucha activa del motivo de la visita", sev: "baja",
+    desc: "Verifica si deja que el cliente explique el motivo sin interrumpir y resume lo entendido.",
+    v: [84, 88, 91, 97] },
+  { n: 4, name: "Confirmación del motivo y expectativas", sev: "baja",
+    desc: "Verifica si confirma explícitamente qué espera resolver el cliente en la visita.",
+    v: [77, 81, 84, 90] },
+  { n: 5, name: "Disclosure de tasas y condiciones vigentes", sev: "alta",
+    desc: "Punto crítico regulatorio. Verifica si informa tasa, CAT o condiciones vigentes antes de ofrecer el producto.",
+    v: [48, 52, 55, 61] },
+  { n: 6, name: "Explicación de costos y comisiones", sev: "alta",
+    desc: "Verifica si detalla comisiones, cargos por mantenimiento y penalidades del producto ofrecido.",
+    v: [55, 59, 62, 68] },
+  { n: 7, name: "Ofrecimiento de producto complementario", sev: "media",
+    desc: "Verifica si ofrece activamente un segundo producto acorde al perfil detectado (tarjeta, seguro, inversión).",
+    v: [52, 56, 59, 65] },
+  { n: 8, name: "Manejo de objeciones", sev: "media",
+    desc: "Verifica si responde con argumento de valor ante objeciones de tasa, plazo o competencia.",
+    v: [57, 61, 64, 70] },
+  { n: 9, name: "Validación de comprensión y resolución de dudas", sev: "media",
+    desc: "Verifica si pregunta explícitamente si quedó alguna duda y la resuelve antes de avanzar.",
+    v: [59, 63, 66, 72] },
+  { n: 10, name: "Mención de canales digitales (app o web)", sev: "media",
+    desc: "Verifica si invita a usar la app o el sitio para consultas y trámites simples sin volver a la agencia.",
+    v: [25, 29, 32, 38] },
+  { n: 11, name: "Confirmación de próximos pasos y plazos", sev: "media",
+    desc: "Verifica si establece con fecha concreta cuándo y cómo continúa el trámite.",
+    v: [64, 68, 71, 77] },
+  { n: 12, name: "Entrega de comprobante o documentación", sev: "baja",
+    desc: "Verifica si entrega comprobante, contrato o documentación de respaldo de la operación.",
+    v: [80, 84, 87, 93] },
+  { n: 13, name: "Verificación de satisfacción", sev: "baja",
+    desc: "Verifica si pregunta explícitamente si la atención resolvió lo que el cliente buscaba.",
+    v: [53, 57, 60, 66] },
+  { n: 14, name: "Despedida institucional", sev: "baja",
+    desc: "Verifica si se despide con amabilidad y mensaje institucional de cierre.",
+    v: [75, 79, 82, 88] },
+];
+const protoAvg = s => Math.round(s.v.reduce((a, b) => a + b, 0) / s.v.length);
+const PROTO_ESCALA = [
+  { max: 10, label: "Bajo", color: "#D97B3F" },
+  { max: 30, label: "Neutro", color: "#6E7391" },
+  { max: 50, label: "Medio", color: "#B8B54A" },
+  { max: 70, label: "Bueno", color: "#7FA33F" },
+  { max: 100, label: "Muy bueno", color: "#0F7A3D" },
+];
+const protoBand = v => PROTO_ESCALA.find(b => v <= b.max) || PROTO_ESCALA[4];
+const PROTO_REVIEWS = [
+  { id: "#4521", reason: "Disclosure de tasas ausente", sev: "crit", exec: "María González", fecha: "15/07/2026, 11:42" },
+  { id: "#4518", reason: "Escalación a defensoría", sev: "crit", exec: "María González", fecha: "15/07/2026, 11:05" },
+  { id: "#4515", reason: "Satisfacción estimada baja", sev: "warn", exec: "Carlos Fuentes", fecha: "15/07/2026, 10:48" },
+];
+
+function ProtocoloHeatmap() {
+  return (
+    <section className="card span-12" data-screen-label="Cumplimiento por paso del protocolo">
+      <div className="card-head">
+        <span className="card-title">Cumplimiento por paso del protocolo <InfoDot text="Porcentaje de interacciones del período en que se detectó cada paso, según la escala de color." /></span>
+        <span className="card-sub">14 pasos · 2.334 interacciones</span>
+      </div>
+      <div role="list" aria-label="Cumplimiento por paso del protocolo" style={{ display: "flex", flexDirection: "column" }}>
+        {PROTO_STEPS.map((s, i) => {
+          const band = protoBand(protoAvg(s));
+          return (
+            <div key={s.n} role="listitem" title={s.desc}
+              style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, background: i % 2 ? "transparent" : "#FAFAFC" }}>
+              <span style={{ fontSize: 11, color: "var(--ink-3)", fontVariantNumeric: "tabular-nums", width: 16, textAlign: "right", flexShrink: 0 }}>{s.n}</span>
+              <span style={{ fontSize: 13, flex: 1, minWidth: 0, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+              <span title={band.label} style={{ fontSize: 12.5, fontWeight: 600, fontVariantNumeric: "tabular-nums", width: 44, textAlign: "right", color: band.color }}>{protoAvg(s)}%</span>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 12, fontSize: 11.5, color: "var(--ink-3)", flexWrap: "wrap" }}>
+        {PROTO_ESCALA.map((b, i) => (
+          <span key={b.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 3, background: b.color, flexShrink: 0 }}></span>
+            {b.label} ({i === 0 ? 0 : PROTO_ESCALA[i - 1].max}–{b.max})
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RequierenRevision() {
+  return (
+    <section className="card span-12" data-screen-label="Requieren revisión">
+      <div className="review-strip" style={{ marginBottom: 0 }}>
+        <div className="strip-title"><i className="ph-fill ph-flag" aria-hidden="true" style={{ color: "var(--red)", marginRight: 6 }}></i>Requieren revisión</div>
+        <div className="review-cards">
+          {PROTO_REVIEWS.map(r => (
+            <div className={"review-card " + r.sev} key={r.id}>
+              <div className="rc-top">
+                <span className="rc-reason">{r.reason}</span>
+                <span className={"pill sm " + (r.sev === "crit" ? "crit" : "warn")}>{r.sev === "crit" ? "Crítica" : "Media"}</span>
+              </div>
+              <div className="rc-meta">
+                <span>{r.id}</span>·<span>{r.exec}</span>·<span>{r.fecha}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Dashboard({ variant, rankingPublico, nubePalabras, onDrillToInteractions, onOpenProfile, onGoTemas, onDrillTopic, activeKeyword, onFilterKeyword, onOpenConsentimiento }) {
   const locked = variant === "locked" || variant === "setup";
   const day1 = variant === "day1";
@@ -1732,6 +1943,30 @@ function Dashboard({ variant, rankingPublico, nubePalabras, onDrillToInteraction
       ) : null}
       <div className="grid" data-screen-label="Dashboard Resumen">
 
+        {/* Row 0 — Embudo de cobertura: qué se transcribe, qué se analiza, qué se resuelve */}
+        <div className="span-12" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))", gap: 16 }}>
+          <FunnelCard
+            title="Transcripción"
+            info="De todas las atenciones del período, cuántas produjeron audio interpretable para transcribir."
+            meta="2.610 atenciones · 100% del total"
+            primary={{ label: "Interpretables", pct: 89, sub: "2.334 atenciones", info: "Audio con calidad suficiente para transcribir y evaluar." }}
+            secondary={{ label: "No interpretables", pct: 11, sub: "276 atenciones", info: "Audio inaudible, incompleto o sin grabación." }} />
+          <FunnelCard
+            title="Alcance del análisis"
+            info="Del subgrupo interpretable, cuántas atenciones pudo evaluar el modelo de extremo a extremo."
+            meta="2.334 interpretables · 100% del subgrupo"
+            primary={{ label: "Analizables", pct: 91, sub: "2.124 atenciones", info: "Conversaciones evaluadas contra el protocolo activo." }}
+            secondary={{ label: "Excluidas", pct: 9, sub: "210 atenciones", info: "Excluidas por duración mínima o motivo no clasificable." }}
+            foot="De las 210 excluidas: 138 no se presentó (66%) · 72 otros motivos" />
+          <FunnelCard
+            title="Resultado de la gestión"
+            info="Del subgrupo analizable, cuántas atenciones se cerraron sin necesidad de volver."
+            meta="2.124 analizables · 100% del subgrupo"
+            primary={{ label: "Resueltas", pct: 95, sub: "2.018 atenciones", info: "Cerradas en el primer contacto." }}
+            secondary={{ label: "No resueltas", pct: 5, sub: "106 atenciones", info: "Requieren seguimiento o una nueva visita." }}
+            foot="210 excluidas del cálculo" />
+        </div>
+
         {/* Row 1 — KPIs principales */}
         <div className="span-12" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
           <div style={{ display: "flex" }}>
@@ -1742,14 +1977,14 @@ function Dashboard({ variant, rankingPublico, nubePalabras, onDrillToInteraction
               locked={locked} lockedText="Activá esta métrica cargando tu protocolo" />
           </div>
           <div style={{ display: "flex" }}>
-            <MetricCard label="Total atenciones interpretables"
-              info="Total de interacciones con audio interpretable, analizadas en el período."
-              value="2.334" sub="de 2.610 atenciones totales" spark={sparkFcr} />
-          </div>
-          <div style={{ display: "flex" }}>
             <MetricCard label="CSAT estimado"
               info="Satisfacción estimada por IA a partir del tono y contenido de la conversación. No reemplaza encuestas."
               value={day1 ? "3.9" : "4.1"} unit="/5" spark={sparkSat} />
+          </div>
+          <div style={{ display: "flex" }}>
+            <MetricCard label="Mención app o web"
+              info="Paso del protocolo que incentiva canales alternos. Es la palanca directa sobre las visitas que solo buscan un resultado o trámite simple."
+              value="31" unit="%" spark={[0.22, 0.28, 0.25, 0.31, 0.29, 0.34, 0.33, 0.38, 0.36]} />
           </div>
           <div style={{ display: "flex" }}>
             <MetricCard label="Score promedio"
@@ -1805,6 +2040,9 @@ function Dashboard({ variant, rankingPublico, nubePalabras, onDrillToInteraction
             </div>
           </div>
         </section>
+
+        <ProtocoloHeatmap />
+        <RequierenRevision />
 
         {/* Row 2 — Sentimiento + Top ejecutivos */}
         <SentimentChart />
