@@ -640,20 +640,6 @@ const FV_QUEUES = [16222, 16221]; // Alternar entre estos dos queueId
         saludActivosChevron.classList.add('bi-chevron-down');
       });
     }
-
-    // Manejar el cambio de ícono en el desplegable Speech Analytics
-    const speechAnalyticsActivosCollapse = document.getElementById('speechAnalyticsActivosCollapse');
-    const speechAnalyticsActivosChevron = document.getElementById('speechAnalyticsActivosChevron');
-    if (speechAnalyticsActivosCollapse && speechAnalyticsActivosChevron) {
-      speechAnalyticsActivosCollapse.addEventListener('show.bs.collapse', function () {
-        speechAnalyticsActivosChevron.classList.remove('bi-chevron-down');
-        speechAnalyticsActivosChevron.classList.add('bi-chevron-up');
-      });
-      speechAnalyticsActivosCollapse.addEventListener('hide.bs.collapse', function () {
-        speechAnalyticsActivosChevron.classList.remove('bi-chevron-up');
-        speechAnalyticsActivosChevron.classList.add('bi-chevron-down');
-      });
-    }
     
     // Manejar el cambio de ícono en el botón de colapsar Usuarios Numia
     const usuariosNumiaCollapse = document.getElementById('usuariosNumiaCollapse');
