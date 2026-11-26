@@ -9,7 +9,16 @@
   <meta name="referrer" content="strict-origin">
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Test API - Generación de Turnos</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#060A27">
+  <title>Numia · Demo Hub</title>
+  <link rel="icon" href="images/favicon/favicon.ico" sizes="32x32">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/favicon/favicon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/favicon/favicon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/ integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
   <link rel="stylesheet" href="assets/css/shared/index.css">
@@ -66,18 +75,18 @@
           </div>
           <div class="collapse show" id="bancaActivosCollapse">
           <div class="card-body p-4">
-        <div class="activos-opciones-row align-items-center mb-3">
+        <div class="activos-opciones-row mb-3">
           <div class="activo-item">
-            <a href="iniciar-videollamada.html" target="_blank" rel="noopener noreferrer" title="Este QR lleva a una atención por videollamada directamente" data-bs-toggle="tooltip" data-bs-placement="top">
+            <a href="iniciar-videollamada.html" target="_blank" rel="noopener noreferrer" class="qr-chip" title="Este QR lleva a una atención por videollamada directamente" data-bs-toggle="tooltip" data-bs-placement="top">
               <img src="images/QRVideollamada.png" alt="QR Videollamada" class="index-inline-4"/>
             </a>
             <p class="mb-0 mt-1 small text-muted">Atención por videollamada</p>
           </div>
           <div class="activo-item">
-            <a href="QR.html" target="_blank" rel="noopener noreferrer" title="Abrir QR">
+            <a href="QR.html" target="_blank" rel="noopener noreferrer" class="qr-chip" title="Abrir QR">
               <img src="images/qr-demo.png" alt="QR Demo Presencial" class="index-inline-4"/>
             </a>
-            <p class="mb-0 mt-1 small text-muted">formulario de atención orquestado por AI</p>
+            <p class="mb-0 mt-1 small text-muted">formulario de atención orquestado por IA</p>
           </div>
           <div class="activo-item">
             <a href="app-cliente.html" target="_blank" rel="noopener noreferrer" class="datos-importantes-link">
@@ -108,7 +117,7 @@
         </div>
         
         <!-- Nuevos accesos -->
-        <div class="row mt-3">
+        <div class="row mt-3 align-items-stretch">
           <div class="col-md-3 text-center">
             <a href="indexNumiaBank.html" target="_blank" rel="noopener noreferrer" class="datos-importantes-link">
               <i class="bi bi-bank me-2"></i>Acceso a numia bank para demo digital
@@ -131,11 +140,11 @@
           </div>
           <div class="col-md-3 text-center">
             <a href="https://wa.me/5491126591500" target="_blank" rel="noopener noreferrer" class="datos-importantes-link">
-              <i class="bi bi-telephone me-2"></i>Demo de Agente de atención al cliente: +54 9 11 2659-1500
+              <i class="bi bi-telephone me-2"></i>Demo de Agente de atención al cliente<span class="link-phone">+54 9 11 2659-1500</span>
             </a>
           </div>
         </div>
-        <div class="row mt-3">
+        <div class="row mt-3 align-items-stretch">
           <div class="col-md-3 text-center">
             <a href="https://wfm.numia.co/login" target="_blank" rel="noopener noreferrer" class="datos-importantes-link">
               <i class="bi bi-people me-2"></i>Workforce management
@@ -143,7 +152,7 @@
           </div>
           <div class="col-md-3 text-center">
             <a href="https://wa.me/5491152734098" target="_blank" rel="noopener noreferrer" class="datos-importantes-link">
-              <i class="bi bi-whatsapp me-2"></i>Demo agente administración de sucursales: +54 9 11 5273-4098
+              <i class="bi bi-whatsapp me-2"></i>Demo agente administración de sucursales<span class="link-phone">+54 9 11 5273-4098</span>
             </a>
           </div>
           <div class="col-md-3 text-center">
@@ -154,6 +163,7 @@
         </div>
           </div>
         </div>
+        </div>
         
         <!-- Desplegable Salud -->
         <div class="card">
@@ -163,18 +173,18 @@
           </div>
           <div class="collapse" id="saludActivosCollapse">
           <div class="card-body p-4">
-        <div class="activos-opciones-row align-items-center mb-3">
+        <div class="activos-opciones-row mb-3">
           <div class="activo-item">
-            <a href="iniciar-videollamada.html" target="_blank" rel="noopener noreferrer" title="Este QR lleva a una atención por videollamada directamente" data-bs-toggle="tooltip" data-bs-placement="top">
+            <a href="iniciar-videollamada.html" target="_blank" rel="noopener noreferrer" class="qr-chip" title="Este QR lleva a una atención por videollamada directamente" data-bs-toggle="tooltip" data-bs-placement="top">
               <img src="images/QRVideollamada.png" alt="QR Videollamada" class="index-inline-4"/>
             </a>
             <p class="mb-0 mt-1 small text-muted">Atención por videollamada</p>
           </div>
           <div class="activo-item">
-            <a href="QR.html" target="_blank" rel="noopener noreferrer" title="Abrir QR">
+            <a href="QR.html" target="_blank" rel="noopener noreferrer" class="qr-chip" title="Abrir QR">
               <img src="images/qr-demo.png" alt="QR Demo Presencial" class="index-inline-4"/>
             </a>
-            <p class="mb-0 mt-1 small text-muted">formulario de atención orquestado por AI</p>
+            <p class="mb-0 mt-1 small text-muted">formulario de atención orquestado por IA</p>
           </div>
           <div class="activo-item">
             <a href="app-mobileSalud.html" target="_blank" rel="noopener noreferrer" class="datos-importantes-link" id="linkAppMobileSalud" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="top" data-bs-html="true" title="Script - App Mobile Salud">
@@ -218,10 +228,10 @@
               <i class="bi bi-camera-video me-2"></i>Fila virtual videollamada 
             </a>
           </div>
-        
+        </div>
         
         <!-- Nuevos accesos -->
-        <div class="row mt-3">
+        <div class="row mt-3 align-items-stretch">
           <div class="col-md-3 text-center">
             <a href="indexNumiaCare.html" target="_blank" rel="noopener noreferrer" class="datos-importantes-link">
               <i class="bi bi-bank me-2"></i>Acceso a numiacare para demo digital
@@ -244,11 +254,11 @@
           </div>
           <div class="col-md-3 text-center">
             <a href="https://wa.me/5491152466310" target="_blank" rel="noopener noreferrer" class="datos-importantes-link">
-              <i class="bi bi-telephone me-2"></i>Demo de Agente de atención al cliente: +54 9 11 5246-6310
+              <i class="bi bi-telephone me-2"></i>Demo de Agente de atención al cliente<span class="link-phone">+54 9 11 5246-6310</span>
             </a>
           </div>
-      
-        <div class="row mt-3">
+        </div>
+        <div class="row mt-3 align-items-stretch">
           <div class="col-md-3 text-center">
             <a href="https://wfm.numia.co/login" target="_blank" rel="noopener noreferrer" class="datos-importantes-link">
               <i class="bi bi-people me-2"></i>Workforce management
@@ -256,7 +266,7 @@
           </div>
           <div class="col-md-3 text-center">
             <a href="https://wa.me/5491152734098" target="_blank" rel="noopener noreferrer" class="datos-importantes-link">
-              <i class="bi bi-whatsapp me-2"></i>Demo agente administración de sucursales: +54 9 11 5273-4098
+              <i class="bi bi-whatsapp me-2"></i>Demo agente administración de sucursales<span class="link-phone">+54 9 11 5273-4098</span>
             </a>
           </div>
         </div>
@@ -275,7 +285,7 @@
         <i class="bi bi-graph-up-arrow me-2"></i>Speech Analytics
       </div>
       <div class="card-body p-4">
-        <div class="activos-opciones-row align-items-center">
+        <div class="activos-opciones-row">
           <div class="activo-item">
             <a href="https://demonumia.co/speech-analytics-numia/index-retail.html" target="_blank" rel="noopener noreferrer" class="datos-importantes-link">
               <i class="bi bi-shop me-2"></i>Retail
@@ -317,7 +327,7 @@
           </li>
           <li>
             <span class="label">URL de Ingreso:</span>
-            <span><a href="https://journeybuilder.numia.co/" target="_blank" rel="noopener noreferrer">https://journeybuilder.numia.co/</a></span>
+            <span><a href="https://journeybuilder.numia.co/" target="_blank" rel="noopener noreferrer">Abrir Journey Builder</a></span>
           </li>
         </ul>
       </div>
@@ -665,7 +675,7 @@
           <div class="mb-3">
             <h6 class="fw-bold mb-2">Link al player web:</h6>
             <a href="https://debq2.debmedia.com/debsign/assets/debPlayerWeb/views/config.html" target="_blank" rel="noopener noreferrer" class="text-decoration-underline">
-              https://debq2.debmedia.com/debsign/assets/debPlayerWeb/views/config.html
+              Abrir configuración de PlayerWeb
             </a>
           </div>
           
