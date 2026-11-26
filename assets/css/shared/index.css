@@ -350,47 +350,6 @@ code {
   text-decoration: underline;
 }
 
-/* Tabla Clientes y Scores */
-#scoresContainer {
-  overflow-x: auto;
-}
-.table-score {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-.table-score thead {
-  background: var(--color-header-bg);
-  color: var(--color-on-primary);
-}
-.table-score th {
-  padding: 0.85rem 1rem;
-  text-align: left;
-  font-weight: 600;
-}
-.table-score td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-border);
-  color: var(--color-text);
-}
-.table-score tbody tr:hover {
-  background: var(--color-surface-alt);
-}
-.table-score tbody tr:last-child td {
-  border-bottom: none;
-}
-.table-score td.score-priority {
-  color: var(--color-success);
-  font-weight: 700;
-}
-.table-score td.score-normal {
-  color: var(--color-text-secondary);
-}
-
 /* --------------------------------------------------------------------
    Badges
    -------------------------------------------------------------------- */
@@ -564,10 +523,6 @@ h5.fw-bold.text-primary {
   object-fit: contain;
   border-radius: var(--radius-sm);
 }
-.index-inline-5 {
-  font-size: 2.6rem;
-  color: var(--color-primary);
-}
 
 /* Filas de accesos en grilla de Bootstrap (col-md-3): mismo alto por fila */
 .row.align-items-stretch > [class^="col-"],
@@ -722,6 +677,4 @@ h5.fw-bold.text-primary {
 }
 
 /* Generated from former inline style attributes */
-.index-inline-1 { border-width: 2px; }
-.index-inline-2 { background: var(--color-header-bg); }
 .index-inline-3 { cursor: pointer; }

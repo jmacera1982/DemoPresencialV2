@@ -1,6 +1,4 @@
 const FV_QUEUES = [16222, 16221]; // Alternar entre estos dos queueId
-    
-    const NOCO_TABLE_PATH = 'tables/mpgwc03ukvww2hg/records';
 
     let portalPersonas = [];
 
@@ -473,146 +471,6 @@ const FV_QUEUES = [16222, 16221]; // Alternar entre estos dos queueId
       }
     }
     
-    btnCargarScores.addEventListener('click', async () => {
-      await cargarScores();
-    });
-    
-    async function cargarScores() {
-      btnCargarScores.disabled = true;
-      btnCargarScores.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cargando...';
-      
-      scoresContainer.innerHTML = '<div class="text-center text-muted p-4"><span class="spinner-border spinner-border-sm me-2"></span>Cargando datos...</div>';
-      
-      try {
-        const data = await DebmediaApi.nocoRequest(NOCO_TABLE_PATH);
-        
-        if (data.list && data.list.length > 0) {
-          mostrarScores(data.list);
-        } else {
-          scoresContainer.innerHTML = '<div class="text-center text-muted p-4">No se encontraron datos</div>';
-        }
-      } catch (error) {
-        console.error('Error al cargar scores:', error);
-        scoresContainer.innerHTML = `
-          <div class="alert alert-danger">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            <strong>Error:</strong> ${error.message}
-          </div>
-        `;
-      } finally {
-        btnCargarScores.disabled = false;
-        btnCargarScores.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Cargar Datos';
-      }
-    }
-    
-    function mostrarScores(lista) {
-      // Ordenar por score descendente
-      const listaOrdenada = [...lista].sort((a, b) => {
-        const scoreA = parseInt(a.score) || 0;
-        const scoreB = parseInt(b.score) || 0;
-        return scoreB - scoreA;
-      });
-      
-      let html = `
-        <table class="table-score">
-          <thead>
-            <tr>
-              <th>DNI</th>
-              <th>Score</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-      
-      listaOrdenada.forEach(item => {
-        const score = parseInt(item.score) || 0;
-        const esPrioritario = score > 700;
-        const scoreClass = esPrioritario ? 'score-priority' : 'score-normal';
-        const estadoBadge = esPrioritario 
-          ? '<span class="badge score-priority">PRIORITARIO</span>' 
-          : '<span class="badge bg-secondary">Normal</span>';
-        
-        html += `
-          <tr>
-            <td><strong>${item.dni || 'N/A'}</strong></td>
-            <td class="${scoreClass}"><strong>${score}</strong></td>
-            <td>${estadoBadge}</td>
-          </tr>
-        `;
-      });
-      
-      html += `
-          </tbody>
-        </table>
-      `;
-      
-      scoresContainer.innerHTML = html;
-    }
-    
-    // ——— Monitor de Sucursales ———
-    const branchesMonitorContainer = document.getElementById('branchesMonitorContainer');
-    const btnRefrescarBranches = document.getElementById('btnRefrescarBranches');
-    
-    async function cargarBranchesMonitor() {
-      if (!branchesMonitorContainer) return;
-      branchesMonitorContainer.innerHTML = '<div class="text-center text-muted p-4"><span class="spinner-border spinner-border-sm me-2"></span>Cargando sucursales...</div>';
-      
-      try {
-        const data = await DebmediaApi.monitorRequest('branches?period=HOUR');
-        const branches = Array.isArray(data) ? data : (data.list || data.branches || []);
-        
-        if (branches.length === 0) {
-          branchesMonitorContainer.innerHTML = '<div class="text-center text-muted p-4">No hay sucursales</div>';
-          return;
-        }
-        
-        let html = `
-          <table class="table table-bordered table-hover align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>Sucursal</th>
-                <th class="text-center">Total turnos</th>
-                <th class="text-center">Turno actual</th>
-                <th class="text-center">Nivel servicio</th>
-                <th class="text-center">Espera promedio</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-        branches.forEach(b => {
-          const name = b.name || b.label || `Sucursal ${b.id}`;
-          const totalTurns = b.totalTurns != null ? b.totalTurns : '--';
-          const totalActualTurn = b.totalActualTurn != null ? b.totalActualTurn : '--';
-          const serviceLevel = b.serviceLevel != null ? b.serviceLevel : '--';
-          const waitingAvg = b.waiting_average != null ? b.waiting_average : '--';
-          html += `
-            <tr>
-              <td><strong>${name}</strong> <span class="text-muted">(ID: ${b.id})</span></td>
-              <td class="text-center"><strong>${totalTurns}</strong></td>
-              <td class="text-center">${totalActualTurn}</td>
-              <td class="text-center">${serviceLevel}</td>
-              <td class="text-center">${waitingAvg}</td>
-            </tr>
-          `;
-        });
-        html += '</tbody></table>';
-        branchesMonitorContainer.innerHTML = html;
-      } catch (error) {
-        console.error('Error al mostrar sucursales:', error);
-        branchesMonitorContainer.innerHTML = `
-          <div class="alert alert-danger mb-0">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            <strong>Error:</strong> ${error.message}
-          </div>
-        `;
-      }
-    }
-    
-    if (btnRefrescarBranches) {
-      btnRefrescarBranches.addEventListener('click', () => cargarBranchesMonitor());
-    }
-    
     // Manejar el cambio de ícono en el desplegable Banca
     const bancaActivosCollapse = document.getElementById('bancaActivosCollapse');
     const bancaActivosChevron = document.getElementById('bancaActivosChevron');
@@ -665,28 +523,6 @@ const FV_QUEUES = [16222, 16221]; // Alternar entre estos dos queueId
       });
     }
     
-    function syncPortalAuthCard() {
-      var loggedOut = document.getElementById('portalAuthLoggedOut');
-      var loggedIn = document.getElementById('portalAuthLoggedIn');
-      var badge = document.getElementById('portalAuthBadge');
-      var err = document.getElementById('portalAuthErr');
-      if (!loggedOut || !loggedIn) return;
-      var ok = typeof AuthPortal !== 'undefined' && AuthPortal.isAuthenticated();
-      if (ok) {
-        document.documentElement.classList.add('portal-authenticated');
-        loggedOut.classList.add('d-none');
-        loggedIn.classList.remove('d-none');
-        if (badge) badge.classList.remove('d-none');
-      } else {
-        document.documentElement.classList.remove('portal-authenticated');
-        loggedOut.classList.remove('d-none');
-        loggedIn.classList.add('d-none');
-        if (badge) badge.classList.add('d-none');
-      }
-      if (err) err.classList.add('d-none');
-    }
-
-    // Cargar scores y monitor de sucursales al cargar la página
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof AuthPortal === 'undefined' || !AuthPortal.isAuthenticated()) {
         if (typeof AuthPortal !== 'undefined' && typeof AuthPortal.require === 'function') {
@@ -695,43 +531,6 @@ const FV_QUEUES = [16222, 16221]; // Alternar entre estos dos queueId
         return;
       }
 
-      syncPortalAuthCard();
-      var btn = document.getElementById('portalAuthBtn');
-      var pwd = document.getElementById('portalAuthPwd');
-      var err = document.getElementById('portalAuthErr');
-      if (btn && pwd) {
-        btn.addEventListener('click', function () {
-          if (typeof AuthPortal === 'undefined') return;
-          var v = (pwd.value || '').trim();
-          btn.disabled = true;
-          AuthPortal.login(v).then(function (ok) {
-            if (ok) {
-              syncPortalAuthCard();
-              pwd.value = '';
-              if (err) err.classList.add('d-none');
-            } else if (err) {
-              err.classList.remove('d-none');
-            }
-            btn.disabled = false;
-          });
-        });
-        pwd.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter') btn.click();
-        });
-      }
-      var lo = document.getElementById('portalAuthLogout');
-      if (lo) {
-        lo.addEventListener('click', function () {
-          if (typeof AuthPortal !== 'undefined') AuthPortal.logout();
-          document.documentElement.classList.remove('portal-authenticated');
-          if (typeof AuthPortal !== 'undefined' && typeof AuthPortal.require === 'function') {
-            AuthPortal.require();
-          }
-        });
-      }
-
-      cargarScores();
-      cargarBranchesMonitor();
       // Inicializar tooltips de Bootstrap
       const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -742,17 +541,6 @@ const FV_QUEUES = [16222, 16221]; // Alternar entre estos dos queueId
       if (linkAppSalud) {
         const contentEl = document.getElementById('popoverAppSaludContent');
         new bootstrap.Popover(linkAppSalud, {
-          content: contentEl ? contentEl.innerHTML : '',
-          html: true,
-          trigger: 'hover',
-          placement: 'top'
-        });
-      }
-      // Inicializar popover Avatar Salud
-      const linkAvatarSalud = document.getElementById('linkAvatarSalud');
-      if (linkAvatarSalud) {
-        const contentEl = document.getElementById('popoverAvatarSaludContent');
-        new bootstrap.Popover(linkAvatarSalud, {
           content: contentEl ? contentEl.innerHTML : '',
           html: true,
           trigger: 'hover',
